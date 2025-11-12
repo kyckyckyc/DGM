@@ -25,6 +25,9 @@
 #define OFFSET_LUT_NUM   128U
 #define COGGING_MAP_NUM  5000U
 
+//电机选型
+#define AK80_9
+
 typedef enum {
     CAN_BAUDRATE_250K = 0,
     CAN_BAUDRATE_500K,

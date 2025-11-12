@@ -107,6 +107,7 @@ uint16_t cdd_TLI5012_WriteReg(uint16_t i_Cmd, uint16_t i_Data);
 void cdd_TLI5012_Init(void);
 
 void Test_TLI5012B(void);
+void can2_txMessage(uint8_t length,uint8_t id,uint8_t *can2txdata);
 
 
 /* user code [global 1] begin */

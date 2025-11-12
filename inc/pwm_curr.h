@@ -19,6 +19,7 @@
 
 #include "main.h"
 #include <math.h>
+#include "usr_config.h"
 
 #define PWM_FREQUENCY          20000
 #define CURRENT_MEASURE_HZ     PWM_FREQUENCY
@@ -28,9 +29,20 @@
 #define PWM_PERIOD_CYCLES      (uint16_t) ((TIMER0_CLK_MHz * (uint32_t) 1000000u / ((uint32_t) (PWM_FREQUENCY))) & 0xFFFE)
 #define HALF_PWM_PERIOD_CYCLES (uint16_t) (PWM_PERIOD_CYCLES / 2U)
 
-#define SHUNT_RESISTENCE       (0.01f)
-#define V_SCALE                ((float) (16.0f * 3.3f / 4095.0f))
-#define I_SCALE                ((float) ((3.3f / 4095.0f) / SHUNT_RESISTENCE / 15.0f))
+#if defined(AK80_9)
+//母线电压额定电压48V   相电流额定电流10.3A  相电流峰值电流22.3A
+#define PEAK_CURRENT           22.3f     // 从参数表得到峰值电流22.3A
+#define ADC_REF_VOLTAGE        3.3f
+#define ADC_RESOLUTION         4095.0f
+#define ADC_ZERO_OFFSET        1.65f     // 零位1.65V   阈值1.5V
+#define SHUNT_RESISTENCE       (0.01f)   // 分流电阻0.01Ω
+#define V_RATIO                (10.0f)   //(30V/3.3V)
+#define I_RATIO                (6.8f)    //(1.5A/(0.01Ω*22.3A))
+#define V_SCALE                ((float) (V_RATIO * 3.3f / 4095.0f))
+#define I_SCALE                ((float) ((3.3f / 4095.0f) / SHUNT_RESISTENCE / I_RATIO))
+
+#endif
+
 
 #define READ_IPHASE_A_ADC()    (uint16_t) (adc_inserted_data_read(ADC0, ADC_INSERTED_CHANNEL_0))
 #define READ_IPHASE_B_ADC()    (uint16_t) (adc_inserted_data_read(ADC0, ADC_INSERTED_CHANNEL_1))

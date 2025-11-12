@@ -84,7 +84,7 @@ int main(void)
 //		msd_usart2_init();
   		NVIC_init();
 		//WATCH_DOG_init();
-                msd_can0_init();
+        msd_can0_init();
         msd_can2_init();
 //cdd_TLI5012_Init();
  if (USR_CONFIG_read_config()) {
@@ -176,14 +176,15 @@ int main(void)
             can2_rxflag = RESET;
             /* read the receive message */
             can_mailbox_receive_data_read(CAN2, 2U, &can2receive_message);
-            can2_rxframe.id = can2receive_message.id & 0xFFFFFF;;
+            can2_rxframe.id = can2receive_message.id & 0xFFFFFF;
             testid = can2receive_message.id;
             can2_rxframe.dlc = can2receive_message.dlc;
             for(int j=0;j<8;j++)
             {
               can2_rxframe.data[j] = (uint8_t) can2receive_message.data[j];
             }
-            parse_frame(&can2_rxframe);
+            
+           parse_frame(&can2_rxframe);
         }
 			
     }

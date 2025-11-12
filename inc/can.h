@@ -30,40 +30,40 @@
 #define GET_CMD(can_id)            (can_id & ID_CMD_BIT)
 
 // CMD ID
-#define CAN_CMD_SET_OP_MODE        0
-#define CAN_CMD_MOTOR_ENABLE       1
-#define CAN_CMD_MOTOR_DISABLE      2
+#define CAN_CMD_SET_OP_MODE        0   // 设置操作模式
+#define CAN_CMD_MOTOR_ENABLE       1   // 电机使能
+#define CAN_CMD_MOTOR_DISABLE      2   // 电机失能
 
-#define CAN_CMD_SET_TORQUE         3
-#define CAN_CMD_SET_VELOCITY       4
-#define CAN_CMD_SET_POSITION       5
-#define CAN_CMD_SYNC               6
+#define CAN_CMD_SET_TORQUE         3   // 设置目标扭矩
+#define CAN_CMD_SET_VELOCITY       4   // 设置目标速度  
+#define CAN_CMD_SET_POSITION       5   // 设置目标位置
+#define CAN_CMD_SYNC               6   // 同步命令
 
-#define CAN_CMD_CALIB_START        7
-#define CAN_CMD_CALIB_REPORT       8
-#define CAN_CMD_CALIB_ABORT        9
+#define CAN_CMD_CALIB_START        7   // 开始校准
+#define CAN_CMD_CALIB_REPORT       8   // 校准状态报告
+#define CAN_CMD_CALIB_ABORT        9   // 中止校准
 
-#define CAN_CMD_ANTICOGGING_START  10
-#define CAN_CMD_ANTICOGGING_REPORT 11
-#define CAN_CMD_ANTICOGGING_ABORT  12
+#define CAN_CMD_ANTICOGGING_START  10  // 开始抗齿槽效应校准
+#define CAN_CMD_ANTICOGGING_REPORT 11  // 抗齿槽效应状态报告
+#define CAN_CMD_ANTICOGGING_ABORT  12  // 中止抗齿槽效应校准
 
-#define CAN_CMD_SET_HOME           13
-#define CAN_CMD_ERROR_RESET        14
-#define CAN_CMD_GET_STATUSWORD     15
-#define CAN_CMD_STATUSWORD_REPORT  16
+#define CAN_CMD_SET_HOME           13  // 设置零点/原点
+#define CAN_CMD_ERROR_RESET        14  // 错误复位
+#define CAN_CMD_GET_STATUSWORD     15  // 获取状态字
+#define CAN_CMD_STATUSWORD_REPORT  16  // 状态字报告
 
-#define CAN_CMD_GET_VALUE_1        17
-#define CAN_CMD_GET_VALUE_2        18
+#define CAN_CMD_GET_VALUE_1        17  // 获取值1
+#define CAN_CMD_GET_VALUE_2        18  // 获取值2
 
-#define CAN_CMD_HEARTBEAT          23
-#define CAN_CMD_SET_CONFIG         24
-#define CAN_CMD_GET_CONFIG         25
-#define CAN_CMD_SAVE_ALL_CONFIG    26
-#define CAN_CMD_RESET_ALL_CONFIG   27
-#define CAN_CMD_GET_FW_VERSION     28
-#define CAN_CMD_DFU_START          29
-#define CAN_CMD_DFU_DATA           30
-#define CAN_CMD_DFU_END            31
+#define CAN_CMD_HEARTBEAT          23  // 心跳包
+#define CAN_CMD_SET_CONFIG         24  // 设置配置参数
+#define CAN_CMD_GET_CONFIG         25  // 获取配置参数
+#define CAN_CMD_SAVE_ALL_CONFIG    26  // 保存所有配置
+#define CAN_CMD_RESET_ALL_CONFIG   27  // 重置所有配置
+#define CAN_CMD_GET_FW_VERSION     28  // 获取固件版本
+#define CAN_CMD_DFU_START          29  // 开始固件升级
+#define CAN_CMD_DFU_DATA           30  // 固件升级数据
+#define CAN_CMD_DFU_END            31  // 结束固件升级
 
 typedef struct
 {

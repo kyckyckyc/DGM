@@ -58,7 +58,7 @@ void CAN_comm_loop(void)
         if (get_ms_since(mTxTick) > UsrConfig.heartbeat_producer_ms) {
             // Send heartbeat
             CanFrame tx_frame;
-            tx_frame.id  = ID_ECHO_BIT | (mNodeID << 5) | CAN_CMD_HEARTBEAT;
+            tx_frame.id  = ID_ECHO_BIT | (mNodeID << 5) | CAN_CMD_HEARTBEAT;//0x437
             tx_frame.dlc = 0;
             can_tx(&tx_frame);
         }
@@ -202,9 +202,10 @@ static void can_error_check(void)
     can2transmit_message.dlc  =  tx_frame->dlc;
     can2transmit_message.data_bytes = tx_frame->dlc;
     can2transmit_message.id = tx_frame->id;
-     for(int i = 0; i < tx_frame->dlc; i++){
-        can2transmit_message.data[i] = tx_frame->data[i];
+    for(int i = 0; i < tx_frame->dlc; i++){
+       can2transmit_message.data[i] = tx_frame->data[i];
     }
+  
     can_mailbox_config(CAN2, 3u, &can2transmit_message);
 	
 
