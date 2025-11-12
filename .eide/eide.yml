@@ -1,0 +1,90 @@
+version: "4.1"
+name: DGM
+type: ARM
+deviceName: null
+packDir: null
+srcDirs:
+  - .eide
+  - .vscode
+  - build
+  - firmware
+  - gcc_startup
+  - inc
+  - ldscripts
+  - openocd_gdlink
+  - src
+virtualFolder:
+  name: <virtual_root>
+  files:
+    - path: .clang-format
+    - path: .gitignore
+    - path: DGM.code-workspace
+    - path: gd32g5x3_flash.ld
+  folders: []
+dependenceList: []
+outDir: build
+miscInfo:
+  uid: 184366dedb41a6f9dbed6521d1d3f1e7
+targets:
+  Debug:
+    cppPreprocessAttrs:
+      defineList: []
+      incList:
+        - inc
+        - firmware/cmsis/inc
+        - firmware/GD32G5x3_standard_peripheral/Include
+      libList: []
+    excludeList: []
+    toolchain: GCC
+    toolchainConfigMap:
+      GCC:
+        archExtensions: ""
+        cpuType: Cortex-M3
+        floatingPointHardware: none
+        options:
+          version: 5
+          afterBuildTasks: []
+          asm-compiler: {}
+          beforeBuildTasks: []
+          c/cpp-compiler:
+            language-c: c11
+            language-cpp: c++11
+            one-elf-section-per-data: true
+            one-elf-section-per-function: true
+            optimization: level-3
+            warnings: all-warnings
+          global:
+            $float-abi-type: hard
+            arm-thumb-mode: thumb
+            not-use-syscalls: true
+            output-debug-info: enable
+            use-newlib-nano: true
+          linker:
+            $outputTaskExcludes:
+              - .bin
+            $toolName: auto
+            LD_FLAGS: -T gd32g5x3_flash.ld
+            LIB_FLAGS: -lm
+            output-format: elf
+            remove-unused-input-sections: true
+        scatterFilePath: ""
+        storageLayout:
+          RAM: []
+          ROM: []
+        useCustomScatterFile: true
+    uploadConfigMap:
+      JLink:
+        baseAddr: ""
+        bin: ""
+        cpuInfo:
+          cpuName: "null"
+          vendor: "null"
+        otherCmds: ""
+        proType: 1
+        speed: 8000
+      OpenOCD:
+        baseAddr: "0x08000000"
+        bin: ""
+        interface: stlink
+        target: openocd_gdlink
+    uploader: OpenOCD
