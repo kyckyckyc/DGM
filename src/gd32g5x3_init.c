@@ -29,7 +29,8 @@ WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWIS
 ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY
 OF SUCH DAMAGE.
 */
-
+#include "gd32g5x3.h"
+#include "system_gd32g5x3.h"
 #include "gd32g5x3_init.h"
 #include "main.h"
 #include "encoder.h"
@@ -168,19 +169,70 @@ void msd_system_init(void)
     \param[out] none
     \retval     none
 */
+// #if defined(__SYSTEM_CLOCK_216M_PLL_HXTAL) 
+
+// void msd_clock_init(void)
+// {
+//     /* user code [clock_init local 0] begin */
+
+//     /* user code [clock_init local 0] end */
+
+//     rcu_osci_on(RCU_HXTAL);
+//     while (rcu_osci_stab_wait(RCU_HXTAL) != SUCCESS);
+
+//     rcu_pll_source_config(RCU_PLLSRC_HXTAL);
+//     rcu_pll_config((1U), (54U), (2U), (2U), (2U));
+//     rcu_pll_clock_output_enable(RCU_PLLP);
+//     rcu_pll_clock_output_enable(RCU_PLLR);
+//     fmc_wscnt_set(FMC_WAIT_STATE_7);
+//     rcu_system_clock_source_config(RCU_CKSYSSRC_PLLP);
+//     rcu_osci_on(RCU_PLL_CK);
+//     while (rcu_osci_stab_wait(RCU_PLL_CK) != SUCCESS);
+
+//     rcu_ahb_clock_config(RCU_AHB_CKSYS_DIV1);
+//     rcu_apb1_clock_config(RCU_APB1_CKAHB_DIV1);
+//     rcu_apb2_clock_config(RCU_APB2_CKAHB_DIV1);
+//     rcu_apb3_clock_config(RCU_APB3_CKAHB_DIV1);
+
+//     rcu_can_clock_config(IDX_CAN0, RCU_CANSRC_APB2);
+//     rcu_adc_clock_config(IDX_ADC0, RCU_ADCSRC_PLLR);
+//     rcu_adc_clock_config(IDX_ADC1, RCU_ADCSRC_PLLR);
+//     rcu_usart_clock_config(IDX_USART0, RCU_USARTSRC_APB);
+//     rcu_usart_clock_config(IDX_USART2, RCU_USARTSRC_APB);
+
+//     rcu_osci_bypass_mode_disable(RCU_HXTAL);
+//     rcu_osci_bypass_mode_disable(RCU_LXTAL);
+//     rcu_hxtal_clock_monitor_disable();
+//     rcu_lxtal_clock_monitor_disable();
+
+//     /* update SystemCoreClock value */
+//     SystemCoreClockUpdate();
+
+//     /* setup systick timer for 1000Hz interrupts */
+//     if (SysTick_Config(SystemCoreClock / 1000U))
+//     {
+//         /* capture error */
+//         while (1);
+//     }
+
+//     /* user code [clock_init local 1] begin */
+
+//     /* user code [clock_init local 1] end */
+// }
+
+//#elif defined(__SYSTEM_CLOCK_216M_PLL_IRC8M)
+
 void msd_clock_init(void)
 {
-    /* user code [clock_init local 0] begin */
 
-    /* user code [clock_init local 0] end */
 
-    rcu_osci_on(RCU_HXTAL);
-    while (rcu_osci_stab_wait(RCU_HXTAL) != SUCCESS);
+    rcu_osci_on(RCU_IRC8M);
+    while (rcu_osci_stab_wait(RCU_IRC8M) != SUCCESS);
+    rcu_irc8m_adjust_value_set(16U);
 
-    rcu_pll_source_config(RCU_PLLSRC_HXTAL);
-    rcu_pll_config((1U), (54U), (2U), (2U), (2U));
+    rcu_pll_source_config(RCU_PLLSRC_IRC8M);
+    rcu_pll_config((2U), (108U), (2U), (2U), (2U));
     rcu_pll_clock_output_enable(RCU_PLLP);
-    rcu_pll_clock_output_enable(RCU_PLLR);
     fmc_wscnt_set(FMC_WAIT_STATE_7);
     rcu_system_clock_source_config(RCU_CKSYSSRC_PLLP);
     rcu_osci_on(RCU_PLL_CK);
@@ -190,32 +242,24 @@ void msd_clock_init(void)
     rcu_apb1_clock_config(RCU_APB1_CKAHB_DIV1);
     rcu_apb2_clock_config(RCU_APB2_CKAHB_DIV1);
     rcu_apb3_clock_config(RCU_APB3_CKAHB_DIV1);
-
-    rcu_can_clock_config(IDX_CAN0, RCU_CANSRC_APB2);
-    rcu_adc_clock_config(IDX_ADC0, RCU_ADCSRC_PLLR);
-    rcu_adc_clock_config(IDX_ADC1, RCU_ADCSRC_PLLR);
-    rcu_usart_clock_config(IDX_USART0, RCU_USARTSRC_APB);
-    rcu_usart_clock_config(IDX_USART2, RCU_USARTSRC_APB);
-
     rcu_osci_bypass_mode_disable(RCU_HXTAL);
     rcu_osci_bypass_mode_disable(RCU_LXTAL);
     rcu_hxtal_clock_monitor_disable();
     rcu_lxtal_clock_monitor_disable();
-
-    /* update SystemCoreClock value */
+ 
     SystemCoreClockUpdate();
 
-    /* setup systick timer for 1000Hz interrupts */
+
     if (SysTick_Config(SystemCoreClock / 1000U))
     {
-        /* capture error */
-        while (1);
+
+    while (1);
     }
 
-    /* user code [clock_init local 1] begin */
-
-    /* user code [clock_init local 1] end */
 }
+
+//#endif
+
 
 /*!
     \brief      GPIO initialization function
@@ -1157,9 +1201,11 @@ void timer_config(void)
 
     /* BREAK configuration */
     timer_break_struct_para_init(&timer_breakpara);
+    
+
     timer_breakpara.runoffstate         = TIMER_ROS_STATE_ENABLE;
     timer_breakpara.ideloffstate        = TIMER_IOS_STATE_ENABLE;
-    timer_breakpara.deadtime            = 0U;
+    timer_breakpara.deadtime            = 54U;
     timer_breakpara.outputautostate     = TIMER_OUTAUTO_DISABLE;
     timer_breakpara.protectmode         = TIMER_CCHP0_PROT_OFF;
     timer_breakpara.break0state         = TIMER_BREAK0_ENABLE;
