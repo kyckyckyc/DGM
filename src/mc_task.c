@@ -250,7 +250,7 @@ void MCT_high_frequency_task(void)
    case BOOT_UP:
        break;
 
-   case CALIBRATION:
+   case CALIBRATION://@
        CALIBRATION_loop();
 
        // check over current

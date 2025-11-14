@@ -183,38 +183,38 @@ void CAN2_Message_IRQHandler(void)
      if(can_interrupt_flag_get(CAN2, CAN_INT_FLAG_FIFO_AVAILABLE) != RESET) {
         
         
-        /* ¶ÁÈ¡FIFOÊı¾İ */
+        /* è¯»å–FIFOæ•°æ® */
         can_rx_fifo_read(CAN2, &rx_frame);
 
         can2_rxframe.id = rx_frame.id & 0xFFFFFF;
         can2_rxframe.dlc = rx_frame.dlc;
-        can2_rxframe.data[0] = (rx_frame.data[0] >> 0) & 0xFF;  /* ×Ö½Ú3 ¡ú datanew[0] */
-        can2_rxframe.data[1] = (rx_frame.data[0] >> 8) & 0xFF;  /* ×Ö½Ú2 ¡ú datanew[1] */
-        can2_rxframe.data[2] = (rx_frame.data[0] >> 16)  & 0xFF;  /* ×Ö½Ú1 ¡ú datanew[2] */
-        can2_rxframe.data[3] = (rx_frame.data[0] >> 24)  & 0xFF;  /* ×Ö½Ú0 ¡ú datanew[3] */
-        can2_rxframe.data[4] = (rx_frame.data[1] >> 0) & 0xFF;  /* ×Ö½Ú7 ¡ú datanew[4] */
-        can2_rxframe.data[5] = (rx_frame.data[1] >> 8) & 0xFF;  /* ×Ö½Ú6 ¡ú datanew[5] */
-        can2_rxframe.data[6] = (rx_frame.data[1] >> 16)  & 0xFF;  /* ×Ö½Ú5 ¡ú datanew[6] */
-        can2_rxframe.data[7] = (rx_frame.data[1] >> 24)  & 0xFF;  /* ×Ö½Ú4 ¡ú datanew[7]*/
+        can2_rxframe.data[0] = (rx_frame.data[0] >> 0) & 0xFF;  /* å­—èŠ‚3 â†’ datanew[0] */
+        can2_rxframe.data[1] = (rx_frame.data[0] >> 8) & 0xFF;  /* å­—èŠ‚2 â†’ datanew[1] */
+        can2_rxframe.data[2] = (rx_frame.data[0] >> 16)  & 0xFF;  /* å­—èŠ‚1 â†’ datanew[2] */
+        can2_rxframe.data[3] = (rx_frame.data[0] >> 24)  & 0xFF;  /* å­—èŠ‚0 â†’ datanew[3] */
+        can2_rxframe.data[4] = (rx_frame.data[1] >> 0) & 0xFF;  /* å­—èŠ‚7 â†’ datanew[4] */
+        can2_rxframe.data[5] = (rx_frame.data[1] >> 8) & 0xFF;  /* å­—èŠ‚6 â†’ datanew[5] */
+        can2_rxframe.data[6] = (rx_frame.data[1] >> 16)  & 0xFF;  /* å­—èŠ‚5 â†’ datanew[6] */
+        can2_rxframe.data[7] = (rx_frame.data[1] >> 24)  & 0xFF;  /* å­—èŠ‚4 â†’ datanew[7]*/
 
         parse_frame(&can2_rxframe);
         //can_tx(&can2_rxframe);
-        /* ´¦Àí½ÓÊÕµ½µÄÊı¾İ */
+        /* å¤„ç†æ¥æ”¶åˆ°çš„æ•°æ® */
        // process_can2_received_frame(&rx_frame);
         
-        /* Çå³ıÖĞ¶Ï±êÖ¾ */
+        /* æ¸…é™¤ä¸­æ–­æ ‡å¿— */
         
         can_interrupt_flag_clear(CAN2, CAN_INT_FLAG_FIFO_AVAILABLE);
 
     }
     
-    /* ´¦ÀíFIFO¾¯¸æÖĞ¶Ï */
+    /* å¤„ç†FIFOè­¦å‘Šä¸­æ–­ */
     if(can_interrupt_flag_get(CAN2, CAN_INT_FLAG_FIFO_WARNING) != RESET) {
         printf("CAN2 FIFO Warning Interrupt\n");
         can_interrupt_flag_clear(CAN2, CAN_INT_FLAG_FIFO_WARNING);
     }
     
-    /* ´¦ÀíFIFOÒç³öÖĞ¶Ï */
+    /* å¤„ç†FIFOæº¢å‡ºä¸­æ–­ */
     if(can_interrupt_flag_get(CAN2, CAN_INT_FLAG_FIFO_OVERFLOW) != RESET) {
         printf("CAN2 FIFO Overflow Interrupt - Data Lost!\n");
         can_interrupt_flag_clear(CAN2, CAN_INT_FLAG_FIFO_OVERFLOW);

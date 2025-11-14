@@ -99,7 +99,7 @@ void CALIBRATION_loop(void)
     static uint32_t loop_count;
 
     // R
-    static const float    kI           = 2.0f;
+    static const float    kI           = 0.02f;
     static const uint32_t num_R_cycles = CURRENT_MEASURE_HZ * 2;
 
     // L

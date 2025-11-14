@@ -445,7 +445,7 @@ void msd_gpio_init(void)
     gpio_output_options_set(GPIOB, GPIO_OTYPE_PP, GPIO_OSPEED_100_220MHZ, GPIO_PIN_12);
     gpio_input_filter_set(GPIOB, GPIO_ISPERIOD(0), GPIO_IFTYPE_ASYNC, GPIO_PIN_12);
     //nsleep
-    gpio_bit_reset(GPIOB, GPIO_PIN_11);
+    gpio_bit_set(GPIOB, GPIO_PIN_11);
     gpio_mode_set(GPIOB, GPIO_MODE_OUTPUT, GPIO_PUPD_NONE, GPIO_PIN_11);
     gpio_output_options_set(GPIOB, GPIO_OTYPE_PP, GPIO_OSPEED_100_220MHZ, GPIO_PIN_11);
 
@@ -1205,7 +1205,7 @@ void timer_config(void)
 
     timer_breakpara.runoffstate         = TIMER_ROS_STATE_ENABLE;
     timer_breakpara.ideloffstate        = TIMER_IOS_STATE_ENABLE;
-    timer_breakpara.deadtime            = 54U;
+    timer_breakpara.deadtime            = 0U;
     timer_breakpara.outputautostate     = TIMER_OUTAUTO_DISABLE;
     timer_breakpara.protectmode         = TIMER_CCHP0_PROT_OFF;
     timer_breakpara.break0state         = TIMER_BREAK0_ENABLE;
@@ -1503,7 +1503,7 @@ void msd_can2_fifo_init(void)
     can2_parameter.rx_private_filter_queue_enable = DISABLE;
     can2_parameter.edge_filter_enable = DISABLE;
     can2_parameter.protocol_exception_enable = DISABLE;
-    can2_parameter.rx_filter_order = CAN_RX_FILTER_ORDER_FIFO_FIRST;  // ��ΪFIFO����
+    can2_parameter.rx_filter_order = CAN_RX_FILTER_ORDER_FIFO_FIRST;  // 锟斤拷为FIFO锟斤拷锟斤拷
     can2_parameter.memory_size = CAN_MEMSIZE_32_UNIT;
     /* filter configuration */
     can2_parameter.mb_public_filter = 0U;
@@ -1518,7 +1518,7 @@ void msd_can2_fifo_init(void)
     can_init(CAN2, &can2_parameter);
 
     fifo_parameter.dma_enable = DISABLE;
-    fifo_parameter.filter_format_and_number = CAN_RXFIFO_FILTER_A_NUM_8;  // 8��������
+    fifo_parameter.filter_format_and_number = CAN_RXFIFO_FILTER_A_NUM_8;  // 8锟斤拷锟斤拷锟斤拷锟斤拷
     fifo_parameter.fifo_public_filter = 0x00000000U;
 
     can_rx_fifo_config(CAN2, &fifo_parameter);
@@ -1526,9 +1526,9 @@ void msd_can2_fifo_init(void)
 
     for(uint8_t i = 0; i < 8; i++) 
     {
-        id_filter_table[i].remote_frame = CAN_DATA_FRAME_ACCEPTED;    // ֻ��������֡
-        id_filter_table[i].extended_frame = CAN_STANDARD_FRAME_ACCEPTED; // ֻ���ձ�׼֡
-        id_filter_table[i].id = 0x01U;  // ����Ŀ��ID
+        id_filter_table[i].remote_frame = CAN_DATA_FRAME_ACCEPTED;    // 只锟斤拷锟斤拷锟斤拷锟斤拷帧
+        id_filter_table[i].extended_frame = CAN_STANDARD_FRAME_ACCEPTED; // 只锟斤拷锟秸憋拷准帧
+        id_filter_table[i].id = 0x01U;  // 锟斤拷锟斤拷目锟斤拷ID
     }
 
     can_rx_fifo_filter_table_config(CAN2, id_filter_table);
@@ -1537,9 +1537,9 @@ void msd_can2_fifo_init(void)
     nvic_irq_enable(CAN2_Message_IRQn, 0U, 0U);
 
     /* enable CAN MB0 interrupt */
-    can_interrupt_enable(CAN2, CAN_INT_FIFO_AVAILABLE);  // FIFO�����ж�
-    can_interrupt_enable(CAN2, CAN_INT_FIFO_WARNING);    // FIFO�����ж�
-    can_interrupt_enable(CAN2, CAN_INT_FIFO_OVERFLOW);   // FIFO����ж�
+    can_interrupt_enable(CAN2, CAN_INT_FIFO_AVAILABLE);  // FIFO锟斤拷锟斤拷锟叫讹拷
+    can_interrupt_enable(CAN2, CAN_INT_FIFO_WARNING);    // FIFO锟斤拷锟斤拷锟叫讹拷
+    can_interrupt_enable(CAN2, CAN_INT_FIFO_OVERFLOW);   // FIFO锟斤拷锟斤拷卸锟�
 
     can_operation_mode_enter(CAN2, CAN_NORMAL_MODE);
  
@@ -1576,24 +1576,24 @@ ErrStatus can2_tx_with_mailbox(uint8_t length, uint32_t id, uint8_t *can2txdata,
         return ERROR;
     }
     
-    /* ��������Ƿ���������Χ�� */
+    /* 锟斤拷锟斤拷锟斤拷锟斤拷欠锟斤拷锟斤拷锟斤拷锟斤拷锟轿э拷锟� */
     if(mailbox_index < 8 || mailbox_index > 10) {
         return ERROR;
     }
     
-    /* �������״̬ */
+    /* 锟斤拷锟斤拷锟斤拷锟阶刺� */
     mailbox_code = can_mailbox_code_get(CAN2, mailbox_index);
     if(mailbox_code != CAN_MB_TX_STATUS_INACTIVE) {
-        return ERROR; /* ����æµ */
+        return ERROR; /* 锟斤拷锟斤拷忙碌 */
     }
     
     
-    /* ������� */
+    /* 锟斤拷锟斤拷锟斤拷锟� */
     for(int i = 0; i < length; i++) {
         can2transmit_message.data[i] = can2txdata[i];
     }
     
-    /* ���÷��Ͳ��� */
+    /* 锟斤拷锟矫凤拷锟酵诧拷锟斤拷 */
     can2transmit_message.rtr = 0U;
     can2transmit_message.ide = 0U;
     can2transmit_message.code = CAN_MB_TX_STATUS_DATA;
@@ -1604,14 +1604,14 @@ ErrStatus can2_tx_with_mailbox(uint8_t length, uint32_t id, uint8_t *can2txdata,
     can2transmit_message.data_bytes = length;
     can2transmit_message.id = id;
     
-    /* �������䲢���� */
+    /* 锟斤拷锟斤拷锟斤拷锟戒并锟斤拷锟斤拷 */
     can_mailbox_config(CAN2, mailbox_index, &can2transmit_message);
     
     return SUCCESS;
 }
 ErrStatus can2_tx_auto(uint8_t length, uint32_t id, uint8_t *can2txdata)
 {
-    /* �����������״̬��ѡ���һ�����õ� */
+    /* 锟斤拷锟斤拷锟斤拷锟斤拷锟斤拷锟阶刺拷锟窖★拷锟斤拷一锟斤拷锟斤拷锟矫碉拷 */
     for(uint8_t i = 0; i < 3; i++) {
         uint32_t mailbox_index = can2_tx_manager.mailboxes[i];
         uint32_t mailbox_code = can_mailbox_code_get(CAN2, mailbox_index);
@@ -1624,7 +1624,7 @@ ErrStatus can2_tx_auto(uint8_t length, uint32_t id, uint8_t *can2txdata)
         }
     }
     
-    return ERROR; /* �������䶼æµ */
+    return ERROR; /* 锟斤拷锟斤拷锟斤拷锟戒都忙碌 */
 }
 void can2_txMessage(uint8_t length,uint8_t id,uint8_t *can2txdata)
 {

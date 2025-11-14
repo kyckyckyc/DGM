@@ -58,7 +58,7 @@ uint8_t can2_txdata[8]={0};
 extern uint8_t can0_rxflag;
 extern uint8_t can2_rxflag;
 
-/* 全局发送管理器 */
+/* 鍏ㄥ眬鍙戦�佺鐞嗗櫒 */
 can2_tx_manager_t can2_tx_manager = {
     .mailboxes = {8, 9, 10},
     .current_index = 0,
