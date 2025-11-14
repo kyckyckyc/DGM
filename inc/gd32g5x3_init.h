@@ -96,7 +96,9 @@ void NVIC_init(void);
 void WATCH_DOG_init(void);
 void CAN0_init(int baudrate);
 void msd_can2_init(void);
- 
+void msd_can2_fifo_init(void);
+ErrStatus can2_tx_with_mailbox(uint8_t length, uint32_t id, uint8_t *can2txdata, uint32_t mailbox_index);
+ErrStatus can2_tx_auto(uint8_t length, uint32_t id, uint8_t *can2txdata);
  
 
  

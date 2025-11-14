@@ -39,11 +39,17 @@ extern "C" {
 #define DEBUG_PLOT(value)
 #endif
 
+typedef struct {
+    uint32_t mailboxes[3];      /* 可用的发送邮箱 */
+    uint8_t current_index;      /* 当前使用的邮箱索引 */
+    uint32_t sent_count[3];     /* 每个邮箱的发送计数 */
+} can2_tx_manager_t;
 extern volatile uint32_t SystickCount;
 extern can_mailbox_descriptor_struct transmit_message;
 extern can_mailbox_descriptor_struct receive_message;
 extern can_mailbox_descriptor_struct can2transmit_message;
 extern can_mailbox_descriptor_struct can2receive_message;
+extern can2_tx_manager_t can2_tx_manager;
 // LED ACT
 #define LED_ACT_SET()        GPIO_BOP(GPIOC) = (uint32_t) GPIO_PIN_13
 #define LED_ACT_RESET()      GPIO_BC(GPIOC) = (uint32_t) GPIO_PIN_13

@@ -23,6 +23,7 @@
 #include "usr_config.h"
 #include "util.h"
 #include <string.h>
+#include "gd32g5x3_init.h"
 
 static uint8_t  mNodeID;
 static uint32_t mRxTick       = 0;
@@ -192,22 +193,22 @@ static void can_error_check(void)
 
  bool can_tx(CanFrame *tx_frame)
 {
-    can2transmit_message.rtr = 0U;
-    can2transmit_message.ide = 0U;
-    can2transmit_message.code = CAN_MB_TX_STATUS_DATA;
-    can2transmit_message.brs = 0U;
-    can2transmit_message.fdf = 0U;
-    can2transmit_message.esi = 0U;
-    can2transmit_message.prio = 0U;
-    can2transmit_message.dlc  =  tx_frame->dlc;
-    can2transmit_message.data_bytes = tx_frame->dlc;
-    can2transmit_message.id = tx_frame->id;
-    for(int i = 0; i < tx_frame->dlc; i++){
-       can2transmit_message.data[i] = tx_frame->data[i];
-    }
+    // can2transmit_message.rtr = 0U;
+    // can2transmit_message.ide = 0U;
+    // can2transmit_message.code = CAN_MB_TX_STATUS_DATA;
+    // can2transmit_message.brs = 0U;
+    // can2transmit_message.fdf = 0U;
+    // can2transmit_message.esi = 0U;
+    // can2transmit_message.prio = 0U;
+    // can2transmit_message.dlc  =  tx_frame->dlc;
+    // can2transmit_message.data_bytes = tx_frame->dlc;
+    // can2transmit_message.id = tx_frame->id;
+    // for(int i = 0; i < tx_frame->dlc; i++){
+    //    can2transmit_message.data[i] = tx_frame->data[i];
+    // }
   
-    can_mailbox_config(CAN2, 3u, &can2transmit_message);
-	
+    // can_mailbox_config(CAN2, 10u, &can2transmit_message);
+	can2_tx_auto(tx_frame->dlc, tx_frame->id, tx_frame->data);
 
 //    /* select one empty mailbox */
 //    if (CAN_TSTAT_TME0 == (CAN_TSTAT(CAN0) & CAN_TSTAT_TME0)) {

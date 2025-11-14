@@ -76,13 +76,15 @@ int USR_CONFIG_erease_config(void)
 {
     uint32_t       addr;
     fmc_state_enum status;
+    uint32_t page_number;
 
     fmc_unlock();
 
     // Erase
-    for (addr = 0; addr < (0 + USR_CONFIG_MAX_SIZE); addr += PAGE_SIZE) {
+    for (addr = USR_CONFIG_ADDR; addr < (USR_CONFIG_ADDR + USR_CONFIG_MAX_SIZE); addr += PAGE_SIZE) {
+         page_number = (addr - MAIN_FLASH_BASE_ADDRESS) / PAGE_SIZE;
         fmc_flag_clear(FMC_FLAG_ENDF | FMC_FLAG_WPERR | FMC_FLAG_PGAERR | FMC_FLAG_PGERR);
-        status = fmc_page_erase(FMC_BANK0,addr);
+        status = fmc_page_erase(FMC_BANK0,page_number);
         if (status != FMC_READY) {
             fmc_lock();
             return -1;
@@ -156,13 +158,16 @@ int USR_CONFIG_erease_cogging_map(void)
 {
     uint32_t       addr;
     fmc_state_enum status;
+    uint32_t page_number;
 
     fmc_unlock();
 
     // Erase
-    for (addr = 0; addr < (0 + COGGING_MAP_MAX_SIZE); addr += PAGE_SIZE) {
+    for (addr = COGGING_MAP_ADDR; addr < (COGGING_MAP_ADDR + COGGING_MAP_MAX_SIZE); addr += PAGE_SIZE) {
+
+        page_number = (addr - MAIN_FLASH_BASE_ADDRESS) / PAGE_SIZE;
         fmc_flag_clear(FMC_FLAG_ENDF | FMC_FLAG_WPERR | FMC_FLAG_PGAERR | FMC_FLAG_PGERR);
-        status = fmc_page_erase(FMC_BANK0,addr);
+        status = fmc_page_erase(FMC_BANK0,page_number);
         if (status != FMC_READY) {
             fmc_lock();
             return -1;

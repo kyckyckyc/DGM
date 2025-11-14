@@ -57,6 +57,13 @@ uint8_t can2_txdata[8]={0};
  uint32_t testid = 0;
 extern uint8_t can0_rxflag;
 extern uint8_t can2_rxflag;
+
+/* 全局发送管理器 */
+can2_tx_manager_t can2_tx_manager = {
+    .mailboxes = {8, 9, 10},
+    .current_index = 0,
+    .sent_count = {0, 0, 0}
+};
 /*!
     \brief      main function
     \param[in]  none
@@ -85,7 +92,8 @@ int main(void)
   		NVIC_init();
 		//WATCH_DOG_init();
         msd_can0_init();
-        msd_can2_init();
+       // msd_can2_init();
+       msd_can2_fifo_init();
 //cdd_TLI5012_Init();
  if (USR_CONFIG_read_config()) {
        USR_CONFIG_set_default_config();
@@ -160,7 +168,7 @@ int main(void)
          can2_txdata[3]=0x13;
          can2_txdata[4]=0x14;
 
-        //can2_txMessage(0x05,0x10,can2_txdata);
+       // can2_txMessage_checked(0x05, 0x10, can2_txdata, 10u);
         //delay_ms(50);
         //can2_txMessage(0x05,0x09,can2_txdata);
 
@@ -173,18 +181,18 @@ int main(void)
          }
         if(SET == can2_rxflag) 
         {
-            can2_rxflag = RESET;
+           // can2_rxflag = RESET;
             /* read the receive message */
-            can_mailbox_receive_data_read(CAN2, 2U, &can2receive_message);
-            can2_rxframe.id = can2receive_message.id & 0xFFFFFF;
-            testid = can2receive_message.id;
-            can2_rxframe.dlc = can2receive_message.dlc;
-            for(int j=0;j<8;j++)
-            {
-              can2_rxframe.data[j] = (uint8_t) can2receive_message.data[j];
-            }
+        //     can_mailbox_receive_data_read(CAN2, 2U, &can2receive_message);
+             //can2_rxframe.id = can2receive_message.id & 0xFFFFFF;
+
+        //     can2_rxframe.dlc = can2receive_message.dlc;
+        //     for(int j=0;j<8;j++)
+        //     {
+        //       can2_rxframe.data[j] = (uint8_t) can2receive_message.data[j];
+        //     }
             
-           parse_frame(&can2_rxframe);
+        //    parse_frame(&can2_rxframe);
         }
 			
     }

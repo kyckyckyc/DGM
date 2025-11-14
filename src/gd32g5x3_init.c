@@ -1195,7 +1195,7 @@ void timer_config(void)
     timer_channel_output_shadow_config(TIMER0, TIMER_CH_2, TIMER_OC_SHADOW_DISABLE);
 
     /* CH3 configuration in PWM mode 0, duty cycle 80% */
-    timer_channel_output_pulse_value_config(TIMER0, TIMER_CH_3, 20);
+    timer_channel_output_pulse_value_config(TIMER0, TIMER_CH_3, 800);
     timer_channel_output_mode_config(TIMER0, TIMER_CH_3, TIMER_OC_MODE_PWM0);
     timer_channel_output_shadow_config(TIMER0, TIMER_CH_3, TIMER_OC_SHADOW_DISABLE);
 
@@ -1458,6 +1458,98 @@ void msd_can2_init(void)
     can2receive_message.id = 0x01U;
     can_mailbox_config(CAN2, 2U, &can2receive_message);
 }
+
+void msd_can2_fifo_init(void)
+{
+    /* user code [can0_init local 0] begin */
+
+    /* user code [can0_init local 0] end */
+
+    rcu_periph_clock_enable(RCU_GPIOB);
+
+    /* configure CAN0_TX GPIO */
+    gpio_mode_set(GPIOB, GPIO_MODE_AF, GPIO_PUPD_PULLUP, GPIO_PIN_4);
+    gpio_output_options_set(GPIOB, GPIO_OTYPE_PP, GPIO_OSPEED_60MHZ, GPIO_PIN_4);
+    gpio_af_set(GPIOB, GPIO_AF_11, GPIO_PIN_4);
+
+    /* configure CAN0_RX GPIO */
+	gpio_mode_set(GPIOB, GPIO_MODE_AF, GPIO_PUPD_NONE, GPIO_PIN_3);
+    gpio_output_options_set(GPIOB, GPIO_OTYPE_PP, GPIO_OSPEED_60MHZ, GPIO_PIN_3);
+    gpio_af_set(GPIOB, GPIO_AF_11, GPIO_PIN_3);
+   
+	can_parameter_struct can2_parameter;
+    can_fifo_parameter_struct fifo_parameter;  
+    //can_fd_parameter_struct fd2_parameter;
+
+    /* select CK_APB2 as CAN's clock source */
+    rcu_can_clock_config(IDX_CAN2, RCU_CANSRC_APB2);
+    /* enable CAN clock */
+    rcu_periph_clock_enable(RCU_CAN2);
+    /* initialize CAN register */
+    can_deinit(CAN2);
+    /* initialize CAN */
+    can_struct_para_init(CAN_INIT_STRUCT, &can2_parameter);
+    can_struct_para_init(CAN_FIFO_INIT_STRUCT, &fifo_parameter);
+    //can_struct_para_init(CAN_FD_INIT_STRUCT, &fd2_parameter);
+
+    /* initialize CAN parameters */
+    can2_parameter.internal_counter_source = CAN_TIMER_SOURCE_BIT_CLOCK;
+    can2_parameter.self_reception = DISABLE;
+    can2_parameter.mb_tx_order = CAN_TX_HIGH_PRIORITY_MB_FIRST;
+    can2_parameter.mb_tx_abort_enable = ENABLE;
+    can2_parameter.local_priority_enable = DISABLE;
+    can2_parameter.mb_rx_ide_rtr_type = CAN_IDE_RTR_FILTERED;
+    can2_parameter.mb_remote_frame = CAN_STORE_REMOTE_REQUEST_FRAME;
+    can2_parameter.rx_private_filter_queue_enable = DISABLE;
+    can2_parameter.edge_filter_enable = DISABLE;
+    can2_parameter.protocol_exception_enable = DISABLE;
+    can2_parameter.rx_filter_order = CAN_RX_FILTER_ORDER_FIFO_FIRST;  // ��ΪFIFO����
+    can2_parameter.memory_size = CAN_MEMSIZE_32_UNIT;
+    /* filter configuration */
+    can2_parameter.mb_public_filter = 0U;
+    /* baud rate 1Mbps */
+    can2_parameter.resync_jump_width = 1U;
+    can2_parameter.prop_time_segment = 2U;
+    can2_parameter.time_segment_1 = 4U;
+    can2_parameter.time_segment_2 = 1U;
+    can2_parameter.prescaler = 54U;
+
+    /* initialize CAN */
+    can_init(CAN2, &can2_parameter);
+
+    fifo_parameter.dma_enable = DISABLE;
+    fifo_parameter.filter_format_and_number = CAN_RXFIFO_FILTER_A_NUM_8;  // 8��������
+    fifo_parameter.fifo_public_filter = 0x00000000U;
+
+    can_rx_fifo_config(CAN2, &fifo_parameter);
+    can_rx_fifo_id_filter_struct id_filter_table[8];
+
+    for(uint8_t i = 0; i < 8; i++) 
+    {
+        id_filter_table[i].remote_frame = CAN_DATA_FRAME_ACCEPTED;    // ֻ��������֡
+        id_filter_table[i].extended_frame = CAN_STANDARD_FRAME_ACCEPTED; // ֻ���ձ�׼֡
+        id_filter_table[i].id = 0x01U;  // ����Ŀ��ID
+    }
+
+    can_rx_fifo_filter_table_config(CAN2, id_filter_table);
+
+    /* configure CAN0 NVIC */
+    nvic_irq_enable(CAN2_Message_IRQn, 0U, 0U);
+
+    /* enable CAN MB0 interrupt */
+    can_interrupt_enable(CAN2, CAN_INT_FIFO_AVAILABLE);  // FIFO�����ж�
+    can_interrupt_enable(CAN2, CAN_INT_FIFO_WARNING);    // FIFO�����ж�
+    can_interrupt_enable(CAN2, CAN_INT_FIFO_OVERFLOW);   // FIFO����ж�
+
+    can_operation_mode_enter(CAN2, CAN_NORMAL_MODE);
+ 
+    can_mailbox_transmit_inactive(CAN2, 8U);
+    can_mailbox_transmit_inactive(CAN2, 9U);
+    can_mailbox_transmit_inactive(CAN2, 10U);
+
+  
+}
+
 void can0fd_txMessage(uint8_t length,uint8_t id,uint8_t *can0txdata)
 {
     for(int i = 0; i < length; i++){
@@ -1474,6 +1566,65 @@ void can0fd_txMessage(uint8_t length,uint8_t id,uint8_t *can0txdata)
     transmit_message.id = id;
 
     can_mailbox_config(CAN0, 1U, &transmit_message);
+}
+
+uint32_t mailbox_code = 0;
+ErrStatus can2_tx_with_mailbox(uint8_t length, uint32_t id, uint8_t *can2txdata, uint32_t mailbox_index)
+{
+    
+    if(length > 8) {
+        return ERROR;
+    }
+    
+    /* ��������Ƿ���������Χ�� */
+    if(mailbox_index < 8 || mailbox_index > 10) {
+        return ERROR;
+    }
+    
+    /* �������״̬ */
+    mailbox_code = can_mailbox_code_get(CAN2, mailbox_index);
+    if(mailbox_code != CAN_MB_TX_STATUS_INACTIVE) {
+        return ERROR; /* ����æµ */
+    }
+    
+    
+    /* ������� */
+    for(int i = 0; i < length; i++) {
+        can2transmit_message.data[i] = can2txdata[i];
+    }
+    
+    /* ���÷��Ͳ��� */
+    can2transmit_message.rtr = 0U;
+    can2transmit_message.ide = 0U;
+    can2transmit_message.code = CAN_MB_TX_STATUS_DATA;
+    can2transmit_message.brs = 0U;
+    can2transmit_message.fdf = 0U;
+    can2transmit_message.esi = 0U;
+    can2transmit_message.prio = 0U;
+    can2transmit_message.data_bytes = length;
+    can2transmit_message.id = id;
+    
+    /* �������䲢���� */
+    can_mailbox_config(CAN2, mailbox_index, &can2transmit_message);
+    
+    return SUCCESS;
+}
+ErrStatus can2_tx_auto(uint8_t length, uint32_t id, uint8_t *can2txdata)
+{
+    /* �����������״̬��ѡ���һ�����õ� */
+    for(uint8_t i = 0; i < 3; i++) {
+        uint32_t mailbox_index = can2_tx_manager.mailboxes[i];
+        uint32_t mailbox_code = can_mailbox_code_get(CAN2, mailbox_index);
+        
+        if(mailbox_code == CAN_MB_TX_STATUS_INACTIVE) {
+            if(can2_tx_with_mailbox(length, id, can2txdata, mailbox_index) == SUCCESS) {
+                can2_tx_manager.sent_count[i]++;
+                return SUCCESS;
+            }
+        }
+    }
+    
+    return ERROR; /* �������䶼æµ */
 }
 void can2_txMessage(uint8_t length,uint8_t id,uint8_t *can2txdata)
 {

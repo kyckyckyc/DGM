@@ -160,14 +160,63 @@ void CAN0_Message_IRQHandler(void)
     }
 }
 
-
+can_rx_fifo_struct rx_frame;
 void CAN2_Message_IRQHandler(void)
 {
-    if(RESET != can_interrupt_flag_get(CAN2, CAN_INT_FLAG_MB2)) {
-        can_interrupt_flag_clear(CAN2, CAN_INT_FLAG_MB2);
-        can2_rxflag = SET;
+    // if(RESET != can_interrupt_flag_get(CAN2, CAN_INT_FLAG_MB2)) {
+    //     can_interrupt_flag_clear(CAN2, CAN_INT_FLAG_MB2);
+    //    // can2_rxflag = SET;
+    //      can_mailbox_receive_data_read(CAN2, 2U, &can2receive_message);
+    //         can2_rxframe.id = can2receive_message.id & 0xFFFFFF;
+    //         can2_rxframe.dlc = can2receive_message.dlc;
+    //         for(int j=0;j<8;j++)
+    //         {
+    //           can2_rxframe.data[j] = (uint8_t) can2receive_message.data[j];
+    //         }
+            
+    //        parse_frame(&can2_rxframe);
 
 
 
+    // }
+
+     if(can_interrupt_flag_get(CAN2, CAN_INT_FLAG_FIFO_AVAILABLE) != RESET) {
+        
+        
+        /* 读取FIFO数据 */
+        can_rx_fifo_read(CAN2, &rx_frame);
+
+        can2_rxframe.id = rx_frame.id & 0xFFFFFF;
+        can2_rxframe.dlc = rx_frame.dlc;
+        can2_rxframe.data[0] = (rx_frame.data[0] >> 0) & 0xFF;  /* 字节3 → datanew[0] */
+        can2_rxframe.data[1] = (rx_frame.data[0] >> 8) & 0xFF;  /* 字节2 → datanew[1] */
+        can2_rxframe.data[2] = (rx_frame.data[0] >> 16)  & 0xFF;  /* 字节1 → datanew[2] */
+        can2_rxframe.data[3] = (rx_frame.data[0] >> 24)  & 0xFF;  /* 字节0 → datanew[3] */
+        can2_rxframe.data[4] = (rx_frame.data[1] >> 0) & 0xFF;  /* 字节7 → datanew[4] */
+        can2_rxframe.data[5] = (rx_frame.data[1] >> 8) & 0xFF;  /* 字节6 → datanew[5] */
+        can2_rxframe.data[6] = (rx_frame.data[1] >> 16)  & 0xFF;  /* 字节5 → datanew[6] */
+        can2_rxframe.data[7] = (rx_frame.data[1] >> 24)  & 0xFF;  /* 字节4 → datanew[7]*/
+
+        parse_frame(&can2_rxframe);
+        //can_tx(&can2_rxframe);
+        /* 处理接收到的数据 */
+       // process_can2_received_frame(&rx_frame);
+        
+        /* 清除中断标志 */
+        
+        can_interrupt_flag_clear(CAN2, CAN_INT_FLAG_FIFO_AVAILABLE);
+
+    }
+    
+    /* 处理FIFO警告中断 */
+    if(can_interrupt_flag_get(CAN2, CAN_INT_FLAG_FIFO_WARNING) != RESET) {
+        printf("CAN2 FIFO Warning Interrupt\n");
+        can_interrupt_flag_clear(CAN2, CAN_INT_FLAG_FIFO_WARNING);
+    }
+    
+    /* 处理FIFO溢出中断 */
+    if(can_interrupt_flag_get(CAN2, CAN_INT_FLAG_FIFO_OVERFLOW) != RESET) {
+        printf("CAN2 FIFO Overflow Interrupt - Data Lost!\n");
+        can_interrupt_flag_clear(CAN2, CAN_INT_FLAG_FIFO_OVERFLOW);
     }
 }
