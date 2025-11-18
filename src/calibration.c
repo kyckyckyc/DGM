@@ -99,7 +99,7 @@ void CALIBRATION_loop(void)
     static uint32_t loop_count;
 
     // R
-    static const float    kI           = 0.02f;
+    static const float    kI           = 0.05f;
     static const uint32_t num_R_cycles = CURRENT_MEASURE_HZ * 2;
 
     // L
@@ -147,6 +147,9 @@ void CALIBRATION_loop(void)
             float_to_data(UsrConfig.motor_phase_resistance, data);
             CAN_calib_report(1, data);
         }
+        // mCalibStep            = CS_NULL;
+        // UsrConfig.calib_valid = true;
+        // MCT_set_state(IDLE);
         mCalibStep = CS_MOTOR_L_START;
         break;
 
@@ -174,7 +177,7 @@ void CALIBRATION_loop(void)
     } break;
 
     case CS_MOTOR_L_END: {
-        float dI_by_dt                   = (Ialphas[1] - Ialphas[0]) / (float) (CURRENT_MEASURE_PERIOD * num_L_cycles);
+        float dI_by_dt                   = (Ialphas[0] - Ialphas[1]) / (float) (CURRENT_MEASURE_PERIOD * num_L_cycles);
         float L                          = UsrConfig.calib_voltage / dI_by_dt;
         UsrConfig.motor_phase_inductance = L * 2.0f / 3.0f;
         FOC_update_current_ctrl_gain(UsrConfig.current_ctrl_bw);

@@ -36,10 +36,10 @@
 #define ADC_RESOLUTION         4095.0f
 #define ADC_ZERO_OFFSET        1.65f     // 零位1.65V   阈值1.5V
 #define SHUNT_RESISTENCE       (0.001f)   // 分流电阻0.001Ω
-#define V_RATIO                (10.0f)   //(30V/3.3V)
+#define V_RATIO                (24.0f)   //(30V/3.3V)
 #define I_RATIO                (68.0f)    //(1.5A/(0.001Ω*22.3A))
-#define V_SCALE                ((float) (V_RATIO * 3.3f / 4095.0f))
-#define I_SCALE                ((float) ((3.3f / 4095.0f) / SHUNT_RESISTENCE / I_RATIO))
+#define V_SCALE                ((float) (V_RATIO * 3.3f / ADC_RESOLUTION))
+#define I_SCALE                ((float) ((3.3f / ADC_RESOLUTION) / SHUNT_RESISTENCE / I_RATIO))
 
 #endif
 
@@ -65,9 +65,11 @@ static const int16_t temp_table[]
        -18, -19, -19, -20, -21, -21, -22, -23, -24, -25, -26, -26, -27, -28, -29, -30, -31, -32, -33, -35, -36, -37,
        -38, -40, -41, -43, -45, -47, -49, -51, -54, -57, -61, -65, -72, -82};
 
+
 static inline float read_vbus(void)
-{
+{   
     return (float) (adc_inserted_data_read(ADC0,ADC_INSERTED_CHANNEL_3)) * V_SCALE;
+    //return (float) (adc_inserted_data_read(ADC0,ADC_INSERTED_CHANNEL_3))*12;
 }
 
 static inline int read_drv_temp(void)

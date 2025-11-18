@@ -171,68 +171,19 @@ void msd_system_init(void)
 */
 // #if defined(__SYSTEM_CLOCK_216M_PLL_HXTAL) 
 
-// void msd_clock_init(void)
-// {
-//     /* user code [clock_init local 0] begin */
-
-//     /* user code [clock_init local 0] end */
-
-//     rcu_osci_on(RCU_HXTAL);
-//     while (rcu_osci_stab_wait(RCU_HXTAL) != SUCCESS);
-
-//     rcu_pll_source_config(RCU_PLLSRC_HXTAL);
-//     rcu_pll_config((1U), (54U), (2U), (2U), (2U));
-//     rcu_pll_clock_output_enable(RCU_PLLP);
-//     rcu_pll_clock_output_enable(RCU_PLLR);
-//     fmc_wscnt_set(FMC_WAIT_STATE_7);
-//     rcu_system_clock_source_config(RCU_CKSYSSRC_PLLP);
-//     rcu_osci_on(RCU_PLL_CK);
-//     while (rcu_osci_stab_wait(RCU_PLL_CK) != SUCCESS);
-
-//     rcu_ahb_clock_config(RCU_AHB_CKSYS_DIV1);
-//     rcu_apb1_clock_config(RCU_APB1_CKAHB_DIV1);
-//     rcu_apb2_clock_config(RCU_APB2_CKAHB_DIV1);
-//     rcu_apb3_clock_config(RCU_APB3_CKAHB_DIV1);
-
-//     rcu_can_clock_config(IDX_CAN0, RCU_CANSRC_APB2);
-//     rcu_adc_clock_config(IDX_ADC0, RCU_ADCSRC_PLLR);
-//     rcu_adc_clock_config(IDX_ADC1, RCU_ADCSRC_PLLR);
-//     rcu_usart_clock_config(IDX_USART0, RCU_USARTSRC_APB);
-//     rcu_usart_clock_config(IDX_USART2, RCU_USARTSRC_APB);
-
-//     rcu_osci_bypass_mode_disable(RCU_HXTAL);
-//     rcu_osci_bypass_mode_disable(RCU_LXTAL);
-//     rcu_hxtal_clock_monitor_disable();
-//     rcu_lxtal_clock_monitor_disable();
-
-//     /* update SystemCoreClock value */
-//     SystemCoreClockUpdate();
-
-//     /* setup systick timer for 1000Hz interrupts */
-//     if (SysTick_Config(SystemCoreClock / 1000U))
-//     {
-//         /* capture error */
-//         while (1);
-//     }
-
-//     /* user code [clock_init local 1] begin */
-
-//     /* user code [clock_init local 1] end */
-// }
-
-//#elif defined(__SYSTEM_CLOCK_216M_PLL_IRC8M)
-
 void msd_clock_init(void)
 {
+    /* user code [clock_init local 0] begin */
 
+    /* user code [clock_init local 0] end */
 
-    rcu_osci_on(RCU_IRC8M);
-    while (rcu_osci_stab_wait(RCU_IRC8M) != SUCCESS);
-    rcu_irc8m_adjust_value_set(16U);
+    rcu_osci_on(RCU_HXTAL);
+    while (rcu_osci_stab_wait(RCU_HXTAL) != SUCCESS);
 
-    rcu_pll_source_config(RCU_PLLSRC_IRC8M);
-    rcu_pll_config((2U), (108U), (2U), (2U), (2U));
+    rcu_pll_source_config(RCU_PLLSRC_HXTAL);
+    rcu_pll_config((1U), (54U), (2U), (2U), (2U));
     rcu_pll_clock_output_enable(RCU_PLLP);
+    rcu_pll_clock_output_enable(RCU_PLLR);
     fmc_wscnt_set(FMC_WAIT_STATE_7);
     rcu_system_clock_source_config(RCU_CKSYSSRC_PLLP);
     rcu_osci_on(RCU_PLL_CK);
@@ -242,21 +193,70 @@ void msd_clock_init(void)
     rcu_apb1_clock_config(RCU_APB1_CKAHB_DIV1);
     rcu_apb2_clock_config(RCU_APB2_CKAHB_DIV1);
     rcu_apb3_clock_config(RCU_APB3_CKAHB_DIV1);
+
+    rcu_can_clock_config(IDX_CAN0, RCU_CANSRC_APB2);
+    rcu_adc_clock_config(IDX_ADC0, RCU_ADCSRC_PLLR);
+    rcu_adc_clock_config(IDX_ADC1, RCU_ADCSRC_PLLR);
+    rcu_usart_clock_config(IDX_USART0, RCU_USARTSRC_APB);
+    rcu_usart_clock_config(IDX_USART2, RCU_USARTSRC_APB);
+
     rcu_osci_bypass_mode_disable(RCU_HXTAL);
     rcu_osci_bypass_mode_disable(RCU_LXTAL);
     rcu_hxtal_clock_monitor_disable();
     rcu_lxtal_clock_monitor_disable();
- 
+
+    /* update SystemCoreClock value */
     SystemCoreClockUpdate();
 
-
+    /* setup systick timer for 1000Hz interrupts */
     if (SysTick_Config(SystemCoreClock / 1000U))
     {
-
-    while (1);
+        /* capture error */
+        while (1);
     }
 
+    /* user code [clock_init local 1] begin */
+
+    /* user code [clock_init local 1] end */
 }
+
+//#elif defined(__SYSTEM_CLOCK_216M_PLL_IRC8M)
+
+// void msd_clock_init(void)
+// {
+
+
+//     rcu_osci_on(RCU_IRC8M);
+//     while (rcu_osci_stab_wait(RCU_IRC8M) != SUCCESS);
+//     rcu_irc8m_adjust_value_set(16U);
+
+//     rcu_pll_source_config(RCU_PLLSRC_IRC8M);
+//     rcu_pll_config((2U), (108U), (2U), (2U), (2U));
+//     rcu_pll_clock_output_enable(RCU_PLLP);
+//     fmc_wscnt_set(FMC_WAIT_STATE_7);
+//     rcu_system_clock_source_config(RCU_CKSYSSRC_PLLP);
+//     rcu_osci_on(RCU_PLL_CK);
+//     while (rcu_osci_stab_wait(RCU_PLL_CK) != SUCCESS);
+
+//     rcu_ahb_clock_config(RCU_AHB_CKSYS_DIV1);
+//     rcu_apb1_clock_config(RCU_APB1_CKAHB_DIV1);
+//     rcu_apb2_clock_config(RCU_APB2_CKAHB_DIV1);
+//     rcu_apb3_clock_config(RCU_APB3_CKAHB_DIV1);
+//     rcu_osci_bypass_mode_disable(RCU_HXTAL);
+//     rcu_osci_bypass_mode_disable(RCU_LXTAL);
+//     rcu_hxtal_clock_monitor_disable();
+//     rcu_lxtal_clock_monitor_disable();
+ 
+//     SystemCoreClockUpdate();
+
+
+//     if (SysTick_Config(SystemCoreClock / 1000U))
+//     {
+
+//     while (1);
+//     }
+
+// }
 
 //#endif
 
@@ -1503,7 +1503,7 @@ void msd_can2_fifo_init(void)
     can2_parameter.rx_private_filter_queue_enable = DISABLE;
     can2_parameter.edge_filter_enable = DISABLE;
     can2_parameter.protocol_exception_enable = DISABLE;
-    can2_parameter.rx_filter_order = CAN_RX_FILTER_ORDER_FIFO_FIRST;  // 锟斤拷为FIFO锟斤拷锟斤拷
+    can2_parameter.rx_filter_order = CAN_RX_FILTER_ORDER_FIFO_FIRST;  // 闂備浇娉曢崰鎰板几婵犳艾绠柧姘€界粈濠㊣FO闂備浇娉曢崰鎰板几婵犳艾绠柣鎴ｅГ閺呮悂鏌￠崒妯衡偓鏍偓姘炬嫹
     can2_parameter.memory_size = CAN_MEMSIZE_32_UNIT;
     /* filter configuration */
     can2_parameter.mb_public_filter = 0U;
@@ -1518,7 +1518,7 @@ void msd_can2_fifo_init(void)
     can_init(CAN2, &can2_parameter);
 
     fifo_parameter.dma_enable = DISABLE;
-    fifo_parameter.filter_format_and_number = CAN_RXFIFO_FILTER_A_NUM_8;  // 8锟斤拷锟斤拷锟斤拷锟斤拷
+    fifo_parameter.filter_format_and_number = CAN_RXFIFO_FILTER_A_NUM_8;  // 8闂備浇娉曢崰鎰板几婵犳艾绠柣鎴ｅГ閺呮悂鏌￠崒妯衡偓鏍偓姘秺閺屻劑鎮㈤崨濠勪紕闂佸綊顥撻崗姗€寮幘璇叉闁靛牆妫楅锟�
     fifo_parameter.fifo_public_filter = 0x00000000U;
 
     can_rx_fifo_config(CAN2, &fifo_parameter);
@@ -1526,9 +1526,9 @@ void msd_can2_fifo_init(void)
 
     for(uint8_t i = 0; i < 8; i++) 
     {
-        id_filter_table[i].remote_frame = CAN_DATA_FRAME_ACCEPTED;    // 只锟斤拷锟斤拷锟斤拷锟斤拷帧
-        id_filter_table[i].extended_frame = CAN_STANDARD_FRAME_ACCEPTED; // 只锟斤拷锟秸憋拷准帧
-        id_filter_table[i].id = 0x01U;  // 锟斤拷锟斤拷目锟斤拷ID
+        id_filter_table[i].remote_frame = CAN_DATA_FRAME_ACCEPTED;    // 闂佸憡鐟禍顏堝极閹捐妫橀柕鍫濇椤忓爼姊虹捄銊ユ瀾闁哄顭烽獮蹇涙倻閼恒儲娅㈤梺鍝勫€堕崐鏍偓姘秺閺屻劑鎮㈤崨濠勪紕闂佺懓鍢查崲鏌ュ箮閿燂拷
+        id_filter_table[i].extended_frame = CAN_STANDARD_FRAME_ACCEPTED; // 闂佸憡鐟禍顏堝极閹捐妫橀柕鍫濇椤忓爼姊虹捄銊ユ灁缁楁垿鏌熼幓鎺濆剱閻庢艾缍婂畷娆撳幢濡や礁顫�
+        id_filter_table[i].id = 0x01U;  // 闂備浇娉曢崰鎰板几婵犳艾绠柣鎴ｅГ閺呮悂鏌￠崒妯衡偓鏍偓姘秺閹嫰顢氶埀顒勫极閹捐妫橀柕鍫濇椤忕D
     }
 
     can_rx_fifo_filter_table_config(CAN2, id_filter_table);
@@ -1537,9 +1537,9 @@ void msd_can2_fifo_init(void)
     nvic_irq_enable(CAN2_Message_IRQn, 0U, 0U);
 
     /* enable CAN MB0 interrupt */
-    can_interrupt_enable(CAN2, CAN_INT_FIFO_AVAILABLE);  // FIFO锟斤拷锟斤拷锟叫讹拷
-    can_interrupt_enable(CAN2, CAN_INT_FIFO_WARNING);    // FIFO锟斤拷锟斤拷锟叫讹拷
-    can_interrupt_enable(CAN2, CAN_INT_FIFO_OVERFLOW);   // FIFO锟斤拷锟斤拷卸锟�
+    can_interrupt_enable(CAN2, CAN_INT_FIFO_AVAILABLE);  // FIFO闂備浇娉曢崰鎰板几婵犳艾绠柣鎴ｅГ閺呮悂鏌￠崒妯衡偓鏍偓姘秺閺屻劑鎮㈠畡鏉跨紦闁荤姳娴囬～澶屸偓姘炬嫹
+    can_interrupt_enable(CAN2, CAN_INT_FIFO_WARNING);    // FIFO闂備浇娉曢崰鎰板几婵犳艾绠柣鎴ｅГ閺呮悂鏌￠崒妯衡偓鏍偓姘秺閺屻劑鎮㈠畡鏉跨紦闁荤姳娴囬～澶屸偓姘炬嫹
+    can_interrupt_enable(CAN2, CAN_INT_FIFO_OVERFLOW);   // FIFO闂備浇娉曢崰鎰板几婵犳艾绠柣鎴ｅГ閺呮悂鏌￠崒妯衡偓鏍偓姘秺瀹曪繝骞栨担瑙勬闂佽法鍣﹂幏锟�
 
     can_operation_mode_enter(CAN2, CAN_NORMAL_MODE);
  
@@ -1576,24 +1576,24 @@ ErrStatus can2_tx_with_mailbox(uint8_t length, uint32_t id, uint8_t *can2txdata,
         return ERROR;
     }
     
-    /* 锟斤拷锟斤拷锟斤拷锟斤拷欠锟斤拷锟斤拷锟斤拷锟斤拷锟轿э拷锟� */
+    /* 闂備浇娉曢崰鎰板几婵犳艾绠柣鎴ｅГ閺呮悂鏌￠崒妯衡偓鏍偓姘秺閺屻劑鎮㈤崨濠勪紕闂佸綊顥撻崗姗€寮幘璇叉闁靛牆妫楅鑸电箾閸℃瑥鈻堥柡浣规崌瀵剟濡堕崱妤婁紦闂備浇娉曢崰鎰板几婵犳艾绠柣鎴ｅГ閺呮悂鏌￠崒妯衡偓鏍偓姘秺閺屻劑鎮㈤崨濠勪紕闂佸綊顥撻崗姗€寮幘瀛樺闁割煉绠戠粔鐢碘偓姘秺閺屻劑鎮ら崒娑橆伓 */
     if(mailbox_index < 8 || mailbox_index > 10) {
         return ERROR;
     }
     
-    /* 锟斤拷锟斤拷锟斤拷锟阶刺� */
+    /* 闂備浇娉曢崰鎰板几婵犳艾绠柣鎴ｅГ閺呮悂鏌￠崒妯衡偓鏍偓姘秺閺屻劑鎮㈤崨濠勪紕闂佸綊顥撻崗姗€寮幘缁樷挀閻犲搫鎼悡娑㈡煥閻曞倹瀚� */
     mailbox_code = can_mailbox_code_get(CAN2, mailbox_index);
     if(mailbox_code != CAN_MB_TX_STATUS_INACTIVE) {
-        return ERROR; /* 锟斤拷锟斤拷忙碌 */
+        return ERROR; /* 闂備浇娉曢崰鎰板几婵犳艾绠柣鎴ｅГ閺呮悂鏌￠崒妯衡偓鏍偓姘鳖攰缁犳稑鈻庨幋顓熸 */
     }
     
     
-    /* 锟斤拷锟斤拷锟斤拷锟� */
+    /* 闂備浇娉曢崰鎰板几婵犳艾绠柣鎴ｅГ閺呮悂鏌￠崒妯衡偓鏍偓姘秺閺屻劑鎮㈤崨濠勪紕闂佸綊顥撻崗姗€寮幘缁樻櫢闁跨噦鎷� */
     for(int i = 0; i < length; i++) {
         can2transmit_message.data[i] = can2txdata[i];
     }
     
-    /* 锟斤拷锟矫凤拷锟酵诧拷锟斤拷 */
+    /* 闂備浇娉曢崰鎰板几婵犳艾绠柣鎴ｅГ閺呮悂鏌ｉ褍浜滈柛銈嗙墵楠炲繘鎮滈懞銉︽闂備線顣︾徊濠氼敋濠婂牆绠柣鎴ｅГ閺呮悂鏌￠崒妯衡偓鏍偓姘炬嫹 */
     can2transmit_message.rtr = 0U;
     can2transmit_message.ide = 0U;
     can2transmit_message.code = CAN_MB_TX_STATUS_DATA;
@@ -1604,14 +1604,14 @@ ErrStatus can2_tx_with_mailbox(uint8_t length, uint32_t id, uint8_t *can2txdata,
     can2transmit_message.data_bytes = length;
     can2transmit_message.id = id;
     
-    /* 锟斤拷锟斤拷锟斤拷锟戒并锟斤拷锟斤拷 */
+    /* 闂備浇娉曢崰鎰板几婵犳艾绠柣鎴ｅГ閺呮悂鏌￠崒妯衡偓鏍偓姘秺閺屻劑鎮㈤崨濠勪紕闂佸綊顥撻崗姗€寮幘璇茬闁圭儤鍨肩€氭瑩姊虹捄銊ユ瀾闁哄顭烽獮蹇涙倻閼恒儲娅㈤梺鍝勫€堕崐鏍偓姘炬嫹 */
     can_mailbox_config(CAN2, mailbox_index, &can2transmit_message);
     
     return SUCCESS;
 }
 ErrStatus can2_tx_auto(uint8_t length, uint32_t id, uint8_t *can2txdata)
 {
-    /* 锟斤拷锟斤拷锟斤拷锟斤拷锟斤拷锟阶刺拷锟窖★拷锟斤拷一锟斤拷锟斤拷锟矫碉拷 */
+    /* 闂備浇娉曢崰鎰板几婵犳艾绠柣鎴ｅГ閺呮悂鏌￠崒妯衡偓鏍偓姘秺閺屻劑鎮㈤崨濠勪紕闂佸綊顥撻崗姗€寮幘璇叉闁靛牆妫楅鍫曟⒑鐠恒劌鏋戦柡瀣煼楠炲繘鎮滈懞銉︽闂傚倸鍟冲▔娑㈠春閿熺媭鏁嗗┑鐘插暙椤忓爼姊虹捄銊ユ灁闁绘稏鍊濋崺銉╁川椤旂⒈浼撻梻浣芥硶閸犳劙寮告繝姘闁炬艾鍊婚閬嶆⒑鐠恒劌鏋戦柡瀣煼楠炲繘鎮滈懞銉︽闂佸搫鍊堕崐鏍偓姘秺閺屻劑鎮㈤搹鐟板絼缂佺偓婢橀ˇ鎵偓姘炬嫹 */
     for(uint8_t i = 0; i < 3; i++) {
         uint32_t mailbox_index = can2_tx_manager.mailboxes[i];
         uint32_t mailbox_code = can_mailbox_code_get(CAN2, mailbox_index);
@@ -1624,7 +1624,7 @@ ErrStatus can2_tx_auto(uint8_t length, uint32_t id, uint8_t *can2txdata)
         }
     }
     
-    return ERROR; /* 锟斤拷锟斤拷锟斤拷锟戒都忙碌 */
+    return ERROR; /* 闂備浇娉曢崰鎰板几婵犳艾绠柣鎴ｅГ閺呮悂鏌￠崒妯衡偓鏍偓姘秺閺屻劑鎮㈤崨濠勪紕闂佸綊顥撻崗姗€寮幘璇茬闁圭儤顨呴崢鎾叓閸ャ劎鎳呮い锝忔嫹 */
 }
 void can2_txMessage(uint8_t length,uint8_t id,uint8_t *can2txdata)
 {

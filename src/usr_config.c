@@ -57,7 +57,7 @@ void USR_CONFIG_set_default_config(void)
 
     // Protect
     UsrConfig.protect_under_voltage = 12;
-    UsrConfig.protect_over_voltage  = 30;
+    UsrConfig.protect_over_voltage  = 50;
     UsrConfig.protect_over_current  = 8;
     UsrConfig.protect_drv_over_tmp  = 80;
     UsrConfig.protect_ntc_over_tmp  = 80;

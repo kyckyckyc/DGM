@@ -123,7 +123,7 @@ void TIMER1_IRQHandler(void)
     /* clear update interrupt bit */
     TIMER_INTF(TIMER1) = (~(uint32_t) TIMER_INT_FLAG_UP);
 
-     MCT_safety_task();
+    MCT_safety_task();
 
     SystickCount++;
 

@@ -237,14 +237,11 @@ void MCT_high_frequency_task(void)
 
 	// Test_TLI5012B();
 	
-	
-	
-	
-   Foc.v_bus = read_vbus();
-   UTILS_LP_FAST(Foc.v_bus_filt, Foc.v_bus, 0.05f);
-     Foc.i_a = read_iphase_a();
-     Foc.i_b = read_iphase_b();
-   Foc.i_c = -(Foc.i_a + Foc.i_b);
+    Foc.v_bus = read_vbus();
+    UTILS_LP_FAST(Foc.v_bus_filt, Foc.v_bus, 0.05f);
+    Foc.i_a = read_iphase_a();
+    Foc.i_b = read_iphase_b();
+    Foc.i_c = -(Foc.i_a + Foc.i_b);
 
    switch (mFSM.state) {
    case BOOT_UP:
