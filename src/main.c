@@ -64,6 +64,7 @@ can2_tx_manager_t can2_tx_manager = {
     .current_index = 0,
     .sent_count = {0, 0, 0}
 };
+int32_t test_offset_lut[128];
 /*!
     \brief      main function
     \param[in]  none
@@ -107,6 +108,11 @@ int main(void)
 
     CAN_set_node_id(UsrConfig.node_id);
 //      CAN0_init(UsrConfig.can_baudrate);
+   for(int i = 0;i<128;i++)
+   {
+     test_offset_lut[i] = *(volatile int32_t *)(USR_CONFIG_ADDR + 144 + 4*i);
+
+   }
 
    MCT_init();
    FOC_init();
