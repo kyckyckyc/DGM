@@ -30,13 +30,13 @@
 #define HALF_PWM_PERIOD_CYCLES (uint16_t) (PWM_PERIOD_CYCLES / 2U)
 
 #if defined(AK80_9)
-//母线电压额定电压48V   相电流额定电流10.3A  相电流峰值电流22.3A
+//母线电压额定电压48V    
 #define PEAK_CURRENT           22.3f     // 从参数表得到峰值电流22.3A
 #define ADC_REF_VOLTAGE        3.3f
 #define ADC_RESOLUTION         4095.0f
 #define ADC_ZERO_OFFSET        1.65f     // 零位1.65V   阈值1.5V
 #define SHUNT_RESISTENCE       (0.001f)   // 分流电阻0.001Ω
-#define V_RATIO                (24.0f)   //(30V/3.3V)
+#define V_RATIO                (22.27f)   //(104.7/4.7)
 #define I_RATIO                (68.0f)    //(1.5A/(0.001Ω*22.3A))
 #define V_SCALE                ((float) (V_RATIO * 3.3f / ADC_RESOLUTION))
 #define I_SCALE                ((float) ((3.3f / ADC_RESOLUTION) / SHUNT_RESISTENCE / I_RATIO))

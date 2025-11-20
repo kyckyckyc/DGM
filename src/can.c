@@ -279,6 +279,7 @@ static void fill_value(uint8_t idx, uint8_t *data)
 
     case 4:
         float_to_data(Foc.i_bus_filt, data);
+        //float_to_data(Foc.i_a, data);
         break;
 
     case 5:

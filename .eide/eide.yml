@@ -56,6 +56,7 @@ targets:
           global:
             $float-abi-type: hard
             arm-thumb-mode: thumb
+            misc-control: -gdwarf-4
             not-use-syscalls: true
             output-debug-info: enable
             use-newlib-nano: true

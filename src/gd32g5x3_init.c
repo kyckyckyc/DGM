@@ -1503,7 +1503,7 @@ void msd_can2_fifo_init(void)
     can2_parameter.rx_private_filter_queue_enable = DISABLE;
     can2_parameter.edge_filter_enable = DISABLE;
     can2_parameter.protocol_exception_enable = DISABLE;
-    can2_parameter.rx_filter_order = CAN_RX_FILTER_ORDER_FIFO_FIRST;  // 闂備浇娉曢崰鎰板几婵犳艾绠柧姘€界粈濠㊣FO闂備浇娉曢崰鎰板几婵犳艾绠柣鎴ｅГ閺呮悂鏌￠崒妯衡偓鏍偓姘炬嫹
+    can2_parameter.rx_filter_order = CAN_RX_FILTER_ORDER_FIFO_FIRST;  // 闂傚倷娴囧▔鏇㈠窗閹版澘鍑犲┑鐘宠壘缁狀垶鏌у顒€鈧晫绮堟繝銑O闂傚倷娴囧▔鏇㈠窗閹版澘鍑犲┑鐘宠壘缁狀垶鏌ｉ幋锝呅撻柡鍛倐閺岋繝宕掑Ο琛″亾閺嶎偀鍋撳鐐
     can2_parameter.memory_size = CAN_MEMSIZE_32_UNIT;
     /* filter configuration */
     can2_parameter.mb_public_filter = 0U;
@@ -1518,7 +1518,7 @@ void msd_can2_fifo_init(void)
     can_init(CAN2, &can2_parameter);
 
     fifo_parameter.dma_enable = DISABLE;
-    fifo_parameter.filter_format_and_number = CAN_RXFIFO_FILTER_A_NUM_8;  // 8闂備浇娉曢崰鎰板几婵犳艾绠柣鎴ｅГ閺呮悂鏌￠崒妯衡偓鏍偓姘秺閺屻劑鎮㈤崨濠勪紕闂佸綊顥撻崗姗€寮幘璇叉闁靛牆妫楅锟�
+    fifo_parameter.filter_format_and_number = CAN_RXFIFO_FILTER_A_NUM_8;  // 8闂傚倷娴囧▔鏇㈠窗閹版澘鍑犲┑鐘宠壘缁狀垶鏌ｉ幋锝呅撻柡鍛倐閺岋繝宕掑Ο琛″亾閺嶎偀鍋撳顒傜Ш闁哄被鍔戦幃銏ゅ川婵犲嫪绱曢梻浣哥秺椤ユ捇宕楀鈧顐﹀箻鐠囧弶顥濋梺闈涚墕濡顢旈敓锟�
     fifo_parameter.fifo_public_filter = 0x00000000U;
 
     can_rx_fifo_config(CAN2, &fifo_parameter);
@@ -1526,9 +1526,9 @@ void msd_can2_fifo_init(void)
 
     for(uint8_t i = 0; i < 8; i++) 
     {
-        id_filter_table[i].remote_frame = CAN_DATA_FRAME_ACCEPTED;    // 闂佸憡鐟禍顏堝极閹捐妫橀柕鍫濇椤忓爼姊虹捄銊ユ瀾闁哄顭烽獮蹇涙倻閼恒儲娅㈤梺鍝勫€堕崐鏍偓姘秺閺屻劑鎮㈤崨濠勪紕闂佺懓鍢查崲鏌ュ箮閿燂拷
-        id_filter_table[i].extended_frame = CAN_STANDARD_FRAME_ACCEPTED; // 闂佸憡鐟禍顏堝极閹捐妫橀柕鍫濇椤忓爼姊虹捄銊ユ灁缁楁垿鏌熼幓鎺濆剱閻庢艾缍婂畷娆撳幢濡や礁顫�
-        id_filter_table[i].id = 0x01U;  // 闂備浇娉曢崰鎰板几婵犳艾绠柣鎴ｅГ閺呮悂鏌￠崒妯衡偓鏍偓姘秺閹嫰顢氶埀顒勫极閹捐妫橀柕鍫濇椤忕D
+        id_filter_table[i].remote_frame = CAN_DATA_FRAME_ACCEPTED;    // 闂備礁鎲￠悷顖涚椤忓牆鏋侀柟鎹愵嚙濡﹢鏌曢崼婵囶棞妞ゅ繐鐖煎铏规崉閵娿儲鐎鹃梺鍝勵儏椤兘鐛箛娑欏€婚柤鎭掑劜濞呫垽姊洪崫鍕偓鍫曞磹閺嶎偀鍋撳顒傜Ш闁哄被鍔戦幃銏ゅ川婵犲嫪绱曢梻浣烘嚀閸㈡煡宕查弻銉ョ闁跨噦鎷�
+        id_filter_table[i].extended_frame = CAN_STANDARD_FRAME_ACCEPTED; // 闂備礁鎲￠悷顖涚椤忓牆鏋侀柟鎹愵嚙濡﹢鏌曢崼婵囶棞妞ゅ繐鐖煎铏规崉閵娿儲鐏佺紒妤佸灴閺岀喖骞撻幒婵嗗壉闁诲孩鑹剧紞濠傜暦濞嗘挸骞㈡俊銈勭椤拷
+        id_filter_table[i].id = 0x01U;  // 闂傚倷娴囧▔鏇㈠窗閹版澘鍑犲┑鐘宠壘缁狀垶鏌ｉ幋锝呅撻柡鍛倐閺岋繝宕掑Ο琛″亾閺嶎偀鍋撳顒傜Ш闁诡垰瀚伴、姘跺焵椤掑嫬鏋侀柟鎹愵嚙濡﹢鏌曢崼婵囶棞妞ゅ繒顪侱
     }
 
     can_rx_fifo_filter_table_config(CAN2, id_filter_table);
@@ -1537,9 +1537,9 @@ void msd_can2_fifo_init(void)
     nvic_irq_enable(CAN2_Message_IRQn, 0U, 0U);
 
     /* enable CAN MB0 interrupt */
-    can_interrupt_enable(CAN2, CAN_INT_FIFO_AVAILABLE);  // FIFO闂備浇娉曢崰鎰板几婵犳艾绠柣鎴ｅГ閺呮悂鏌￠崒妯衡偓鏍偓姘秺閺屻劑鎮㈠畡鏉跨紦闁荤姳娴囬～澶屸偓姘炬嫹
-    can_interrupt_enable(CAN2, CAN_INT_FIFO_WARNING);    // FIFO闂備浇娉曢崰鎰板几婵犳艾绠柣鎴ｅГ閺呮悂鏌￠崒妯衡偓鏍偓姘秺閺屻劑鎮㈠畡鏉跨紦闁荤姳娴囬～澶屸偓姘炬嫹
-    can_interrupt_enable(CAN2, CAN_INT_FIFO_OVERFLOW);   // FIFO闂備浇娉曢崰鎰板几婵犳艾绠柣鎴ｅГ閺呮悂鏌￠崒妯衡偓鏍偓姘秺瀹曪繝骞栨担瑙勬闂佽法鍣﹂幏锟�
+    can_interrupt_enable(CAN2, CAN_INT_FIFO_AVAILABLE);  // FIFO闂傚倷娴囧▔鏇㈠窗閹版澘鍑犲┑鐘宠壘缁狀垶鏌ｉ幋锝呅撻柡鍛倐閺岋繝宕掑Ο琛″亾閺嶎偀鍋撳顒傜Ш闁哄被鍔戦幃銏犵暋閺夎法绱﹂梺鑽ゅС濞村洭锝炴径灞稿亾濮樼偓瀚�
+    can_interrupt_enable(CAN2, CAN_INT_FIFO_WARNING);    // FIFO闂傚倷娴囧▔鏇㈠窗閹版澘鍑犲┑鐘宠壘缁狀垶鏌ｉ幋锝呅撻柡鍛倐閺岋繝宕掑Ο琛″亾閺嶎偀鍋撳顒傜Ш闁哄被鍔戦幃銏犵暋閺夎法绱﹂梺鑽ゅС濞村洭锝炴径灞稿亾濮樼偓瀚�
+    can_interrupt_enable(CAN2, CAN_INT_FIFO_OVERFLOW);   // FIFO闂傚倷娴囧▔鏇㈠窗閹版澘鍑犲┑鐘宠壘缁狀垶鏌ｉ幋锝呅撻柡鍛倐閺岋繝宕掑Ο琛″亾閺嶎偀鍋撳顒傜Ш鐎规洩绻濋獮鏍ㄦ媴鐟欏嫭顏熼梻浣芥硶閸ｏ箓骞忛敓锟�
 
     can_operation_mode_enter(CAN2, CAN_NORMAL_MODE);
  
@@ -1576,24 +1576,24 @@ ErrStatus can2_tx_with_mailbox(uint8_t length, uint32_t id, uint8_t *can2txdata,
         return ERROR;
     }
     
-    /* 闂備浇娉曢崰鎰板几婵犳艾绠柣鎴ｅГ閺呮悂鏌￠崒妯衡偓鏍偓姘秺閺屻劑鎮㈤崨濠勪紕闂佸綊顥撻崗姗€寮幘璇叉闁靛牆妫楅鑸电箾閸℃瑥鈻堥柡浣规崌瀵剟濡堕崱妤婁紦闂備浇娉曢崰鎰板几婵犳艾绠柣鎴ｅГ閺呮悂鏌￠崒妯衡偓鏍偓姘秺閺屻劑鎮㈤崨濠勪紕闂佸綊顥撻崗姗€寮幘瀛樺闁割煉绠戠粔鐢碘偓姘秺閺屻劑鎮ら崒娑橆伓 */
+    /* 闂傚倷娴囧▔鏇㈠窗閹版澘鍑犲┑鐘宠壘缁狀垶鏌ｉ幋锝呅撻柡鍛倐閺岋繝宕掑Ο琛″亾閺嶎偀鍋撳顒傜Ш闁哄被鍔戦幃銏ゅ川婵犲嫪绱曢梻浣哥秺椤ユ捇宕楀鈧顐﹀箻鐠囧弶顥濋梺闈涚墕濡顢旈懜鐢电闁糕剝鐟ラ埢鍫ユ煛娴ｈ宕岀€殿噮鍓熸俊鍫曞幢濡ゅ﹣绱﹂梻鍌欐祰濞夋洟宕伴幇鏉垮嚑濠电姵鑹剧粻顖炴煟閹达絽袚闁哄懏鎮傞弻锟犲磼濡　鍋撻弽顐熷亾濮橆剛绉洪柡灞诲姂閹垽宕ㄦ繝鍕磿闂備礁缍婇ˉ鎾诲礂濮椻偓瀵偊骞樼€涙ê顫￠梺鍓茬厜缁犳垹绮旈悽纰樺亾濮橆剛绉洪柡灞诲姂閹倝宕掑☉姗嗕紦 */
     if(mailbox_index < 8 || mailbox_index > 10) {
         return ERROR;
     }
     
-    /* 闂備浇娉曢崰鎰板几婵犳艾绠柣鎴ｅГ閺呮悂鏌￠崒妯衡偓鏍偓姘秺閺屻劑鎮㈤崨濠勪紕闂佸綊顥撻崗姗€寮幘缁樷挀閻犲搫鎼悡娑㈡煥閻曞倹瀚� */
+    /* 闂傚倷娴囧▔鏇㈠窗閹版澘鍑犲┑鐘宠壘缁狀垶鏌ｉ幋锝呅撻柡鍛倐閺岋繝宕掑Ο琛″亾閺嶎偀鍋撳顒傜Ш闁哄被鍔戦幃銏ゅ川婵犲嫪绱曢梻浣哥秺椤ユ捇宕楀鈧顐﹀箻缂佹ǚ鎸€闁荤姴鎼幖顐︽偂濞戙垺鐓ラ柣鏇炲€圭€氾拷 */
     mailbox_code = can_mailbox_code_get(CAN2, mailbox_index);
     if(mailbox_code != CAN_MB_TX_STATUS_INACTIVE) {
-        return ERROR; /* 闂備浇娉曢崰鎰板几婵犳艾绠柣鎴ｅГ閺呮悂鏌￠崒妯衡偓鏍偓姘鳖攰缁犳稑鈻庨幋顓熸 */
+        return ERROR; /* 闂傚倷娴囧▔鏇㈠窗閹版澘鍑犲┑鐘宠壘缁狀垶鏌ｉ幋锝呅撻柡鍛倐閺岋繝宕掑Ο琛″亾閺嶎偀鍋撳槌栨敯缂佺姵绋戦埢搴ㄥ箣椤撶喐顔� */
     }
     
     
-    /* 闂備浇娉曢崰鎰板几婵犳艾绠柣鎴ｅГ閺呮悂鏌￠崒妯衡偓鏍偓姘秺閺屻劑鎮㈤崨濠勪紕闂佸綊顥撻崗姗€寮幘缁樻櫢闁跨噦鎷� */
+    /* 闂傚倷娴囧▔鏇㈠窗閹版澘鍑犲┑鐘宠壘缁狀垶鏌ｉ幋锝呅撻柡鍛倐閺岋繝宕掑Ο琛″亾閺嶎偀鍋撳顒傜Ш闁哄被鍔戦幃銏ゅ川婵犲嫪绱曢梻浣哥秺椤ユ捇宕楀鈧顐﹀箻缂佹ɑ娅㈤梺璺ㄥ櫐閹凤拷 */
     for(int i = 0; i < length; i++) {
         can2transmit_message.data[i] = can2txdata[i];
     }
     
-    /* 闂備浇娉曢崰鎰板几婵犳艾绠柣鎴ｅГ閺呮悂鏌ｉ褍浜滈柛銈嗙墵楠炲繘鎮滈懞銉︽闂備線顣︾徊濠氼敋濠婂牆绠柣鎴ｅГ閺呮悂鏌￠崒妯衡偓鏍偓姘炬嫹 */
+    /* 闂傚倷娴囧▔鏇㈠窗閹版澘鍑犲┑鐘宠壘缁狀垶鏌ｉ幋锝呅撻柡鍛倐閺岋綁顢樿娴滄粓鏌涢妶鍡欏⒌妤犵偛绻橀幃婊堟嚍閵夛附顏熼梻鍌欑窔椤ｏ妇寰婃繝姘兼晪婵犲﹤鐗嗙粻顖炴煟閹达絽袚闁哄懏鎮傞弻锟犲磼濡　鍋撻弽顐熷亾濮樼偓瀚� */
     can2transmit_message.rtr = 0U;
     can2transmit_message.ide = 0U;
     can2transmit_message.code = CAN_MB_TX_STATUS_DATA;
@@ -1604,14 +1604,14 @@ ErrStatus can2_tx_with_mailbox(uint8_t length, uint32_t id, uint8_t *can2txdata,
     can2transmit_message.data_bytes = length;
     can2transmit_message.id = id;
     
-    /* 闂備浇娉曢崰鎰板几婵犳艾绠柣鎴ｅГ閺呮悂鏌￠崒妯衡偓鏍偓姘秺閺屻劑鎮㈤崨濠勪紕闂佸綊顥撻崗姗€寮幘璇茬闁圭儤鍨肩€氭瑩姊虹捄銊ユ瀾闁哄顭烽獮蹇涙倻閼恒儲娅㈤梺鍝勫€堕崐鏍偓姘炬嫹 */
+    /* 闂傚倷娴囧▔鏇㈠窗閹版澘鍑犲┑鐘宠壘缁狀垶鏌ｉ幋锝呅撻柡鍛倐閺岋繝宕掑Ο琛″亾閺嶎偀鍋撳顒傜Ш闁哄被鍔戦幃銏ゅ川婵犲嫪绱曢梻浣哥秺椤ユ捇宕楀鈧顐﹀箻鐠囪尙顓洪梺鍦劋閸ㄨ偐鈧碍鐟╁铏规崉閵娿儲鐎鹃梺鍝勵儏椤兘鐛箛娑欏€婚柤鎭掑劜濞呫垽姊洪崫鍕偓鍫曞磹閺嶎偀鍋撳鐐 */
     can_mailbox_config(CAN2, mailbox_index, &can2transmit_message);
     
     return SUCCESS;
 }
 ErrStatus can2_tx_auto(uint8_t length, uint32_t id, uint8_t *can2txdata)
 {
-    /* 闂備浇娉曢崰鎰板几婵犳艾绠柣鎴ｅГ閺呮悂鏌￠崒妯衡偓鏍偓姘秺閺屻劑鎮㈤崨濠勪紕闂佸綊顥撻崗姗€寮幘璇叉闁靛牆妫楅鍫曟⒑鐠恒劌鏋戦柡瀣煼楠炲繘鎮滈懞銉︽闂傚倸鍟冲▔娑㈠春閿熺媭鏁嗗┑鐘插暙椤忓爼姊虹捄銊ユ灁闁绘稏鍊濋崺銉╁川椤旂⒈浼撻梻浣芥硶閸犳劙寮告繝姘闁炬艾鍊婚閬嶆⒑鐠恒劌鏋戦柡瀣煼楠炲繘鎮滈懞銉︽闂佸搫鍊堕崐鏍偓姘秺閺屻劑鎮㈤搹鐟板絼缂佺偓婢橀ˇ鎵偓姘炬嫹 */
+    /* 闂傚倷娴囧▔鏇㈠窗閹版澘鍑犲┑鐘宠壘缁狀垶鏌ｉ幋锝呅撻柡鍛倐閺岋繝宕掑Ο琛″亾閺嶎偀鍋撳顒傜Ш闁哄被鍔戦幃銏ゅ川婵犲嫪绱曢梻浣哥秺椤ユ捇宕楀鈧顐﹀箻鐠囧弶顥濋梺闈涚墕濡顢旈崼鏇熲拺閻犳亽鍔岄弸鎴︽煛鐎ｎ亶鐓兼鐐茬箻閹粓鎳為妷锔筋仧闂傚倸鍊搁崯鍐测枖濞戙垹鏄ラ柨鐔哄閺佸棗鈹戦悩鎻掓殭妞ゅ繐鐖煎铏规崉閵娿儲鐏侀梺缁樼◤閸婃繈宕洪妷鈺佸窛妞ゆ梻鈷堟导鎾绘⒒娴ｈ姤纭堕柛鐘冲姍瀵憡绻濆顒傤唵闂佺偓鑹鹃崐濠氼敂闁秵鈷戦悹鎭掑妼閺嬫垿鏌＄€ｎ亶鐓兼鐐茬箻閹粓鎳為妷锔筋仧闂備礁鎼崐鍫曞磹閺嶎偀鍋撳顒傜Ш闁哄被鍔戦幃銏ゆ惞閻熸澘绲肩紓浣哄亾濠㈡﹢藝閹殿喒鍋撳鐐 */
     for(uint8_t i = 0; i < 3; i++) {
         uint32_t mailbox_index = can2_tx_manager.mailboxes[i];
         uint32_t mailbox_code = can_mailbox_code_get(CAN2, mailbox_index);
@@ -1624,7 +1624,7 @@ ErrStatus can2_tx_auto(uint8_t length, uint32_t id, uint8_t *can2txdata)
         }
     }
     
-    return ERROR; /* 闂備浇娉曢崰鎰板几婵犳艾绠柣鎴ｅГ閺呮悂鏌￠崒妯衡偓鏍偓姘秺閺屻劑鎮㈤崨濠勪紕闂佸綊顥撻崗姗€寮幘璇茬闁圭儤顨呴崢鎾叓閸ャ劎鎳呮い锝忔嫹 */
+    return ERROR; /* 闂傚倷娴囧▔鏇㈠窗閹版澘鍑犲┑鐘宠壘缁狀垶鏌ｉ幋锝呅撻柡鍛倐閺岋繝宕掑Ο琛″亾閺嶎偀鍋撳顒傜Ш闁哄被鍔戦幃銏ゅ川婵犲嫪绱曢梻浣哥秺椤ユ捇宕楀鈧顐﹀箻鐠囪尙顓洪梺鍦劋椤ㄥ懘宕㈤幘顔惧彄闁搞儯鍔庨幊鍛亜閿濆繑瀚� */
 }
 void can2_txMessage(uint8_t length,uint8_t id,uint8_t *can2txdata)
 {

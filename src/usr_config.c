@@ -27,15 +27,15 @@ void USR_CONFIG_set_default_config(void)
 {
     // Motor
     UsrConfig.invert_motor_dir       = 0;
-    UsrConfig.motor_pole_pairs       = 4;
-    UsrConfig.motor_phase_resistance = 0.28f;
-    UsrConfig.motor_phase_inductance = 110e-6f;
+    UsrConfig.motor_pole_pairs       = 21;
+    UsrConfig.motor_phase_resistance = 0.07685f;
+    UsrConfig.motor_phase_inductance = 18e-6f;
     UsrConfig.current_limit          = 5;
     UsrConfig.velocity_limit         = 60;
 
     // Encoder
     UsrConfig.calib_current = 3.0f;
-    UsrConfig.calib_voltage = 3.0f;
+    UsrConfig.calib_voltage = 5.0f;
 
     // Controller
     UsrConfig.pos_p_gain             = 80.0f;
@@ -58,7 +58,7 @@ void USR_CONFIG_set_default_config(void)
     // Protect
     UsrConfig.protect_under_voltage = 12;
     UsrConfig.protect_over_voltage  = 50;
-    UsrConfig.protect_over_current  = 8;
+    UsrConfig.protect_over_current  = 22;
     UsrConfig.protect_drv_over_tmp  = 80;
     UsrConfig.protect_ntc_over_tmp  = 80;
 
