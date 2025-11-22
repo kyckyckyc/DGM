@@ -108,11 +108,11 @@ int main(void)
 
     CAN_set_node_id(UsrConfig.node_id);
 //      CAN0_init(UsrConfig.can_baudrate);
-   for(int i = 0;i<128;i++)
-   {
-     test_offset_lut[i] = *(volatile int32_t *)(USR_CONFIG_ADDR + 144 + 4*i);
+//    for(int i = 0;i<128;i++)
+//    {
+//      test_offset_lut[i] = *(volatile int32_t *)(USR_CONFIG_ADDR + 144 + 4*i);
 
-   }
+//    }
 
    MCT_init();
    FOC_init();

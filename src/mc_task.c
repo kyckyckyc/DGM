@@ -261,8 +261,7 @@ void MCT_high_frequency_task(void)
 
    case ANTICOGGING:
        ANTICOGGING_loop();
-     break;
-   case RUN:
+    case RUN:
        CONTROLLER_loop();
 
        // check over current

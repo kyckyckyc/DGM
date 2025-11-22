@@ -59,60 +59,40 @@ int32_t ENCODER_read(void)
  
     u16Command = READ_ANGLE_VALUE;
     u16Safe = cdd_TLI5012OUT_ReadReg(u16Command, &u16Data);
-    //u16Data = u16Data & 0x7FFF;
+    u16Data = u16Data & 0x7FFF;
     angle = (u16Data - 32768) * 360.0f / 32768.0f;
-    return (u16Data );
+
+    return (u16Data >>1);//14bit
 }
  
-
 void ENCODER_loop(void)
 {
-    // 1. 读取编码器原始值
     Encoder.raw = ENCODER_read();
-
-    // 2. 处理编码器方向：如果配置为反向，则反转编码器值
     if (UsrConfig.encoder_dir == -1) {
-        Encoder.raw = ENCODER_NATIVE_MAX - 1 - Encoder.raw;
+        Encoder.raw = ENCODER_CPR - 1 - Encoder.raw;
     }
 
-    /* 3. 线性化校正 - 补偿编码器的非线性误差 */
-    // 将编码器范围分成128个区间（每个区间包含128个点）
-    // 使用查找表进行插值补偿
     /* Linearization */
-    // int off_1      = UsrConfig.offset_lut[(Encoder.raw) >> 7];                                      // 获取当前点所在区间的起始索引（高9位作为索引）
-    // int off_2      = UsrConfig.offset_lut[((Encoder.raw >> 7) + 1) % 128];                          // 获取下一个区间的偏移值（循环处理边界）
-    // int off_interp = off_1 + ((off_2 - off_1) * (Encoder.raw - ((Encoder.raw >> 7) << 7)) >> 7);    // 线性插值：根据在区间内的位置计算精确的偏移补偿值
+    int off_1      = UsrConfig.offset_lut[(Encoder.raw) >> 7];
+    int off_2      = UsrConfig.offset_lut[((Encoder.raw >> 7) + 1) % 128];
+    int off_interp = off_1 + ((off_2 - off_1) * (Encoder.raw - ((Encoder.raw >> 7) << 7)) >> 7);
 
-    /* 3. 线性化校正（使用原生值32768-65536） */
-    int segment_index = Encoder.raw >> 7;  // 高9位作为索引（0-127）
-    int segment_pos = Encoder.raw & 0x7F; // 低7位作为区间内位置
-    
-    int off_1 = UsrConfig.offset_lut[segment_index];
-    int off_2 = UsrConfig.offset_lut[(segment_index + 1) % 128];
-    int off_interp = off_1 + ((off_2 - off_1) * segment_pos >> 7);
+    int count = Encoder.raw - off_interp - UsrConfig.encoder_offset;
 
-
-    // 4. 应用补偿：原始值 - 插值补偿 - 全局偏移
-    //int count = Encoder.raw - off_interp - UsrConfig.encoder_offset;//@  
-
-    int electrical_corrected = Encoder.raw - off_interp - ENCODER_NATIVE_OFFSET;
-    int count = electrical_corrected - UsrConfig.encoder_offset;
-                              
-    /* 5. 处理计数环绕 - 确保计数在单圈范围内 [0, ENCODER_CPR-1] */
     /*  Wrap in ENCODER_CPR */
     while (count > ENCODER_CPR)
         count -= ENCODER_CPR;
     while (count < 0)
         count += ENCODER_CPR;
-    // 6. 存储校正后的单圈计数
+
     Encoder.count_in_cpr = count;
-    // 7. 初始化处理：如果是第一次运行，只记录初始位置
+
     if (Encoder.need_init) {
         Encoder.need_init--;
         Encoder.count_in_cpr_prev = Encoder.count_in_cpr;
         return;
     }
-    /* 8. 计算单圈内的计数增量（处理溢出）*/
+
     /* Delta count */
     int delta_count           = Encoder.count_in_cpr - Encoder.count_in_cpr_prev;
     Encoder.count_in_cpr_prev = Encoder.count_in_cpr;
@@ -120,45 +100,36 @@ void ENCODER_loop(void)
         delta_count -= ENCODER_CPR;
     while (delta_count < -ENCODER_CPR_DIV)
         delta_count += ENCODER_CPR;
-    // 9. PLL（锁相环）速度估计 - 提供平滑的位置和速度估计
-    // 预测步骤：根据当前速度积分预测位置
+
     // Run pll (for now pll is in units of encoder counts)
     // Predict current pos
     Encoder.pll_pos += CURRENT_MEASURE_PERIOD * Encoder.pll_vel;
     // Discrete phase detector
     float delta_pos = Encoder.count_in_cpr - floorf(Encoder.pll_pos);
-    // 相位检测：计算测量位置与预测位置的误差
     while (delta_pos > +ENCODER_CPR_DIV)
         delta_pos -= ENCODER_CPR_F;
     while (delta_pos < -ENCODER_CPR_DIV)
         delta_pos += ENCODER_CPR_F;
-    // PLL反馈校正：
-    // 比例项：直接校正位置
     // PLL feedback
     Encoder.pll_pos += CURRENT_MEASURE_PERIOD * Encoder.pll_kp * delta_pos;
-    // 确保PLL位置在有效范围内
     while (Encoder.pll_pos > ENCODER_CPR)
         Encoder.pll_pos -= ENCODER_CPR_F;
     while (Encoder.pll_pos < 0)
         Encoder.pll_pos += ENCODER_CPR_F;
-    // 积分项：校正速度
     Encoder.pll_vel += CURRENT_MEASURE_PERIOD * Encoder.pll_ki * delta_pos;
-    // 10. 速度死区处理：消除低速时的抖动
+
     // Align delta-sigma on zero to prevent jitter
     if (ABS(Encoder.pll_vel) < Encoder.snap_threshold) {
         Encoder.pll_vel = 0.0f;
     }
-    /* 11. 输出计算 - 为控制器提供各种格式的位置和速度 */
-    // 更新多圈阴影计数
-    /* Outputs from Encoder for Controller */
-    Encoder.shadow_count += delta_count;                                                              // 更新多圈阴影计数
-    //Encoder.pos       = Encoder.shadow_count / ENCODER_CPR_F;                                       // 多圈机械位置（单位：圈）
-    Encoder.pos       = 360*Encoder.shadow_count / ENCODER_CPR_F;                                     // 多圈机械位置（单位:度）
-    Encoder.vel       = Encoder.pll_vel / ENCODER_CPR_F;                                              // 机械速度（单位：圈/秒）
-    Encoder.phase     = (M_2PI * UsrConfig.motor_pole_pairs) * Encoder.count_in_cpr / ENCODER_CPR_F;  // 电角度（考虑电机极对数）
-    Encoder.phase_vel = (M_2PI * UsrConfig.motor_pole_pairs) * Encoder.vel;                           // 电角速度
-}
 
+    /* Outputs from Encoder for Controller */
+    Encoder.shadow_count += delta_count;
+    Encoder.pos       = Encoder.shadow_count / ENCODER_CPR_F;
+    Encoder.vel       = Encoder.pll_vel / ENCODER_CPR_F;
+    Encoder.phase     = (M_2PI * UsrConfig.motor_pole_pairs) * Encoder.count_in_cpr / ENCODER_CPR_F;
+    Encoder.phase_vel = (M_2PI * UsrConfig.motor_pole_pairs) * Encoder.vel;
+}
 
 uint16_t spi_rw_half_word(uint32_t spi_periph, const uint16_t i_HalfWord)
 {

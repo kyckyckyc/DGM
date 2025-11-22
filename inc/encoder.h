@@ -28,10 +28,10 @@
 
 
 
-#define ENCODER_NATIVE_OFFSET 32768   // TLE5012B零位对应的原生值
-#define ENCODER_NATIVE_MAX    65536   // TLE5012B最大原生值
-#define ENCODER_CPR     (int)32768        // 16位分辨率
-#define ENCODER_CPR_F   (32768.0f)        // 浮点版本
+// #define ENCODER_NATIVE_OFFSET 32768   // TLE5012B零位对应的原生值
+// #define ENCODER_NATIVE_MAX    65536   // TLE5012B最大原生值
+#define ENCODER_CPR     (int)16384        // 16位分辨率
+#define ENCODER_CPR_F   (16384.0f)        // 浮点版本
 #define ENCODER_CPR_DIV (ENCODER_CPR >> 1) // 32768，用于半转计算
 
 

@@ -34,7 +34,7 @@ void USR_CONFIG_set_default_config(void)
     UsrConfig.velocity_limit         = 60;
 
     // Encoder
-    UsrConfig.calib_current = 3.0f;
+    UsrConfig.calib_current = 1.5f;
     UsrConfig.calib_voltage = 5.0f;
 
     // Controller
@@ -58,7 +58,7 @@ void USR_CONFIG_set_default_config(void)
     // Protect
     UsrConfig.protect_under_voltage = 12;
     UsrConfig.protect_over_voltage  = 50;
-    UsrConfig.protect_over_current  = 22;
+    UsrConfig.protect_over_current  = 100;
     UsrConfig.protect_drv_over_tmp  = 80;
     UsrConfig.protect_ntc_over_tmp  = 80;
 
@@ -136,7 +136,7 @@ int USR_CONFIG_save_config(void)
 
     // Step 2: Unlock flash controller
     fmc_unlock();
-    length =  sizeof(tUsrConfig);
+    length =  sizeof(tUsrConfig)/8;
     // Step 3: Calculate CRC before programming
     UsrConfig.crc = crc32((uint8_t *)&UsrConfig, sizeof(tUsrConfig) - 4);
     
@@ -144,14 +144,14 @@ int USR_CONFIG_save_config(void)
     uint32_t *pData = (uint32_t *)&UsrConfig;
     
     for (int i = 0; i < sizeof(tUsrConfig) / 8 + 1; i++) {
-        if(i<82)
+        if(i<length)
         {
             ram_value = *(pData + 2*i);
             ram_value1 = *(pData + 2*i + 1);
             flashdata = ((uint64_t)ram_value1 << 32) | ram_value;
             flash_address = USR_CONFIG_ADDR + i * 8;
         }
-        if(i==82)
+        if(i==length)
         {
             ram_value = *(pData + 2*i);
             ram_value1 = 0xffffffff;
@@ -281,7 +281,7 @@ int USR_CONFIG_save_cogging_map(void)
 
     // Step 2: Unlock flash controller
     fmc_unlock();
-    maplength =  sizeof(tCoggingMap)/2;
+    maplength =  sizeof(tCoggingMap)/8;
     // Step 3: Calculate CRC before programming
     pCoggingMap->crc = crc32((uint8_t *) pCoggingMap, sizeof(tCoggingMap) - 4);
 
@@ -290,7 +290,7 @@ int USR_CONFIG_save_cogging_map(void)
     
 
     for (int i = 0; i < sizeof(tCoggingMap) / 8 + 1; i++) {
-        if(i<1250)
+        if(i<maplength)
         {
             mapram_value = *(pData + 4*i);
             mapram_value1 = *(pData + 4*i + 1);
@@ -299,7 +299,7 @@ int USR_CONFIG_save_cogging_map(void)
             mapflashdata = ((uint64_t)mapram_value3 << 48) | ((uint64_t)mapram_value2 << 32) |  ((uint64_t)mapram_value1 << 16) | (uint64_t)mapram_value;
             mapflash_address = COGGING_MAP_ADDR + i * 8;
         }
-        if(i==1250)
+        if(i==maplength)
         {
             uint32_t *pdata1 = (uint32_t*)pCoggingMap;
             a = *(pdata1+2500);

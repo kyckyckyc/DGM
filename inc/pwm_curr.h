@@ -31,13 +31,13 @@
 
 #if defined(AK80_9)
 //母线电压额定电压48V    
-#define PEAK_CURRENT           22.3f     // 从参数表得到峰值电流22.3A
+#define PEAK_CURRENT           10.0f     // 从参数表得到峰值电流A
 #define ADC_REF_VOLTAGE        3.3f
 #define ADC_RESOLUTION         4095.0f
 #define ADC_ZERO_OFFSET        1.65f     // 零位1.65V   阈值1.5V
 #define SHUNT_RESISTENCE       (0.001f)   // 分流电阻0.001Ω
 #define V_RATIO                (22.27f)   //(104.7/4.7)
-#define I_RATIO                (68.0f)    //(1.5A/(0.001Ω*22.3A))
+#define I_RATIO                (5.0f)    //(1.5A/(0.001Ω*10A))
 #define V_SCALE                ((float) (V_RATIO * 3.3f / ADC_RESOLUTION))
 #define I_SCALE                ((float) ((3.3f / ADC_RESOLUTION) / SHUNT_RESISTENCE / I_RATIO))
 

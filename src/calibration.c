@@ -253,11 +253,11 @@ void CALIBRATION_loop(void)
         break;
 
     case CS_ENCODER_CW_LOOP:
-        if (sample_count < (UsrConfig.motor_pole_pairs * SAMPLES_PER_PPAIR)) {// 顺时针采样：每个极对数采样SAMPLES_PER_PPAIR个点
+        if (sample_count < (UsrConfig.motor_pole_pairs * SAMPLES_PER_PPAIR)) {// 顺时针采样：每个极对数采样SAMPLES_PER_PPAIR个点    检查是否已完成所有采样点：总采样点数 = 极对数 × 每极对采样点数
             if (time > next_sample_time) {
-                next_sample_time += M_2PI / ((float) SAMPLES_PER_PPAIR * encoder_calib_vel);
+                next_sample_time += M_2PI / ((float) SAMPLES_PER_PPAIR * encoder_calib_vel);   //计算下一个采样时间点：采样时间间隔 = 2π / (SAMPLES_PER_PPAIR × 电角速度)
 
-                int count_ref = (phase_set * ENCODER_CPR_F) / (M_2PI * (float) UsrConfig.motor_pole_pairs);   // 计算理论编码器位置(CPR)
+                int count_ref = (phase_set * ENCODER_CPR_F) / (M_2PI * (float) UsrConfig.motor_pole_pairs);   // 计算理论编码器位置(CPR)  计算理论编码器位置：理论值 = (当前电角度 × 编码器每转计数) / (2π × 极对数)
                 int error     = Encoder.raw - count_ref;                                                      // 计算编码器误差
                 error += ENCODER_CPR * (error < 0);                                                           // 处理负误差
                 p_error_arr[sample_count] = error;                                                            // 存储误差
@@ -317,7 +317,7 @@ void CALIBRATION_loop(void)
         for (int i = 0; i < (UsrConfig.motor_pole_pairs * SAMPLES_PER_PPAIR); i++) {
             moving_avg += p_error_arr[i];
         }
-        UsrConfig.encoder_offset = moving_avg / (UsrConfig.motor_pole_pairs * SAMPLES_PER_PPAIR);
+        UsrConfig.encoder_offset = moving_avg / (UsrConfig.motor_pole_pairs * SAMPLES_PER_PPAIR);//取平均
 
         {
             uint8_t data[4];
@@ -344,7 +344,7 @@ void CALIBRATION_loop(void)
             if (lut_index > (OFFSET_LUT_NUM - 1)) {
                 lut_index -= OFFSET_LUT_NUM;
             }
-            UsrConfig.offset_lut[lut_index] = moving_avg - UsrConfig.encoder_offset;
+            UsrConfig.offset_lut[lut_index] = moving_avg - UsrConfig.encoder_offset;//偏移表？
         }
         // 准备报告LUT
         loop_count       = 0;
