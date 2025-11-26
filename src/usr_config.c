@@ -35,7 +35,7 @@ void USR_CONFIG_set_default_config(void)
 
     // Encoder
     UsrConfig.calib_current = 1.5f;
-    UsrConfig.calib_voltage = 5.0f;
+    UsrConfig.calib_voltage = 3.0f;
 
     // Controller
     UsrConfig.pos_p_gain             = 80.0f;

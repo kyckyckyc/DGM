@@ -54,7 +54,9 @@ typedef enum eCalibStep {
 static int       *p_error_arr = NULL;
 static tCalibStep mCalibStep  = CS_NULL;
 
-static volatile float current_samples[21 * SAMPLES_PER_PPAIR];  // MAX_SAMPLES需要根据实际情况定义
+static volatile float current_samples_a[21 * SAMPLES_PER_PPAIR];  // MAX_SAMPLES需要根据实际情况定义
+static volatile float current_samples_b[21 * SAMPLES_PER_PPAIR]; 
+static volatile float current_samples_c[21 * SAMPLES_PER_PPAIR]; 
 static volatile float ENCODERtest_sample[21 * SAMPLES_PER_PPAIR]; 
 static volatile float count_ref_sample[21 * SAMPLES_PER_PPAIR];
 void CALIBRATION_start(void)
@@ -102,7 +104,7 @@ void CALIBRATION_loop(void)
     static uint32_t loop_count;
 
     // R
-    static const float    kI           = 0.05f;
+    static const float    kI           = 0.005f;
     static const uint32_t num_R_cycles = CURRENT_MEASURE_HZ * 2;// 电阻测量周期数(2秒)
 
     // L
@@ -120,7 +122,8 @@ void CALIBRATION_loop(void)
 
     float       time    = (float) loop_count * CURRENT_MEASURE_PERIOD;                                     // 当前时间
     const float voltage = UsrConfig.calib_current * UsrConfig.motor_phase_resistance * 3.0f / 2.0f;        // 计算电压=校准电流*相电阻*3/2
-    const float voltageencoder = 2*UsrConfig.calib_current * UsrConfig.motor_phase_resistance * 3.0f / 2.0f;
+    const float voltageencoder = 4*UsrConfig.calib_current * UsrConfig.motor_phase_resistance * 3.0f / 2.0f;//@
+    const float voltagepp = 2*UsrConfig.calib_current * UsrConfig.motor_phase_resistance * 3.0f / 2.0f;//@
 
     switch (mCalibStep) {
     case CS_NULL:
@@ -183,7 +186,7 @@ void CALIBRATION_loop(void)
     case CS_MOTOR_L_END: {
         // 计算电流变化率: dI/dt = (I_neg - I_pos) / (时间)
         // 注意：这里用Ialphas[0]-Ialphas[1]确保dI/dt为正
-        float dI_by_dt                   = (Ialphas[0] - Ialphas[1]) / (float) (CURRENT_MEASURE_PERIOD * num_L_cycles);
+        float dI_by_dt                   = (Ialphas[1] - Ialphas[0]) / (float) (CURRENT_MEASURE_PERIOD * num_L_cycles);
         float L                          = UsrConfig.calib_voltage / dI_by_dt;         // 计算电感: L = V / (dI/dt)
         UsrConfig.motor_phase_inductance = L * 2.0f / 3.0f;                            // 转换为相电感值
         FOC_update_current_ctrl_gain(UsrConfig.current_ctrl_bw);                       // 更新电流控制环增益
@@ -198,7 +201,7 @@ void CALIBRATION_loop(void)
     } break;
 
     case CS_DIR_PP_START://方向与极对数识别
-        FOC_voltage((voltage * time / 2.0f), 0, phase_set);// 斜坡增加电压，使电机缓慢启动
+        FOC_voltage((voltagepp * time / 2.0f), 0, phase_set);// 斜坡增加电压，使电机缓慢启动
         if (time >= 2.0f) {                                // 2秒后开始正式测试
             start_count = (float) Encoder.shadow_count;    // 记录起始编码器位置
             mCalibStep  = CS_DIR_PP_LOOP;
@@ -207,8 +210,10 @@ void CALIBRATION_loop(void)
         break;
 
     case CS_DIR_PP_LOOP:
-        phase_set += calib_phase_vel * CURRENT_MEASURE_PERIOD;// 以固定相位速度旋转   设置相
-        FOC_voltage(voltage, 0, phase_set);
+        static const float pp_calib_vel = 2.0f * M_PI;  // 专门用于极对数校准的速度  //@
+        phase_set += pp_calib_vel * CURRENT_MEASURE_PERIOD;// 以固定相位速度旋转   设置相
+        //phase_set += calib_phase_vel * CURRENT_MEASURE_PERIOD;// 以固定相位速度旋转   设置相
+        FOC_voltage(voltagepp, 0, phase_set);
         if (phase_set >= 4.0f * M_2PI) {                      // 旋转4圈后结束
             mCalibStep = CS_DIR_PP_END;
         }
@@ -247,7 +252,7 @@ void CALIBRATION_loop(void)
         next_sample_time = 0;
 
          // 提高编码器校准阶段的转速
-        static const float encoder_calib_vel = 6.0f * M_PI;  // 专门用于编码器校准的速度
+        static const float encoder_calib_vel = 8.0f * M_PI;  // 专门用于编码器校准的速度  //@
 
         mCalibStep       = CS_ENCODER_CW_LOOP;// 开始顺时针采样
         break;
@@ -268,8 +273,9 @@ void CALIBRATION_loop(void)
                 
             
                 // 记录当前A相电流值（来自GD30AP724的ADC采样）
-                current_samples[sample_count] = Foc.i_a;
-                
+                current_samples_a[sample_count] = Foc.i_a;
+                current_samples_b[sample_count] = Foc.i_b;
+                current_samples_c[sample_count] = Foc.i_c;
                 ENCODERtest_sample[sample_count] = Encoder.raw;
                 count_ref_sample[sample_count] = count_ref;
 

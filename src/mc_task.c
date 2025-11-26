@@ -51,6 +51,10 @@ static void led_act_loop(void);
 
 
 float displayia;//@
+float displayib;//@
+float displayic;//@
+
+
 
 void MCT_init(void)
 {
@@ -108,6 +112,7 @@ int MCT_set_state(tFSMState state)
                 ret = -3;
             } else {
                 FOC_arm();
+ //               delay_ms(3000);
                 mChargeBootCapDelay = CHARGE_BOOT_CAP_TICKS;
                 mFSM.state_next     = RUN;
             }
@@ -255,9 +260,11 @@ void MCT_high_frequency_task(void)
 
        // check over current
        if (ABS(Foc.i_a) > UsrConfig.protect_over_current || ABS(Foc.i_b) > UsrConfig.protect_over_current
-           || ABS(Foc.i_c) > UsrConfig.protect_over_current) {
+           || ABS(Foc.i_c) > 3*UsrConfig.protect_over_current) {
+     
            FOC_disarm();
            MCT_set_state(IDLE);
+           //displayia = Foc.i_a;
            StatuswordNew.errors.over_current = 1;
        }
        break;
@@ -270,9 +277,13 @@ void MCT_high_frequency_task(void)
        // check over current
        if (ABS(Foc.i_a) > UsrConfig.protect_over_current || ABS(Foc.i_b) > UsrConfig.protect_over_current
            || ABS(Foc.i_c) > UsrConfig.protect_over_current) {
+
+   
            FOC_disarm();
            MCT_set_state(IDLE);
            displayia = Foc.i_a;
+           displayib = Foc.i_b;
+           displayic = Foc.i_c;
            StatuswordNew.errors.over_current = 1;
        }
        break;

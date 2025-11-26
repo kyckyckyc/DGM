@@ -20,6 +20,11 @@
 #include "util.h"
 #include <math.h>
 
+    #define NUM_SAMPLES 1000
+    static volatile float ia_samples[NUM_SAMPLES];
+    static volatile float ib_samples[NUM_SAMPLES]; 
+    static volatile float ic_samples[NUM_SAMPLES];
+
 tFOC Foc;
 
 void FOC_init(void)
@@ -43,6 +48,11 @@ void FOC_update_current_ctrl_gain(float bw)
     Foc.current_ctrl_i_gain = UsrConfig.motor_phase_resistance / UsrConfig.motor_phase_inductance;
 }
 
+
+float test_i_a;
+float test_i_b;
+float test_i_c;
+
 void FOC_arm(void)
 {
     if (Foc.is_armed) {
@@ -61,9 +71,36 @@ void FOC_arm(void)
     Foc.current_ctrl_integral_q = 0;
 
     PWMC_TurnOnLowSides();
+    
+///////////////////////////////////////////////
 
+    //delay_ms(5000);
+    /* 直接调用你的校准函数 */
+    // int ret = PWMC_CurrentReadingPolarization();  // <<<<<<★
+    // if (ret < 0) {
+    //     Foc.is_armed = false;
+    //     __enable_irq();
+    //     return; // offset 异常，退出
+    // }
+
+    /* offset 注入 FOC 结构 */
+//    Foc.offset_u = phase_a_adc_offset;
+//    Foc.offset_v = phase_b_adc_offset;
+
+
+//////////////////////////////////////////////
+// 读取1000次电流值
+    // for(int i = 0; i < NUM_SAMPLES; i++) {    
+    //     ia_samples[i] = read_iphase_a();  // 直接读取A相
+    //     ib_samples[i] = read_iphase_b();  // 直接读取B相
+    //     ic_samples[i] = -(ia_samples[i] +ib_samples[i]);;  // 直接读取C相，不要计算！
+        
+    //     // 可选：添加小延迟避免读取过快
+    //     // delay_us(10);
+    // }
+    //     delay_ms(5000);//@
+//////////////////////////////////////////////
     Foc.is_armed = true;
-
     __enable_irq();
 }
 

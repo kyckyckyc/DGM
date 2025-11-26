@@ -169,3 +169,57 @@ int PWMC_CurrentReadingPolarization(void)
 
     return i;
 }
+
+
+
+// /* 可调参数：根据你的硬件/PWM 频率调整 */
+// #define ARM_WAIT_PWM_CYCLES  3    /* 等待多少个 PWM 周期（一般 2~4 足够） */
+// #define OFFSET_SAMPLES       64   /* 用于计算 offset 的采样点数（建议 32~128） */
+// #define DISCARD_SAMPLES      8    /* 丢弃的首批不稳定采样数（1~20） */
+// #define OPAMP_SAFE_DELAY_US  50   /* 额外的微秒延迟，保证运放/ADC S&H稳定（可调） */
+
+// /* 你工程里可能已经有 delay_us、timer_flag_get/clear、adc_read_xxx 函数。
+//    如果没有，请替换成你工程对应的 API。 */
+
+// extern void PWMC_TurnOnLowSides(void);
+// extern void delay_us(uint32_t us); /* 微秒延时 */
+// extern int32_t adc_read_phaseA_raw(void); /* 返回原始 ADC 读数或已换算为电流计数值 */
+// extern int32_t adc_read_phaseB_raw(void);
+// extern int32_t adc_read_phaseC_raw(void);
+// //extern void discard_adc_sample(void); /* 可选：如果你有专门的丢弃函数 */
+
+// void measure_current_offsets(int32_t *off_a, int32_t *off_b, int32_t *off_c)
+// {
+//     int64_t sum_a = 0, sum_b = 0, sum_c = 0;
+//     int32_t raw;
+
+//     /* 丢弃前 DISCARD_SAMPLES 次采样（保证 S&H / ADC 稳定） */
+//     for (int i = 0; i < DISCARD_SAMPLES; ++i) {
+//         /* 如果 ADC 是触发型且需要在 PWM 同步下采样，确保这里的 adc_read_* 是阻塞型读取 */
+//         raw = adc_read_phaseA_raw(); (void)raw;
+//         raw = adc_read_phaseB_raw(); (void)raw;
+//         raw = adc_read_phaseC_raw(); (void)raw;
+//     }
+
+//     /* 采样 OFFSET_SAMPLES 次并求均值 */
+//     for (int i = 0; i < OFFSET_SAMPLES; ++i) {
+//         sum_a += adc_read_phaseA_raw();
+//         sum_b += adc_read_phaseB_raw();
+//         sum_c += adc_read_phaseC_raw();
+//     }
+
+//     *off_a = (int32_t)(sum_a / OFFSET_SAMPLES);
+//     *off_b = (int32_t)(sum_b / OFFSET_SAMPLES);
+//     *off_c = (int32_t)(sum_c / OFFSET_SAMPLES);
+// }
+
+// /* 等待 N 个 PWM 周期的辅助（基于你原先的 timer_flag_get 用法） */
+// static void wait_pwm_cycles(uint32_t cycles)
+// {
+//     for (uint32_t i = 0; i < cycles; ++i) {
+//         timer_flag_clear(TIMER0, TIMER_FLAG_UP);
+//         while (RESET == timer_flag_get(TIMER0, TIMER_FLAG_UP)) {
+//             /* 等待下一个 PWM 更新 */
+//         }
+//     }
+// }
