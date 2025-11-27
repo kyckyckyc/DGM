@@ -35,7 +35,7 @@
 #define ADC_REF_VOLTAGE        3.3f
 #define ADC_RESOLUTION         4095.0f
 #define ADC_ZERO_OFFSET        1.65f     // 零位1.65V   阈值1.5V
-#define SHUNT_RESISTENCE       (0.02f)   // 分流电阻
+#define SHUNT_RESISTENCE       (0.01f)   // 分流电阻
 #define V_RATIO                (22.27f)   //(104.7/4.7)
 #define I_RATIO                (5.0f)    //(1.5A/(0.001Ω*10A))
 #define V_SCALE                ((float) (V_RATIO * 3.3f / ADC_RESOLUTION))
