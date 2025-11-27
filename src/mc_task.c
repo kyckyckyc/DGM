@@ -35,7 +35,7 @@ typedef struct sFSM
     uint8_t   state_next_ready;
 } tFSM;
 
-static volatile tFSM mFSM;
+volatile tFSM mFSM;
 
 volatile tMCStatusword StatuswordNew;
 volatile tMCStatusword StatuswordOld;
@@ -140,6 +140,11 @@ int MCT_set_state(tFSMState state)
             }
             break;
 
+        case DEBUG:
+            FOC_arm();
+            mChargeBootCapDelay = CHARGE_BOOT_CAP_TICKS;
+            mFSM.state_next     = DEBUG;
+            break;
         default:
             ret = -1;
             break;
@@ -185,6 +190,10 @@ static void enter_state(void)
         ANTICOGGING_start();
         break;
 
+    case DEBUG:
+        ;
+        break;
+
     default:
         break;
     }
@@ -224,12 +233,62 @@ static void exit_state(void)
         ANTICOGGING_end();
         mFSM.state_next_ready = 1;
         break;
+    case DEBUG:
+        FOC_disarm();
+        StatuswordNew.status.switched_on    = 0;
+        StatuswordNew.status.target_reached = 0;
+        StatuswordOld.status                = StatuswordNew.status;
+        mFSM.state_next_ready               = 1;
+        break;
 
     default:
         break;
     }
 }
 
+
+float ccr1_value = 0.0;
+float ccr2_value = 0.0;
+float ccr3_value = 0.0;
+float erpm = 1000.0,eTheta = 0.0;
+void MCT_high_frequency_task_openloop(void)
+{
+//    /* state transition management */
+   if (mFSM.state_next != mFSM.state) {
+       exit_state();
+       if (mFSM.state_next_ready) {
+           mFSM.state = mFSM.state_next;
+           enter_state();
+       }
+   }
+
+//    ENCODER_loop();
+    Encoder.raw = ENCODER_read();
+	// Test_TLI5012B();
+ 
+
+
+//     eTheta += (erpm / 60.0f) * (2.0f * M_PI) * (1.0f / PWM_FREQUENCY);
+//     if (eTheta > 2.0f * M_PI) {
+//         eTheta -= 2.0f * M_PI;
+//     } 
+//     FOC_voltage_my(0.1,0,eTheta);
+ 
+	
+	
+//    Foc.v_bus = read_vbus();
+//    UTILS_LP_FAST(Foc.v_bus_filt, Foc.v_bus, 0.05f);
+//    Foc.i_a = read_iphase_a();
+//    Foc.i_b = read_iphase_b();
+//    Foc.i_c = -(Foc.i_a + Foc.i_b);
+
+ 
+}
+
+float id_set = 5; // [A]
+float iq_set = 2; // [A]
+float erpm_openloop_current = 1000.0f;
+float phase = 0;
 void MCT_high_frequency_task(void)
 {
    /* state transition management */
@@ -260,7 +319,7 @@ void MCT_high_frequency_task(void)
 
        // check over current
        if (ABS(Foc.i_a) > UsrConfig.protect_over_current || ABS(Foc.i_b) > UsrConfig.protect_over_current
-           || ABS(Foc.i_c) > 3*UsrConfig.protect_over_current) {
+           || ABS(Foc.i_c) > UsrConfig.protect_over_current) {
      
            FOC_disarm();
            MCT_set_state(IDLE);
@@ -287,6 +346,14 @@ void MCT_high_frequency_task(void)
            StatuswordNew.errors.over_current = 1;
        }
        break;
+
+    case DEBUG:
+        phase += (erpm_openloop_current / 60.0f) * (2.0f * M_PI) * (1.0f / PWM_FREQUENCY);
+        if (phase > 2.0f * M_PI) {
+            phase -= 2.0f * M_PI;
+        }
+        FOC_current(0, iq_set, Encoder.phase, 0);
+        break;
 
    default:
        break;
@@ -318,7 +385,7 @@ void MCT_safety_task(void)
        }
    }
 
-   watch_dog_feed();
+//    watch_dog_feed();
 }
 
 void MCT_low_priority_task(void)
@@ -346,6 +413,15 @@ void MCT_low_priority_task(void)
 
     led_act_loop();
     CAN_comm_loop();
+
+   if (mFSM.state_next != mFSM.state) {
+       exit_state();
+       if (mFSM.state_next_ready) {
+           mFSM.state = mFSM.state_next;
+           enter_state();
+       }
+   }
+
 }
 
 static void led_act_loop(void)

@@ -41,5 +41,5 @@ void FOC_arm(void);
 void FOC_disarm(void);
 void FOC_voltage(float Vd_set, float Vq_set, float phase);
 void FOC_current(float Id_set, float Iq_set, float phase, float phase_vel);
-
+void FOC_voltage_my(float Vd_set, float Vq_set, float phase);
 #endif

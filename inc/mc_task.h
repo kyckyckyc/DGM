@@ -26,6 +26,7 @@ typedef enum eFSMState {
     RUN         = 2,
     CALIBRATION = 3,
     ANTICOGGING = 4,
+    DEBUG      = 5,
 } tFSMState;
 
 typedef struct sMCStatusword

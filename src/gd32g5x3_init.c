@@ -1259,7 +1259,7 @@ void timer_config(void)
     nvic_priority_group_set(NVIC_PRIGROUP_PRE4_SUB0);
 
     // ADC01 insert convert complete interrupt NVIC
-    NVIC_SetPriority(ADC0_1_IRQn, 0);
+    NVIC_SetPriority(ADC0_1_IRQn, 1);
     NVIC_EnableIRQ(ADC0_1_IRQn);
 
     // TIM1 interrupt NVIC
@@ -1268,10 +1268,10 @@ void timer_config(void)
 
 
     // CAN0 Rx interrupt NVIC
-    NVIC_SetPriority(CAN0_Message_IRQn, 2);
+    NVIC_SetPriority(CAN0_Message_IRQn, 0);
     NVIC_EnableIRQ(CAN0_Message_IRQn);
 
-    NVIC_SetPriority(CAN2_Message_IRQn, 2);
+    NVIC_SetPriority(CAN2_Message_IRQn, 0);
     NVIC_EnableIRQ(CAN2_Message_IRQn);
 
 }

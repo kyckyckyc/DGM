@@ -38,6 +38,7 @@ typedef enum eCalibStep {
 
     CS_DIR_PP_START,
     CS_DIR_PP_LOOP,
+    CS_DIR_PP_LOOP_CCW,
     CS_DIR_PP_END,
 
     CS_ENCODER_START,
@@ -116,14 +117,16 @@ void CALIBRATION_loop(void)
 
     static float phase_set;                                     // 设置的相位角
     static float start_count;                                   // 起始编码器计数值
+    static float start_count_ccw; 
+    static float ccw_encoder_end;
 
     static int16_t sample_count;                                // 采样计数器
     static float   next_sample_time;                            // 下次采样时间
 
     float       time    = (float) loop_count * CURRENT_MEASURE_PERIOD;                                     // 当前时间
     const float voltage = UsrConfig.calib_current * UsrConfig.motor_phase_resistance * 3.0f / 2.0f;        // 计算电压=校准电流*相电阻*3/2
-    const float voltageencoder = 4*UsrConfig.calib_current * UsrConfig.motor_phase_resistance * 3.0f / 2.0f;//@
-    const float voltagepp = 2*UsrConfig.calib_current * UsrConfig.motor_phase_resistance * 3.0f / 2.0f;//@
+    const float voltageencoder = 6*UsrConfig.calib_current * UsrConfig.motor_phase_resistance * 3.0f / 2.0f;//@
+    const float voltagepp = 3*UsrConfig.calib_current * UsrConfig.motor_phase_resistance * 3.0f / 2.0f;//@
 
     switch (mCalibStep) {
     case CS_NULL:
@@ -210,18 +213,34 @@ void CALIBRATION_loop(void)
         break;
 
     case CS_DIR_PP_LOOP:
-        static const float pp_calib_vel = 2.0f * M_PI;  // 专门用于极对数校准的速度  //@
+        static const float pp_calib_vel = 1.5f * M_PI;  // 专门用于极对数校准的速度                        //@
         phase_set += pp_calib_vel * CURRENT_MEASURE_PERIOD;// 以固定相位速度旋转   设置相
         //phase_set += calib_phase_vel * CURRENT_MEASURE_PERIOD;// 以固定相位速度旋转   设置相
         FOC_voltage(voltagepp, 0, phase_set);
         if (phase_set >= 4.0f * M_2PI) {                      // 旋转4圈后结束
             mCalibStep = CS_DIR_PP_END;
+            start_count_ccw = (float) Encoder.shadow_count;    // 记录起始编码器位置
+            //mCalibStep = CS_DIR_PP_LOOP_CCW;
         }
         break;
+    
+    // case CS_DIR_PP_LOOP_CCW:
+    //     //static const float pp_calib_vel = 1.5f * M_PI;  // 专门用于极对数校准的速度                        //@
+    //     phase_set -= pp_calib_vel * CURRENT_MEASURE_PERIOD;// 以固定相位速度旋转   设置相
+    //     //phase_set += calib_phase_vel * CURRENT_MEASURE_PERIOD;// 以固定相位速度旋转   设置相
+    //     FOC_voltage(voltagepp, 0, phase_set);
+    //     if (phase_set <= -4.0f * M_2PI) {                      // 旋转4圈后结束
+    //         //mCalibStep = CS_DIR_PP_END;
+    //         ccw_encoder_end = Encoder.shadow_count;
+    //         mCalibStep = CS_DIR_PP_END;
+    //     }
+    //     break;    
+
+
 
     case CS_DIR_PP_END: {
         int32_t diff = Encoder.shadow_count - start_count;    // 计算旋转的编码器脉冲数
-
+        int32_t diff2 = start_count_ccw - ccw_encoder_end;    // 计算旋转的编码器脉冲数
         // Check direction
         if (diff > 0) {
             UsrConfig.encoder_dir = +1;
@@ -231,7 +250,7 @@ void CALIBRATION_loop(void)
 
         // Motor pole pairs  计算极对数: 4圈 / (编码器计数/每圈)
         UsrConfig.motor_pole_pairs = round(4.0f / ABS(diff / ENCODER_CPR_F));
-
+        //UsrConfig.motor_pole_pairs = round(4.0f / (ABS(diff)+ABS(diff2)) / ENCODER_CPR_F/2);
         {
             uint8_t data[4];
 
@@ -252,7 +271,7 @@ void CALIBRATION_loop(void)
         next_sample_time = 0;
 
          // 提高编码器校准阶段的转速
-        static const float encoder_calib_vel = 8.0f * M_PI;  // 专门用于编码器校准的速度  //@
+        static const float encoder_calib_vel = 10.0f * M_PI;  // 专门用于编码器校准的速度                 //@
 
         mCalibStep       = CS_ENCODER_CW_LOOP;// 开始顺时针采样
         break;
@@ -273,11 +292,11 @@ void CALIBRATION_loop(void)
                 
             
                 // 记录当前A相电流值（来自GD30AP724的ADC采样）
-                current_samples_a[sample_count] = Foc.i_a;
-                current_samples_b[sample_count] = Foc.i_b;
-                current_samples_c[sample_count] = Foc.i_c;
-                ENCODERtest_sample[sample_count] = Encoder.raw;
-                count_ref_sample[sample_count] = count_ref;
+                // current_samples_a[sample_count] = Foc.i_a;
+                // current_samples_b[sample_count] = Foc.i_b;
+                // current_samples_c[sample_count] = Foc.i_c;
+                // ENCODERtest_sample[sample_count] = Encoder.raw;
+                // count_ref_sample[sample_count] = count_ref;
 
 
                 sample_count++;
@@ -324,6 +343,9 @@ void CALIBRATION_loop(void)
             moving_avg += p_error_arr[i];
         }
         UsrConfig.encoder_offset = moving_avg / (UsrConfig.motor_pole_pairs * SAMPLES_PER_PPAIR);//取平均
+        UsrConfig.encoder_electrical_offset = (UsrConfig.encoder_offset * UsrConfig.motor_pole_pairs)%360;
+ 
+
 
         {
             uint8_t data[4];

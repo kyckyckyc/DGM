@@ -34,8 +34,8 @@ void USR_CONFIG_set_default_config(void)
     UsrConfig.velocity_limit         = 60;
 
     // Encoder
-    UsrConfig.calib_current = 1.5f;
-    UsrConfig.calib_voltage = 3.0f;
+    UsrConfig.calib_current = 10.0f;
+    UsrConfig.calib_voltage = 2.0f;
 
     // Controller
     UsrConfig.pos_p_gain             = 80.0f;

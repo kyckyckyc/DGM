@@ -1,225 +1,1647 @@
-/*!
-    \file    main.c
-    \brief   led spark with systick, USART print and key example
-
-    \version 2025-02-10, V1.1.0, firmware for GD32G5x3
+/*
+    \file  gd32g5x3_init.c
 */
-
 /*
     Copyright (c) 2025, GigaDevice Semiconductor Inc.
 
-    Redistribution and use in source and binary forms, with or without modification, 
+    All rights reserved.
+
+    Redistribution and use in source and binary forms, with or without modification,
 are permitted provided that the following conditions are met:
 
-    1. Redistributions of source code must retain the above copyright notice, this 
+    1. Redistributions of source code must retain the above copyright notice, this
        list of conditions and the following disclaimer.
-    2. Redistributions in binary form must reproduce the above copyright notice, 
-       this list of conditions and the following disclaimer in the documentation 
+    2. Redistributions in binary form must reproduce the above copyright notice,
+       this list of conditions and the following disclaimer in the documentation
        and/or other materials provided with the distribution.
-    3. Neither the name of the copyright holder nor the names of its contributors 
-       may be used to endorse or promote products derived from this software without 
+    3. Neither the name of the copyright holder nor the names of its contributors
+       may be used to endorse or promote products derived from this software without
        specific prior written permission.
 
-    THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" 
-AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED 
-WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. 
-IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, 
-INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT 
-NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR 
-PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, 
-WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) 
-ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY 
+    THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED.
+IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT,
+INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT
+NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR
+PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY,
+WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY
 OF SUCH DAMAGE.
 */
-
 #include "gd32g5x3.h"
-#include "systick.h"
-#include <stdio.h>
-#include "main.h"
- #include "gd32g5x3_misc.h"
+#include "system_gd32g5x3.h"
 #include "gd32g5x3_init.h"
-#include "anticogging.h"
-#include "can.h"
-#include "controller.h"
+#include "main.h"
 #include "encoder.h"
-#include "foc.h"
-#include "mc_task.h"
-#include "pwm_curr.h"
-#include "usr_config.h"
-#include "rgb.h"
- volatile  uint32_t SystickCount = 0;
-can_mailbox_descriptor_struct can2receive_message;
-can_mailbox_descriptor_struct can2transmit_message;
-// can_mailbox_descriptor_struct transmit_message;
-// can_mailbox_descriptor_struct receive_message;
-uint8_t can0fd_txdata[64]={0};
-uint8_t can2_txdata[8]={0};
- uint32_t testid = 0;
-extern uint8_t can0_rxflag;
-extern uint8_t can2_rxflag;
+/* user code [global 0] begin */
+// #define SPI_TX_OFF()                                                                                \
+// 	do {                                                                                          \
+// 		gpio_init(SPI0_MOSI_PORT, GPIO_MODE_IN_FLOATING, GPIO_OSPEED_50MHZ, SPI0_MOSI_PIN); \
+// 	} while(0);
+// #define SPI_TX_ON()                                                                             \
+// 	do {                                                                                      \
+// 		gpio_init(SPI0_MOSI_PORT, SPI0_MOSI_FUNC, GPIO_OSPEED_50MHZ, SPI0_MOSI_PIN); \
+// 	} while(0);
 
-/* 全局发送管理器 */
-can2_tx_manager_t can2_tx_manager = {
-    .mailboxes = {8, 9, 10},
-    .current_index = 0,
-    .sent_count = {0, 0, 0}
-};
-int32_t test_offset_lut[128];
+// #define SPI_CS_ENABLE()	 gpio_bit_reset(U1_SPI0_NSS_PORT, U1_SPI0_NSS_PIN) 
+// #define SPI_CS_DISABLE() gpio_bit_set(U1_SPI0_NSS_PORT, U1_SPI0_NSS_PIN)  
+
+
+
+
+
+
+
+
+
+/* user code [global 0] end */
+
+/* External includes*/
+/* user code [External Includes] begin */
+
+/* user code [External Includes] end */
+
+/* Private Type Definitions */
+/* user code [Private Type Definitions] begin */
+
+/* user code [Private Type Definitions] end */
+
+/* Private Macros */
+/* user code [Private Macros] begin */
+
+/* user code [Private Macros] end */
+
+/* Private Constants */
+/* user code [Private Constants] begin */
+
+/* user code [Private Constants] end */
+
+/* Private Variables */
+/* user code [Private Variables] begin */
+
+/* user code [Private Variables] end */
+
+/* Private Function Declaration */
+/* user code [Private Function Declaration] begin */
+ 
+extern can_mailbox_descriptor_struct transmit_message;
+extern can_mailbox_descriptor_struct receive_message;
+
+/* user code [Private Function Declaration] end */
+
+/* Extern Variables */
+/* user code [Extern Variables] begin */
+
+/* user code [Extern Variables] end */
+
 /*!
-    \brief      main function
+    \brief      SYSTEM initialization function
     \param[in]  none
     \param[out] none
     \retval     none
 */
+// uint16_t spi_rw_half_word(uint32_t spi_periph, const uint16_t i_HalfWord)
+// {
+//     uint32_t to;
+//     uint16_t data = 0xFFFF;
+//     bool ok = true;
+
+//     // Send data
+//     to = 200;
+//     while ((RESET == spi_flag_get(spi_periph, SPI_FLAG_TBE)) && --to);
+//     if (to == 0) ok = false;
+
+//     if (ok) {
+//         if(RESET == spi_flag_get(spi_periph, SPI_FLAG_RBNE)) {
+//             (void)spi_data_receive(spi_periph); /* throw Dummy */
+//         }
+        
+//         spi_data_transmit(spi_periph, i_HalfWord);
+
+//         /* wait rx succ*/
+//         to = 200;
+//         while ((RESET == spi_flag_get(spi_periph, SPI_FLAG_RBNE)) && --to);
+//         if (to == 0) ok = false;
+//         else data = spi_data_receive(spi_periph); /* throw Dummy wait bsu idle */
+
+//         if (ok) {
+//             to = 200;
+//             while ((SET == spi_flag_get(spi_periph, SPI_FLAG_TRANS)) 
+//                    && SET == spi_flag_get(spi_periph, SPI_FLAG_RBNE) && --to);
+//             if (to == 0) ok = false;
+//         }
+//     }
+
+//     return ok ? data : 0xFFFF;
+// }
+ 
 
 
-int main(void)
+
+
+
+
+void msd_system_init(void)
 {
-		__disable_irq();
-		msd_clock_init();
-		msd_system_init();
-		msd_gpio_init();
- 		msd_adc0_init();
- 		msd_adc1_init();
+    /* user code [system_init local 0] begin */
 
-		msd_spi0_init();
-		timer_config();
-        trigsel_init(TRIGSEL_OUTPUT_ADC0_INSTRG, TRIGSEL_INPUT_TIMER0_CH3);
-		TIMER1_init();
-//		msd_uart3_init();
-//		msd_uart4_init();
-//		msd_usart0_init();
-//		msd_usart2_init();
-  		NVIC_init();
-		//WATCH_DOG_init();
-        msd_can0_init();
-       // msd_can2_init();
-       msd_can2_fifo_init();
-//cdd_TLI5012_Init();
- if (USR_CONFIG_read_config()) {
-       USR_CONFIG_set_default_config();
-   }
+    /* user code [system_init local 0] end */
 
-   if (0 == USR_CONFIG_read_cogging_map()) {
-       AnticoggingValid = true;
-   } else {
-       USR_CONFIG_set_default_cogging_map();
-   }
+    rcu_periph_clock_enable(RCU_SYSCFG);
+    nvic_priority_group_set(NVIC_PRIGROUP_PRE4_SUB0);
+    systick_clksource_set(SYSTICK_CLKSOURCE_HCLK);
+    nvic_irq_enable(MemoryManagement_IRQn, 0, 0);
+    nvic_irq_enable(BusFault_IRQn, 0, 0);
+    nvic_irq_enable(UsageFault_IRQn, 0, 0);
+    nvic_irq_enable(SVCall_IRQn, 0, 0);
+    nvic_irq_enable(DebugMonitor_IRQn, 0, 0);
+    nvic_irq_enable(PendSV_IRQn, 0, 0);
 
-    CAN_set_node_id(UsrConfig.node_id);
-//      CAN0_init(UsrConfig.can_baudrate);
-//    for(int i = 0;i<128;i++)
-//    {
-//      test_offset_lut[i] = *(volatile int32_t *)(USR_CONFIG_ADDR + 144 + 4*i);
+    /* user code [system_init local 1] begin */
 
-//    }
+    /* user code [system_init local 1] end */
+}
 
-   MCT_init();
-   FOC_init();
-   PWMC_init();
-   ENCODER_init();
-   CONTROLLER_init();
+/*!
+    \brief      CLOCK initialization function
+    \param[in]  none
+    \param[out] none
+    \retval     none
+*/
+// #if defined(__SYSTEM_CLOCK_216M_PLL_HXTAL) 
 
-    //fwdgt_enable();	
-	
-	
-	
-	
-	    __enable_irq();
-    can_struct_para_init(CAN_MDSC_STRUCT, &can2transmit_message);
-    can_struct_para_init(CAN_MDSC_STRUCT, &can2receive_message);
-    can_struct_para_init(CAN_MDSC_STRUCT, &transmit_message);
-    can_struct_para_init(CAN_MDSC_STRUCT, &receive_message);
-   // wait voltage stable
-   for (uint8_t i = 0, j = 0; i < 250; i++) {
-       if (Foc.v_bus_filt > 20) {
-           if (++j > 20) {
-               break;
-           }
-       }
-       delay_ms(2);
-   }
+void msd_clock_init(void)
+{
+    /* user code [clock_init local 0] begin */
 
-   if (PWMC_CurrentReadingPolarization() != 0) {
-       StatuswordNew.errors.selftest = 1;
-   }
+    /* user code [clock_init local 0] end */
 
-   MCT_set_state(IDLE);
+    rcu_osci_on(RCU_HXTAL);
+    while (rcu_osci_stab_wait(RCU_HXTAL) != SUCCESS);
 
-   uint32_t tick = 0;
+    rcu_pll_source_config(RCU_PLLSRC_HXTAL);
+    rcu_pll_config((1U), (54U), (2U), (2U), (2U));
+    rcu_pll_clock_output_enable(RCU_PLLP);
+    rcu_pll_clock_output_enable(RCU_PLLR);
+    fmc_wscnt_set(FMC_WAIT_STATE_7);
+    rcu_system_clock_source_config(RCU_CKSYSSRC_PLLP);
+    rcu_osci_on(RCU_PLL_CK);
+    while (rcu_osci_stab_wait(RCU_PLL_CK) != SUCCESS);
 
-   
-    while(1) 
-	{
-  
-     fwdgt_counter_reload();
+    rcu_ahb_clock_config(RCU_AHB_CKSYS_DIV1);
+    rcu_apb1_clock_config(RCU_APB1_CKAHB_DIV1);
+    rcu_apb2_clock_config(RCU_APB2_CKAHB_DIV1);
+    rcu_apb3_clock_config(RCU_APB3_CKAHB_DIV1);
+
+    rcu_can_clock_config(IDX_CAN0, RCU_CANSRC_APB2);
+    rcu_adc_clock_config(IDX_ADC0, RCU_ADCSRC_PLLR);
+    rcu_adc_clock_config(IDX_ADC1, RCU_ADCSRC_PLLR);
+    rcu_usart_clock_config(IDX_USART0, RCU_USARTSRC_APB);
+    rcu_usart_clock_config(IDX_USART2, RCU_USARTSRC_APB);
+
+    rcu_osci_bypass_mode_disable(RCU_HXTAL);
+    rcu_osci_bypass_mode_disable(RCU_LXTAL);
+    rcu_hxtal_clock_monitor_disable();
+    rcu_lxtal_clock_monitor_disable();
+
+    /* update SystemCoreClock value */
+    SystemCoreClockUpdate();
+
+    /* setup systick timer for 1000Hz interrupts */
+    if (SysTick_Config(SystemCoreClock / 1000U))
+    {
+        /* capture error */
+        while (1);
+    }
+
+    /* user code [clock_init local 1] begin */
+
+    /* user code [clock_init local 1] end */
+}
+
+//#elif defined(__SYSTEM_CLOCK_216M_PLL_IRC8M)
+
+// void msd_clock_init(void)
+// {
+
+
+//     rcu_osci_on(RCU_IRC8M);
+//     while (rcu_osci_stab_wait(RCU_IRC8M) != SUCCESS);
+//     rcu_irc8m_adjust_value_set(16U);
+
+//     rcu_pll_source_config(RCU_PLLSRC_IRC8M);
+//     rcu_pll_config((2U), (108U), (2U), (2U), (2U));
+//     rcu_pll_clock_output_enable(RCU_PLLP);
+//     fmc_wscnt_set(FMC_WAIT_STATE_7);
+//     rcu_system_clock_source_config(RCU_CKSYSSRC_PLLP);
+//     rcu_osci_on(RCU_PLL_CK);
+//     while (rcu_osci_stab_wait(RCU_PLL_CK) != SUCCESS);
+
+//     rcu_ahb_clock_config(RCU_AHB_CKSYS_DIV1);
+//     rcu_apb1_clock_config(RCU_APB1_CKAHB_DIV1);
+//     rcu_apb2_clock_config(RCU_APB2_CKAHB_DIV1);
+//     rcu_apb3_clock_config(RCU_APB3_CKAHB_DIV1);
+//     rcu_osci_bypass_mode_disable(RCU_HXTAL);
+//     rcu_osci_bypass_mode_disable(RCU_LXTAL);
+//     rcu_hxtal_clock_monitor_disable();
+//     rcu_lxtal_clock_monitor_disable();
+ 
+//     SystemCoreClockUpdate();
+
+
+//     if (SysTick_Config(SystemCoreClock / 1000U))
+//     {
+
+//     while (1);
+//     }
+
+// }
+
+//#endif
+
+
+/*!
+    \brief      GPIO initialization function
+    \param[in]  none
+    \param[out] none
+    \retval     none
+*/
+void msd_gpio_init(void)
+{
+//    /* user code [gpio_init local 0] begin */
+
+//    /* user code [gpio_init local 0] end */
+
+//    rcu_periph_clock_enable(RCU_GPIOD);
+//    rcu_periph_clock_enable(RCU_GPIOC);
+//    rcu_periph_clock_enable(RCU_GPIOB);
+//    rcu_periph_clock_enable(RCU_GPIOA);
+//    gpio_af_set(GPIOC, GPIO_AF_1, GPIO_PIN_6);
+//    gpio_mode_set(GPIOC, GPIO_MODE_AF, GPIO_PUPD_NONE, GPIO_PIN_6);
+//    gpio_output_options_set(GPIOC, GPIO_OTYPE_PP, GPIO_OSPEED_100_220MHZ, GPIO_PIN_6);
+//    gpio_input_filter_set(GPIOC, GPIO_ISPERIOD(0), GPIO_IFTYPE_ASYNC, GPIO_PIN_6);
+
+//    gpio_bit_set(GPIOB, GPIO_PIN_2);
+//    gpio_mode_set(GPIOB, GPIO_MODE_OUTPUT, GPIO_PUPD_NONE, GPIO_PIN_2);
+//    gpio_output_options_set(GPIOB, GPIO_OTYPE_PP, GPIO_OSPEED_100_220MHZ, GPIO_PIN_2);
+
+//    gpio_af_set(GPIOA, GPIO_AF_2, GPIO_PIN_6);
+//    gpio_mode_set(GPIOA, GPIO_MODE_AF, GPIO_PUPD_NONE, GPIO_PIN_6);
+//    gpio_output_options_set(GPIOA, GPIO_OTYPE_PP, GPIO_OSPEED_100_220MHZ, GPIO_PIN_6);
+//    gpio_input_filter_set(GPIOA, GPIO_ISPERIOD(0), GPIO_IFTYPE_ASYNC, GPIO_PIN_6);
+
+//    gpio_af_set(GPIOC, GPIO_AF_2, GPIO_PIN_8);
+//    gpio_mode_set(GPIOC, GPIO_MODE_AF, GPIO_PUPD_NONE, GPIO_PIN_8);
+//    gpio_output_options_set(GPIOC, GPIO_OTYPE_PP, GPIO_OSPEED_100_220MHZ, GPIO_PIN_8);
+//    gpio_input_filter_set(GPIOC, GPIO_ISPERIOD(0), GPIO_IFTYPE_ASYNC, GPIO_PIN_8);
+
+//    gpio_mode_set(GPIOC, GPIO_MODE_INPUT, GPIO_PUPD_NONE, GPIO_PIN_7);
+//    syscfg_exti_line_config(EXTI_SOURCE_GPIOC, EXTI_SOURCE_PIN7);
+//    exti_init(EXTI_7, EXTI_INTERRUPT, EXTI_TRIG_RISING);
+//    exti_interrupt_flag_clear(EXTI_7);
+
+//    gpio_af_set(GPIOA, GPIO_AF_6, GPIO_PIN_8);
+//    gpio_mode_set(GPIOA, GPIO_MODE_AF, GPIO_PUPD_NONE, GPIO_PIN_8);
+//    gpio_output_options_set(GPIOA, GPIO_OTYPE_PP, GPIO_OSPEED_100_220MHZ, GPIO_PIN_8);
+//    gpio_input_filter_set(GPIOA, GPIO_ISPERIOD(0), GPIO_IFTYPE_ASYNC, GPIO_PIN_8);
+
+//    gpio_af_set(GPIOA, GPIO_AF_2, GPIO_PIN_7);
+//    gpio_mode_set(GPIOA, GPIO_MODE_AF, GPIO_PUPD_NONE, GPIO_PIN_7);
+//    gpio_output_options_set(GPIOA, GPIO_OTYPE_PP, GPIO_OSPEED_100_220MHZ, GPIO_PIN_7);
+//    gpio_input_filter_set(GPIOA, GPIO_ISPERIOD(0), GPIO_IFTYPE_ASYNC, GPIO_PIN_7);
+
+//    gpio_af_set(GPIOC, GPIO_AF_2, GPIO_PIN_9);
+//    gpio_mode_set(GPIOC, GPIO_MODE_AF, GPIO_PUPD_NONE, GPIO_PIN_9);
+//    gpio_output_options_set(GPIOC, GPIO_OTYPE_PP, GPIO_OSPEED_100_220MHZ, GPIO_PIN_9);
+//    gpio_input_filter_set(GPIOC, GPIO_ISPERIOD(0), GPIO_IFTYPE_ASYNC, GPIO_PIN_9);
+
+//    gpio_af_set(GPIOA, GPIO_AF_6, GPIO_PIN_9);
+//    gpio_mode_set(GPIOA, GPIO_MODE_AF, GPIO_PUPD_NONE, GPIO_PIN_9);
+//    gpio_output_options_set(GPIOA, GPIO_OTYPE_PP, GPIO_OSPEED_100_220MHZ, GPIO_PIN_9);
+//    gpio_input_filter_set(GPIOA, GPIO_ISPERIOD(0), GPIO_IFTYPE_ASYNC, GPIO_PIN_9);
+
+//    gpio_af_set(GPIOB, GPIO_AF_6, GPIO_PIN_14);
+//    gpio_mode_set(GPIOB, GPIO_MODE_AF, GPIO_PUPD_NONE, GPIO_PIN_14);
+//    gpio_output_options_set(GPIOB, GPIO_OTYPE_PP, GPIO_OSPEED_100_220MHZ, GPIO_PIN_14);
+//    gpio_input_filter_set(GPIOB, GPIO_ISPERIOD(0), GPIO_IFTYPE_ASYNC, GPIO_PIN_14);
+
+//    gpio_af_set(GPIOB, GPIO_AF_6, GPIO_PIN_13);
+//    gpio_mode_set(GPIOB, GPIO_MODE_AF, GPIO_PUPD_NONE, GPIO_PIN_13);
+//    gpio_output_options_set(GPIOB, GPIO_OTYPE_PP, GPIO_OSPEED_100_220MHZ, GPIO_PIN_13);
+//    gpio_input_filter_set(GPIOB, GPIO_ISPERIOD(0), GPIO_IFTYPE_ASYNC, GPIO_PIN_13);
+
+//    gpio_af_set(GPIOB, GPIO_AF_4, GPIO_PIN_15);
+//    gpio_mode_set(GPIOB, GPIO_MODE_AF, GPIO_PUPD_NONE, GPIO_PIN_15);
+//    gpio_output_options_set(GPIOB, GPIO_OTYPE_PP, GPIO_OSPEED_100_220MHZ, GPIO_PIN_15);
+//    gpio_input_filter_set(GPIOB, GPIO_ISPERIOD(0), GPIO_IFTYPE_ASYNC, GPIO_PIN_15);
+
+//    gpio_af_set(GPIOA, GPIO_AF_6, GPIO_PIN_10);
+//    gpio_mode_set(GPIOA, GPIO_MODE_AF, GPIO_PUPD_NONE, GPIO_PIN_10);
+//    gpio_output_options_set(GPIOA, GPIO_OTYPE_PP, GPIO_OSPEED_100_220MHZ, GPIO_PIN_10);
+//    gpio_input_filter_set(GPIOA, GPIO_ISPERIOD(0), GPIO_IFTYPE_ASYNC, GPIO_PIN_10);
+
+//    gpio_bit_reset(GPIOC, GPIO_PIN_0);
+//    gpio_mode_set(GPIOC, GPIO_MODE_OUTPUT, GPIO_PUPD_NONE, GPIO_PIN_0);
+//    gpio_output_options_set(GPIOC, GPIO_OTYPE_PP, GPIO_OSPEED_100_220MHZ, GPIO_PIN_0);
+
+//    gpio_bit_reset(GPIOC, GPIO_PIN_2);
+//    gpio_mode_set(GPIOC, GPIO_MODE_OUTPUT, GPIO_PUPD_NONE, GPIO_PIN_2);
+//    gpio_output_options_set(GPIOC, GPIO_OTYPE_PP, GPIO_OSPEED_100_220MHZ, GPIO_PIN_2);
+
+//    gpio_bit_set(GPIOB, GPIO_PIN_1);
+//    gpio_mode_set(GPIOB, GPIO_MODE_OUTPUT, GPIO_PUPD_NONE, GPIO_PIN_1);
+//    gpio_output_options_set(GPIOB, GPIO_OTYPE_PP, GPIO_OSPEED_100_220MHZ, GPIO_PIN_1);
+
+//    gpio_bit_reset(GPIOC, GPIO_PIN_1);
+//    gpio_mode_set(GPIOC, GPIO_MODE_OUTPUT, GPIO_PUPD_NONE, GPIO_PIN_1);
+//    gpio_output_options_set(GPIOC, GPIO_OTYPE_PP, GPIO_OSPEED_100_220MHZ, GPIO_PIN_1);
+
+//    /* user code [gpio_init local 1] begin */
+   /* user code [gpio_init local 0] begin */
+
+    /* user code [gpio_init local 0] end */
+
+    rcu_periph_clock_enable(RCU_GPIOC);
+    rcu_periph_clock_enable(RCU_GPIOB);
+    rcu_periph_clock_enable(RCU_GPIOA);
+    //CS1
+    gpio_bit_reset(GPIOC, GPIO_PIN_4);
+    gpio_mode_set(GPIOC, GPIO_MODE_OUTPUT, GPIO_PUPD_NONE, GPIO_PIN_4);
+    gpio_output_options_set(GPIOC, GPIO_OTYPE_PP, GPIO_OSPEED_100_220MHZ, GPIO_PIN_4);
+    //CS0
+    gpio_bit_reset(GPIOA, GPIO_PIN_4);
+    gpio_mode_set(GPIOA, GPIO_MODE_OUTPUT, GPIO_PUPD_NONE, GPIO_PIN_4);
+    gpio_output_options_set(GPIOA, GPIO_OTYPE_PP, GPIO_OSPEED_100_220MHZ, GPIO_PIN_4);
+    //RGB
+    gpio_bit_reset(GPIOB, GPIO_PIN_5);
+    gpio_mode_set(GPIOB, GPIO_MODE_OUTPUT, GPIO_PUPD_NONE, GPIO_PIN_5);
+    gpio_output_options_set(GPIOB, GPIO_OTYPE_PP, GPIO_OSPEED_100_220MHZ, GPIO_PIN_5);
+    //TEMP MOS
+    gpio_mode_set(GPIOC, GPIO_MODE_ANALOG, GPIO_PUPD_NONE, GPIO_PIN_5);
+    //enc_IFB
+    gpio_af_set(GPIOC, GPIO_AF_2, GPIO_PIN_8);
+    gpio_mode_set(GPIOC, GPIO_MODE_AF, GPIO_PUPD_NONE, GPIO_PIN_8);
+    gpio_output_options_set(GPIOC, GPIO_OTYPE_PP, GPIO_OSPEED_100_220MHZ, GPIO_PIN_8);
+    gpio_input_filter_set(GPIOC, GPIO_ISPERIOD(0), GPIO_IFTYPE_ASYNC, GPIO_PIN_8);
+    //SPI0_MISO
+    gpio_af_set(GPIOA, GPIO_AF_5, GPIO_PIN_6);
+    gpio_mode_set(GPIOA, GPIO_MODE_INPUT, GPIO_PUPD_NONE, GPIO_PIN_6);
+    gpio_output_options_set(GPIOA, GPIO_OTYPE_PP, GPIO_OSPEED_100_220MHZ, GPIO_PIN_6);
+    gpio_input_filter_set(GPIOA, GPIO_ISPERIOD(0), GPIO_IFTYPE_ASYNC, GPIO_PIN_6);
+    //SPI0_SCK
+    gpio_af_set(GPIOA, GPIO_AF_5, GPIO_PIN_5);
+    gpio_mode_set(GPIOA, GPIO_MODE_AF, GPIO_PUPD_NONE, GPIO_PIN_5);
+    gpio_output_options_set(GPIOA, GPIO_OTYPE_PP, GPIO_OSPEED_100_220MHZ, GPIO_PIN_5);
+    gpio_input_filter_set(GPIOA, GPIO_ISPERIOD(0), GPIO_IFTYPE_ASYNC, GPIO_PIN_5);
+    //enc_IFA
+    gpio_af_set(GPIOC, GPIO_AF_2, GPIO_PIN_7);
+    gpio_mode_set(GPIOC, GPIO_MODE_AF, GPIO_PUPD_PULLUP, GPIO_PIN_7);
+    gpio_output_options_set(GPIOC, GPIO_OTYPE_PP, GPIO_OSPEED_100_220MHZ, GPIO_PIN_7);
+    gpio_input_filter_set(GPIOC, GPIO_ISPERIOD(0), GPIO_IFTYPE_ASYNC, GPIO_PIN_7);
+    //PWMAL
+    gpio_af_set(GPIOA, GPIO_AF_6, GPIO_PIN_8);
+    gpio_mode_set(GPIOA, GPIO_MODE_AF, GPIO_PUPD_NONE, GPIO_PIN_8);
+    gpio_output_options_set(GPIOA, GPIO_OTYPE_PP, GPIO_OSPEED_100_220MHZ, GPIO_PIN_8);
+    gpio_input_filter_set(GPIOA, GPIO_ISPERIOD(0), GPIO_IFTYPE_ASYNC, GPIO_PIN_8);
+    //SPI0_MOSI
+    gpio_af_set(GPIOA, GPIO_AF_5, GPIO_PIN_7);
+    gpio_mode_set(GPIOA, GPIO_MODE_AF, GPIO_PUPD_NONE, GPIO_PIN_7);
+    gpio_output_options_set(GPIOA, GPIO_OTYPE_PP, GPIO_OSPEED_100_220MHZ, GPIO_PIN_7);
+    gpio_input_filter_set(GPIOA, GPIO_ISPERIOD(0), GPIO_IFTYPE_ASYNC, GPIO_PIN_7);
+    //enc_IFC
+    gpio_mode_set(GPIOC, GPIO_MODE_INPUT, GPIO_PUPD_NONE, GPIO_PIN_9);
+    syscfg_exti_line_config(EXTI_SOURCE_GPIOC, EXTI_SOURCE_PIN9);
+    exti_init(EXTI_9, EXTI_INTERRUPT, EXTI_TRIG_RISING);
+    exti_interrupt_flag_clear(EXTI_9);
+    //PWMBL
+    gpio_af_set(GPIOA, GPIO_AF_6, GPIO_PIN_9);
+    gpio_mode_set(GPIOA, GPIO_MODE_AF, GPIO_PUPD_NONE, GPIO_PIN_9);
+    gpio_output_options_set(GPIOA, GPIO_OTYPE_PP, GPIO_OSPEED_100_220MHZ, GPIO_PIN_9);
+    gpio_input_filter_set(GPIOA, GPIO_ISPERIOD(0), GPIO_IFTYPE_ASYNC, GPIO_PIN_9);
+    //PWMBH
+    gpio_af_set(GPIOB, GPIO_AF_6, GPIO_PIN_14);
+    gpio_mode_set(GPIOB, GPIO_MODE_AF, GPIO_PUPD_NONE, GPIO_PIN_14);
+    gpio_output_options_set(GPIOB, GPIO_OTYPE_PP, GPIO_OSPEED_100_220MHZ, GPIO_PIN_14);
+    gpio_input_filter_set(GPIOB, GPIO_ISPERIOD(0), GPIO_IFTYPE_ASYNC, GPIO_PIN_14);
+    //PWMAH
+    gpio_af_set(GPIOB, GPIO_AF_6, GPIO_PIN_13);
+    gpio_mode_set(GPIOB, GPIO_MODE_AF, GPIO_PUPD_NONE, GPIO_PIN_13);
+    gpio_output_options_set(GPIOB, GPIO_OTYPE_PP, GPIO_OSPEED_100_220MHZ, GPIO_PIN_13);
+    gpio_input_filter_set(GPIOB, GPIO_ISPERIOD(0), GPIO_IFTYPE_ASYNC, GPIO_PIN_13);
+    //PWMCH
+    gpio_af_set(GPIOB, GPIO_AF_4, GPIO_PIN_15);
+    gpio_mode_set(GPIOB, GPIO_MODE_AF, GPIO_PUPD_NONE, GPIO_PIN_15);
+    gpio_output_options_set(GPIOB, GPIO_OTYPE_PP, GPIO_OSPEED_100_220MHZ, GPIO_PIN_15);
+    gpio_input_filter_set(GPIOB, GPIO_ISPERIOD(0), GPIO_IFTYPE_ASYNC, GPIO_PIN_15);
+    //PWMAL
+    gpio_af_set(GPIOA, GPIO_AF_6, GPIO_PIN_10);
+    gpio_mode_set(GPIOA, GPIO_MODE_AF, GPIO_PUPD_NONE, GPIO_PIN_10);
+    gpio_output_options_set(GPIOA, GPIO_OTYPE_PP, GPIO_OSPEED_100_220MHZ, GPIO_PIN_10);
+    gpio_input_filter_set(GPIOA, GPIO_ISPERIOD(0), GPIO_IFTYPE_ASYNC, GPIO_PIN_10);
+    //nfault
+    gpio_af_set(GPIOB, GPIO_AF_6, GPIO_PIN_12);
+    gpio_mode_set(GPIOB, GPIO_MODE_AF, GPIO_PUPD_NONE, GPIO_PIN_12);
+    gpio_output_options_set(GPIOB, GPIO_OTYPE_PP, GPIO_OSPEED_100_220MHZ, GPIO_PIN_12);
+    gpio_input_filter_set(GPIOB, GPIO_ISPERIOD(0), GPIO_IFTYPE_ASYNC, GPIO_PIN_12);
+    //nsleep
+    gpio_bit_set(GPIOB, GPIO_PIN_11);
+    gpio_mode_set(GPIOB, GPIO_MODE_OUTPUT, GPIO_PUPD_NONE, GPIO_PIN_11);
+    gpio_output_options_set(GPIOB, GPIO_OTYPE_PP, GPIO_OSPEED_100_220MHZ, GPIO_PIN_11);
+    //gpio_bit_set(GPIOB, GPIO_PIN_11);
+    /* user code [gpio_init local 1] begin */
+
+    /* user code [gpio_init local 1] end */
+    /* user code [gpio_init local 1] end */
+}
+
+/*!
+    \brief      GPIO deinitialization function
+    \param[in]  none
+    \param[out] none
+    \retval     none
+*/
+void msd_gpio_deinit(void)
+{
+    /* user code [gpio_deinit local 0] begin */
+
+    /* user code [gpio_deinit local 0] end */
+
+    rcu_periph_clock_disable(RCU_GPIOD);
+    rcu_periph_clock_disable(RCU_GPIOC);
+    rcu_periph_clock_disable(RCU_GPIOB);
+    rcu_periph_clock_disable(RCU_GPIOA);
+
+    exti_deinit();
+
+    /* user code [gpio_deinit local 1] begin */
+
+    /* user code [gpio_deinit local 1] end */
+}
+
+/*!
+    \brief      ADC0 initialization function
+    \param[in]  none
+    \param[out] none
+    \retval     none
+*/
+void msd_adc0_init(void)
+{
+    /* user code [adc0_init local 0] begin */
+
+    /* user code [adc0_init local 0] end */
+
+    rcu_periph_clock_enable(RCU_ADC0);
+    rcu_periph_clock_enable(RCU_TRIGSEL);
+
+    gpio_mode_set(GPIOA, GPIO_MODE_ANALOG, GPIO_PUPD_NONE, GPIO_PIN_2);
+
+    gpio_mode_set(GPIOA, GPIO_MODE_ANALOG, GPIO_PUPD_NONE, GPIO_PIN_1);
+
+    gpio_mode_set(GPIOA, GPIO_MODE_ANALOG, GPIO_PUPD_NONE, GPIO_PIN_3);
+
+    gpio_mode_set(GPIOA, GPIO_MODE_ANALOG, GPIO_PUPD_NONE, GPIO_PIN_0);
+
+
+   /* reset ADC */
+    adc_deinit(ADC0);
+    /* ADC clock config */
+    adc_clock_config(ADC0, ADC_CLK_SYNC_HCLK_DIV12);
+    /* ADC contineous function enable */
+    adc_special_function_config(ADC0, ADC_CONTINUOUS_MODE, DISABLE);
+    /* ADC scan mode enable */
+    adc_special_function_config(ADC0, ADC_SCAN_MODE, ENABLE);
+    /* ADC resolution config */
+    adc_resolution_config(ADC0, ADC_RESOLUTION_12B);
+    /* ADC data alignment config */
+    adc_data_alignment_config(ADC0, ADC_DATAALIGN_RIGHT);
+
+    /* ADC channel length config */
+    adc_channel_length_config(ADC0, ADC_INSERTED_CHANNEL, 4);
+
+    adc_inserted_channel_config(ADC0, 0, ADC_CHANNEL_0, 6);//Ia
+    adc_inserted_channel_config(ADC0, 1, ADC_CHANNEL_1, 6);//Ib
+    adc_inserted_channel_config(ADC0, 2, ADC_CHANNEL_2, 6);//Ic
+    adc_inserted_channel_config(ADC0, 3, ADC_CHANNEL_3, 6);//vbus
+//     trigsel_init(TRIGSEL_OUTPUT_ADC0_INSTRG, TRIGSEL_INPUT_TIMER0_CH3);
+ 
+    /* ADC trigger config */
+    adc_external_trigger_config(ADC0, ADC_INSERTED_CHANNEL, EXTERNAL_TRIGGER_RISING);
+    /* clear the ADC flag */
+    adc_interrupt_flag_clear(ADC0, ADC_INT_FLAG_EOC);
+    adc_interrupt_flag_clear(ADC0, ADC_INT_FLAG_EOIC);
+    /* enable ADC interrupt */
+    adc_interrupt_enable(ADC0, ADC_INT_EOIC);
+
+    /* enable ADC interface */
+    adc_enable(ADC0);
+    /* wait for ADC stability */
+     delay_ms(1);
+    /* ADC calibration mode config */
+    adc_calibration_mode_config(ADC0, ADC_CALIBRATION_OFFSET_MISMATCH);
+    /* ADC calibration number config */
+    adc_calibration_number(ADC0, ADC_CALIBRATION_NUM1);
+    /* ADC calibration and reset calibration */
+    adc_calibration_enable(ADC0);
+
+}
+
+/*!
+    \brief      ADC0 deinitialization function
+    \param[in]  none
+    \param[out] none
+    \retval     none
+*/
+void msd_adc0_deinit(void)
+{
+    /* user code [adc0_deinit local 0] begin */
+
+    /* user code [adc0_deinit local 0] end */
+
+    rcu_periph_clock_disable(RCU_ADC0);
+
+    adc_deinit(ADC0);
+
+    /* user code [adc0_deinit local 1] begin */
+
+    /* user code [adc0_deinit local 1] end */
+}
+
+/*!
+    \brief      ADC1 initialization function
+    \param[in]  none
+    \param[out] none
+    \retval     none
+*/
+void msd_adc1_init(void)
+{
+    /* user code [adc1_init local 0] begin */
+
+    /* user code [adc1_init local 0] end */
+
+    rcu_periph_clock_enable(RCU_ADC1);
+    rcu_periph_clock_enable(RCU_TRIGSEL);
+
+    gpio_mode_set(GPIOC, GPIO_MODE_ANALOG, GPIO_PUPD_NONE, GPIO_PIN_5);
+
+
+   /* reset ADC */
+    adc_deinit(ADC1);
+    /* ADC clock config */
+    adc_clock_config(ADC1, ADC_CLK_SYNC_HCLK_DIV12);
+    /* ADC contineous function enable */
+    adc_special_function_config(ADC1, ADC_CONTINUOUS_MODE, DISABLE);
+    /* ADC scan mode enable */
+    adc_special_function_config(ADC1, ADC_SCAN_MODE, ENABLE);
+    /* ADC resolution config */
+    adc_resolution_config(ADC1, ADC_RESOLUTION_12B);
+    /* ADC data alignment config */
+    adc_data_alignment_config(ADC1, ADC_DATAALIGN_RIGHT);
+
+    /* ADC channel length config */
+    adc_channel_length_config(ADC1, ADC_INSERTED_CHANNEL, 1);
+
+     adc_inserted_channel_config(ADC1, 0, ADC_CHANNEL_10, 6);//mos temp
+ 
+     trigsel_init(TRIGSEL_OUTPUT_ADC1_INSTRG, TRIGSEL_INPUT_TIMER0_CH3);
+ 
+    /* ADC trigger config */
+    adc_external_trigger_config(ADC1, ADC_INSERTED_CHANNEL, EXTERNAL_TRIGGER_RISING);
+    /* clear the ADC flag */
+    adc_interrupt_flag_clear(ADC1, ADC_INT_FLAG_EOC);
+    adc_interrupt_flag_clear(ADC1, ADC_INT_FLAG_EOIC);
+    /* enable ADC interrupt */
+//     adc_interrupt_enable(ADC1, ADC_INT_EOIC);
+
+    /* enable ADC interface */
+    adc_enable(ADC1);
+    /* wait for ADC stability */
+     delay_ms(1);
+    /* ADC calibration mode config */
+    adc_calibration_mode_config(ADC1, ADC_CALIBRATION_OFFSET_MISMATCH);
+    /* ADC calibration number config */
+    adc_calibration_number(ADC1, ADC_CALIBRATION_NUM1);
+    /* ADC calibration and reset calibration */
+    adc_calibration_enable(ADC1);
+
+    /* user code [adc1_init local 1] begin */
+
+    /* user code [adc1_init local 1] end */
+}
+
+/*!
+    \brief      ADC1 deinitialization function
+    \param[in]  none
+    \param[out] none
+    \retval     none
+*/
+void msd_adc1_deinit(void)
+{
+    /* user code [adc1_deinit local 0] begin */
+
+    /* user code [adc1_deinit local 0] end */
+
+    rcu_periph_clock_disable(RCU_ADC1);
+
+    adc_deinit(ADC1);
+
+    /* user code [adc1_deinit local 1] begin */
+
+    /* user code [adc1_deinit local 1] end */
+}
+
+ 
+/*!
+    \brief      CAN0 deinitialization function
+    \param[in]  none
+    \param[out] none
+    \retval     none
+*/
+void msd_can0_deinit(void)
+{
+    /* user code [can0_deinit local 0] begin */
+
+    /* user code [can0_deinit local 0] end */
+
+    rcu_periph_clock_disable(RCU_CAN0);
+
+    can_deinit(CAN0);
+
+    /* user code [can0_deinit local 1] begin */
+
+    /* user code [can0_deinit local 1] end */
+}
+
+/*!
+    \brief      SPI2 initialization function
+    \param[in]  none
+    \param[out] none
+    \retval     none
+*/
+    spi_parameter_struct spi0_parameter;
+
+
+void msd_spi0_init(void)
+{
+    /* user code [spi2_init local 0] begin */
+
+    /* user code [spi2_init local 0] end */
+
+
+    rcu_periph_clock_enable(RCU_SPI0);
+
+//    gpio_af_set(GPIOB, GPIO_AF_6, GPIO_PIN_3);
+//    gpio_mode_set(GPIOB, GPIO_MODE_AF, GPIO_PUPD_NONE, GPIO_PIN_3);
+//    gpio_output_options_set(GPIOB, GPIO_OTYPE_PP, GPIO_OSPEED_60MHZ, GPIO_PIN_3);
+//    gpio_input_filter_set(GPIOB, GPIO_ISPERIOD(0), GPIO_IFTYPE_ASYNC, GPIO_PIN_3);
+
+//    gpio_af_set(GPIOB, GPIO_AF_6, GPIO_PIN_5);
+//    gpio_mode_set(GPIOB, GPIO_MODE_AF, GPIO_PUPD_NONE, GPIO_PIN_5);
+//    gpio_output_options_set(GPIOB, GPIO_OTYPE_PP, GPIO_OSPEED_60MHZ, GPIO_PIN_5);
+//    gpio_input_filter_set(GPIOB, GPIO_ISPERIOD(0), GPIO_IFTYPE_ASYNC, GPIO_PIN_5);
+
+//    gpio_af_set(GPIOB, GPIO_AF_6, GPIO_PIN_4);
+//    gpio_mode_set(GPIOB, GPIO_MODE_AF, GPIO_PUPD_PULLUP, GPIO_PIN_4);
+//    gpio_output_options_set(GPIOB, GPIO_OTYPE_PP, GPIO_OSPEED_60MHZ, GPIO_PIN_4);
+//    gpio_input_filter_set(GPIOB, GPIO_ISPERIOD(0), GPIO_IFTYPE_ASYNC, GPIO_PIN_4);
+
+    spi_struct_para_init(&spi0_parameter);
+
+    spi0_parameter.device_mode = SPI_MASTER;
+    spi0_parameter.nss = SPI_NSS_SOFT;
+    spi0_parameter.endian = SPI_ENDIAN_MSB;
+
+    #if defined(TLE5012B)
+    spi0_parameter.clock_polarity_phase = SPI_CK_PL_LOW_PH_2EDGE;//
+    spi0_parameter.trans_mode = SPI_TRANSMODE_FULLDUPLEX;
+    spi0_parameter.prescale = SPI_PSC_64;
+    spi0_parameter.frame_size = SPI_FRAMESIZE_16BIT;
     
-     MCT_low_priority_task();
+    #elif defined(KTH71)
+    spi0_parameter.clock_polarity_phase = SPI_CK_PL_HIGH_PH_2EDGE;//
+    spi0_parameter.trans_mode = SPI_TRANSMODE_FULLDUPLEX;
+    spi0_parameter.prescale = SPI_PSC_8;
+    spi0_parameter.frame_size = SPI_FRAMESIZE_8BIT;
 
-       if (get_ms_since(tick) > 1000) {
-           tick = SystickCount;
-       }
+    #endif
+    spi_init(SPI0, &spi0_parameter);
+
+
+    // spi_nss_output_enable(SPI0);
+    // spi_nssp_mode_enable(SPI0);
+
+//    spi_fifo_access_size_config(SPI0, SPI_HALFWORD_ACCESS);
+
+    spi_enable(SPI0);
+
+
+ 
+
+    /* user code [spi2_init local 1] begin */
+
+    /* user code [spi2_init local 1] end */
+}
 
 
 
 
-      for(int i = 0; i < 0x0a; i++){
-           can0fd_txdata[i] = i;
-         }
-        // can0fd_txMessage(0x0a,0x08,can0fd_txdata);
-  /////can2 send test
-         can2_txdata[0]=0x10;
-         can2_txdata[1]=0x11;
-         can2_txdata[2]=0x12;
-         can2_txdata[3]=0x13;
-         can2_txdata[4]=0x14;
 
-       // can2_txMessage_checked(0x05, 0x10, can2_txdata, 10u);
-        //delay_ms(50);
-        //can2_txMessage(0x05,0x09,can2_txdata);
+/**
+  * @brief Send or read half word through SPI
+  * @param[in] spi_periph: SPI peripheral
+  * @param[in] i_HalfWord: data to send
+  * @return received data
+  */
+ 
 
-		 if(SET == can0_rxflag) 
-         {
-            can0_rxflag = RESET;
-            /* read the receive message */
-            can_mailbox_receive_data_read(CAN0, 0U, &receive_message);
-            // unpack_cmd(&receive_message);
-         }
-        if(SET == can2_rxflag) 
-        {
-           // can2_rxflag = RESET;
-            /* read the receive message */
-        //     can_mailbox_receive_data_read(CAN2, 2U, &can2receive_message);
-             //can2_rxframe.id = can2receive_message.id & 0xFFFFFF;
 
-        //     can2_rxframe.dlc = can2receive_message.dlc;
-        //     for(int j=0;j<8;j++)
-        //     {
-        //       can2_rxframe.data[j] = (uint8_t) can2receive_message.data[j];
-        //     }
-            
-        //    parse_frame(&can2_rxframe);
+/*!
+    \brief      SPI2 deinitialization function
+    \param[in]  none
+    \param[out] none
+    \retval     none
+*/
+void msd_spi2_deinit(void)
+{
+    /* user code [spi2_deinit local 0] begin */
+
+    /* user code [spi2_deinit local 0] end */
+
+    rcu_periph_clock_disable(RCU_SPI2);
+
+    spi_deinit(SPI2);
+
+    /* user code [spi2_deinit local 1] begin */
+
+    /* user code [spi2_deinit local 1] end */
+}
+
+/*!
+    \brief      TIMER0 initialization function
+    \param[in]  none
+    \param[out] none
+    \retval     none
+*/
+void msd_timer0_init(void)
+{
+    /* user code [timer0_init local 0] begin */
+
+    /* user code [timer0_init local 0] end */
+
+    timer_parameter_struct timer0_parameter;
+
+    rcu_periph_clock_enable(RCU_TIMER0);
+
+    timer_struct_para_init(&timer0_parameter);
+
+    timer_adjustment_mode_config(TIMER0, DISABLE);
+    timer_auto_reload_shadow_enable(TIMER0);
+    timer_counter_initial_register_config(TIMER0, DISABLE);
+    timer_upif_backup_config(TIMER0, DISABLE);
+    timer_master_slave_mode_config(TIMER0, TIMER_MASTER_SLAVE_MODE_DISABLE);
+    timer_master_output0_trigger_source_select(TIMER0, TIMER_TRI_OUT0_SRC_O3CPRE);
+    timer_master_output1_trigger_source_select(TIMER0, TIMER_TRI_OUT1_SRC_UPDATE);
+    timer0_parameter.prescaler = 0;
+    timer0_parameter.alignedmode = TIMER_COUNTER_CENTER_BOTH;
+    timer0_parameter.period = 5399;
+    timer0_parameter.repetitioncounter = 0x00000000;
+    timer0_parameter.clockdivision = TIMER_CKDIV_DIV1;
+    timer_init(TIMER0, &timer0_parameter);
+
+    timer_internal_clock_config(TIMER0);
+
+    nvic_irq_enable(TIMER0_BRK_IRQn, 0, 0);
+    nvic_irq_enable(TIMER0_UP_IRQn, 0, 0);
+
+    /* user code [timer0_init local 1] begin */
+
+    /* user code [timer0_init local 1] end */
+}
+
+/*!
+    \brief      TIMER0 deinitialization function
+    \param[in]  none
+    \param[out] none
+    \retval     none
+*/
+void msd_timer0_deinit(void)
+{
+    /* user code [timer0_deinit local 0] begin */
+
+    /* user code [timer0_deinit local 0] end */
+
+    rcu_periph_clock_disable(RCU_TIMER0);
+
+    timer_deinit(TIMER0);
+
+    /* user code [timer0_deinit local 1] begin */
+
+    /* user code [timer0_deinit local 1] end */
+}
+
+/*!
+    \brief      UART3 initialization function
+    \param[in]  none
+    \param[out] none
+    \retval     none
+*/
+void msd_uart3_init(void)
+{
+    /* user code [uart3_init local 0] begin */
+
+    /* user code [uart3_init local 0] end */
+
+    rcu_periph_clock_enable(RCU_UART3);
+
+    gpio_af_set(GPIOC, GPIO_AF_5, GPIO_PIN_11);
+    gpio_mode_set(GPIOC, GPIO_MODE_AF, GPIO_PUPD_NONE, GPIO_PIN_11);
+    gpio_output_options_set(GPIOC, GPIO_OTYPE_PP, GPIO_OSPEED_85MHZ, GPIO_PIN_11);
+    gpio_input_filter_set(GPIOC, GPIO_ISPERIOD(0), GPIO_IFTYPE_ASYNC, GPIO_PIN_11);
+
+    gpio_af_set(GPIOC, GPIO_AF_5, GPIO_PIN_10);
+    gpio_mode_set(GPIOC, GPIO_MODE_AF, GPIO_PUPD_NONE, GPIO_PIN_10);
+    gpio_output_options_set(GPIOC, GPIO_OTYPE_PP, GPIO_OSPEED_85MHZ, GPIO_PIN_10);
+    gpio_input_filter_set(GPIOC, GPIO_ISPERIOD(0), GPIO_IFTYPE_ASYNC, GPIO_PIN_10);
+
+    usart_baudrate_set(UART3, 115200);
+    usart_word_length_set(UART3, USART_WL_8BIT);
+    usart_parity_config(UART3, USART_PM_NONE);
+    usart_stop_bit_set(UART3, USART_STB_1BIT);
+    usart_receive_config(UART3, USART_RECEIVE_ENABLE);
+    usart_transmit_config(UART3, USART_TRANSMIT_ENABLE);
+    usart_oversample_config(UART3, USART_OVSMOD_16);
+    usart_sample_bit_config(UART3, USART_OSB_3BIT);
+    usart_fifo_disable(UART3);
+    usart_overrun_disable(UART3);
+    usart_reception_error_dma_disable(UART3);
+    usart_data_first_config(UART3, USART_MSBF_LSB);
+    usart_invert_config(UART3, USART_TXPIN_DISABLE);
+    usart_invert_config(UART3, USART_RXPIN_DISABLE);
+    usart_invert_config(UART3, USART_DINV_DISABLE);
+    usart_invert_config(UART3, USART_SWAP_DISABLE);
+    usart_enable(UART3);
+
+    /* user code [uart3_init local 1] begin */
+
+    /* user code [uart3_init local 1] end */
+}
+
+/*!
+    \brief      UART3 deinitialization function
+    \param[in]  none
+    \param[out] none
+    \retval     none
+*/
+void msd_uart3_deinit(void)
+{
+    /* user code [uart3_deinit local 0] begin */
+
+    /* user code [uart3_deinit local 0] end */
+
+    rcu_periph_clock_disable(RCU_UART3);
+
+    usart_deinit(UART3);
+
+    /* user code [uart3_deinit local 1] begin */
+
+    /* user code [uart3_deinit local 1] end */
+}
+
+/*!
+    \brief      UART4 initialization function
+    \param[in]  none
+    \param[out] none
+    \retval     none
+*/
+void msd_uart4_init(void)
+{
+    /* user code [uart4_init local 0] begin */
+
+    /* user code [uart4_init local 0] end */
+
+    rcu_periph_clock_enable(RCU_UART4);
+
+    gpio_af_set(GPIOC, GPIO_AF_5, GPIO_PIN_12);
+    gpio_mode_set(GPIOC, GPIO_MODE_AF, GPIO_PUPD_NONE, GPIO_PIN_12);
+    gpio_output_options_set(GPIOC, GPIO_OTYPE_PP, GPIO_OSPEED_85MHZ, GPIO_PIN_12);
+    gpio_input_filter_set(GPIOC, GPIO_ISPERIOD(0), GPIO_IFTYPE_ASYNC, GPIO_PIN_12);
+
+    gpio_af_set(GPIOD, GPIO_AF_5, GPIO_PIN_2);
+    gpio_mode_set(GPIOD, GPIO_MODE_AF, GPIO_PUPD_NONE, GPIO_PIN_2);
+    gpio_output_options_set(GPIOD, GPIO_OTYPE_PP, GPIO_OSPEED_85MHZ, GPIO_PIN_2);
+    gpio_input_filter_set(GPIOD, GPIO_ISPERIOD(0), GPIO_IFTYPE_ASYNC, GPIO_PIN_2);
+
+    usart_baudrate_set(UART4, 115200);
+    usart_word_length_set(UART4, USART_WL_8BIT);
+    usart_parity_config(UART4, USART_PM_NONE);
+    usart_stop_bit_set(UART4, USART_STB_1BIT);
+    usart_receive_config(UART4, USART_RECEIVE_ENABLE);
+    usart_transmit_config(UART4, USART_TRANSMIT_ENABLE);
+    usart_oversample_config(UART4, USART_OVSMOD_16);
+    usart_sample_bit_config(UART4, USART_OSB_3BIT);
+    usart_fifo_disable(UART4);
+    usart_overrun_disable(UART4);
+    usart_reception_error_dma_disable(UART4);
+    usart_data_first_config(UART4, USART_MSBF_LSB);
+    usart_invert_config(UART4, USART_TXPIN_DISABLE);
+    usart_invert_config(UART4, USART_RXPIN_DISABLE);
+    usart_invert_config(UART4, USART_DINV_DISABLE);
+    usart_invert_config(UART4, USART_SWAP_DISABLE);
+    usart_enable(UART4);
+
+    /* user code [uart4_init local 1] begin */
+
+    /* user code [uart4_init local 1] end */
+}
+
+/*!
+    \brief      UART4 deinitialization function
+    \param[in]  none
+    \param[out] none
+    \retval     none
+*/
+void msd_uart4_deinit(void)
+{
+    /* user code [uart4_deinit local 0] begin */
+
+    /* user code [uart4_deinit local 0] end */
+
+    rcu_periph_clock_disable(RCU_UART4);
+
+    usart_deinit(UART4);
+
+    /* user code [uart4_deinit local 1] begin */
+
+    /* user code [uart4_deinit local 1] end */
+}
+
+/*!
+    \brief      USART0 initialization function
+    \param[in]  none
+    \param[out] none
+    \retval     none
+*/
+void msd_usart0_init(void)
+{
+    /* user code [usart0_init local 0] begin */
+
+    /* user code [usart0_init local 0] end */
+
+    rcu_periph_clock_enable(RCU_USART0);
+
+    gpio_af_set(GPIOB, GPIO_AF_7, GPIO_PIN_7);
+    gpio_mode_set(GPIOB, GPIO_MODE_AF, GPIO_PUPD_NONE, GPIO_PIN_7);
+    gpio_output_options_set(GPIOB, GPIO_OTYPE_PP, GPIO_OSPEED_85MHZ, GPIO_PIN_7);
+    gpio_input_filter_set(GPIOB, GPIO_ISPERIOD(0), GPIO_IFTYPE_ASYNC, GPIO_PIN_7);
+
+    gpio_af_set(GPIOB, GPIO_AF_7, GPIO_PIN_6);
+    gpio_mode_set(GPIOB, GPIO_MODE_AF, GPIO_PUPD_NONE, GPIO_PIN_6);
+    gpio_output_options_set(GPIOB, GPIO_OTYPE_PP, GPIO_OSPEED_85MHZ, GPIO_PIN_6);
+    gpio_input_filter_set(GPIOB, GPIO_ISPERIOD(0), GPIO_IFTYPE_ASYNC, GPIO_PIN_6);
+
+    usart_baudrate_set(USART0, 115200);
+    usart_word_length_set(USART0, USART_WL_8BIT);
+    usart_parity_config(USART0, USART_PM_NONE);
+    usart_stop_bit_set(USART0, USART_STB_1BIT);
+    usart_receive_config(USART0, USART_RECEIVE_ENABLE);
+    usart_transmit_config(USART0, USART_TRANSMIT_ENABLE);
+    usart_receiver_timeout_disable(USART0);
+    usart_oversample_config(USART0, USART_OVSMOD_16);
+    usart_sample_bit_config(USART0, USART_OSB_3BIT);
+    usart_fifo_disable(USART0);
+    usart_overrun_disable(USART0);
+    usart_reception_error_dma_disable(USART0);
+    usart_data_first_config(USART0, USART_MSBF_LSB);
+    usart_invert_config(USART0, USART_TXPIN_DISABLE);
+    usart_invert_config(USART0, USART_RXPIN_DISABLE);
+    usart_invert_config(USART0, USART_DINV_DISABLE);
+    usart_invert_config(USART0, USART_SWAP_DISABLE);
+    usart_enable(USART0);
+
+    /* user code [usart0_init local 1] begin */
+
+    /* user code [usart0_init local 1] end */
+}
+
+/*!
+    \brief      USART0 deinitialization function
+    \param[in]  none
+    \param[out] none
+    \retval     none
+*/
+void msd_usart0_deinit(void)
+{
+    /* user code [usart0_deinit local 0] begin */
+
+    /* user code [usart0_deinit local 0] end */
+
+    rcu_periph_clock_disable(RCU_USART0);
+
+    usart_deinit(USART0);
+
+    /* user code [usart0_deinit local 1] begin */
+
+    /* user code [usart0_deinit local 1] end */
+}
+
+/*!
+    \brief      USART2 initialization function
+    \param[in]  none
+    \param[out] none
+    \retval     none
+*/
+void msd_usart2_init(void)
+{
+    /* user code [usart2_init local 0] begin */
+
+    /* user code [usart2_init local 0] end */
+
+    rcu_periph_clock_enable(RCU_USART2);
+
+    gpio_af_set(GPIOB, GPIO_AF_7, GPIO_PIN_9);
+    gpio_mode_set(GPIOB, GPIO_MODE_AF, GPIO_PUPD_NONE, GPIO_PIN_9);
+    gpio_output_options_set(GPIOB, GPIO_OTYPE_PP, GPIO_OSPEED_85MHZ, GPIO_PIN_9);
+    gpio_input_filter_set(GPIOB, GPIO_ISPERIOD(0), GPIO_IFTYPE_ASYNC, GPIO_PIN_9);
+
+    gpio_af_set(GPIOB, GPIO_AF_7, GPIO_PIN_11);
+    gpio_mode_set(GPIOB, GPIO_MODE_AF, GPIO_PUPD_NONE, GPIO_PIN_11);
+    gpio_output_options_set(GPIOB, GPIO_OTYPE_PP, GPIO_OSPEED_85MHZ, GPIO_PIN_11);
+    gpio_input_filter_set(GPIOB, GPIO_ISPERIOD(0), GPIO_IFTYPE_ASYNC, GPIO_PIN_11);
+
+    usart_baudrate_set(USART2, 115200);
+    usart_word_length_set(USART2, USART_WL_8BIT);
+    usart_parity_config(USART2, USART_PM_NONE);
+    usart_stop_bit_set(USART2, USART_STB_1BIT);
+    usart_receive_config(USART2, USART_RECEIVE_ENABLE);
+    usart_transmit_config(USART2, USART_TRANSMIT_ENABLE);
+    usart_receiver_timeout_disable(USART2);
+    usart_oversample_config(USART2, USART_OVSMOD_16);
+    usart_sample_bit_config(USART2, USART_OSB_3BIT);
+    usart_fifo_disable(USART2);
+    usart_overrun_disable(USART2);
+    usart_reception_error_dma_disable(USART2);
+    usart_data_first_config(USART2, USART_MSBF_LSB);
+    usart_invert_config(USART2, USART_TXPIN_DISABLE);
+    usart_invert_config(USART2, USART_RXPIN_DISABLE);
+    usart_invert_config(USART2, USART_DINV_DISABLE);
+    usart_invert_config(USART2, USART_SWAP_DISABLE);
+    usart_enable(USART2);
+
+    /* user code [usart2_init local 1] begin */
+
+    /* user code [usart2_init local 1] end */
+}
+
+/*!
+    \brief      USART2 deinitialization function
+    \param[in]  none
+    \param[out] none
+    \retval     none
+*/
+void msd_usart2_deinit(void)
+{
+    /* user code [usart2_deinit local 0] begin */
+
+    /* user code [usart2_deinit local 0] end */
+
+    rcu_periph_clock_disable(RCU_USART2);
+
+    usart_deinit(USART2);
+
+    /* user code [usart2_deinit local 1] begin */
+
+    /* user code [usart2_deinit local 1] end */
+}
+
+/* user code [global 1] begin */
+
+/* user code [global 1] end */
+
+/* user code [Public Functions Implementations] begin */
+
+/* user code [Public Functions Implementations] end */
+
+/* user code [Private Functions Implementations] begin */
+
+/* user code [Private Functions Implementations] end */
+
+
+void timer_config(void)
+{
+    /* -----------------------------------------------------------------------
+    TIMER0 configuration to:
+    generate 4 complementary PWM signals with 4 different duty cycles:
+    - TIMER0 frequency is fixed to 216MHz, TIMER0 prescaler is equal to 216,
+       so TIMER0 counter frequency is 1MHz, the PWM frequency = 1KHz.
+
+       the four duty cycles are computed as the following description:
+       the channel 0 duty cycle is set to 20%, so multi mode channel 0 is set to 80%.
+       the channel 1 duty cycle is set to 40%, so multi mode channel 1 is set to 60%.
+       the channel 2 duty cycle is set to 60%, so multi mode channel 2 is set to 40%.
+       the channel 3 duty cycle is set to 80%, so multi mode channel 3 is set to 20%.
+    - CH0/MCH0,CH1/MCH1, CH2/MCH2 and CH3/MCH3 are configured in PWM mode 0.
+    ----------------------------------------------------------------------- */
+    timer_oc_parameter_struct timer_ocinitpara;
+    timer_parameter_struct timer_initpara;
+    timer_break_parameter_struct timer_breakpara;
+
+    rcu_periph_clock_enable(RCU_TIMER0);
+    timer_deinit(TIMER0);
+
+    /* TIMER0 configuration */
+    timer_struct_para_init(&timer_initpara);
+    timer_initpara.prescaler         = 0;
+    timer_initpara.alignedmode       = TIMER_COUNTER_CENTER_DOWN;
+//    timer_initpara.counterdirection  = TIMER_COUNTER_UP;
+    timer_initpara.period            = 5399;
+    timer_initpara.clockdivision     = TIMER_CKDIV_DIV1;
+    timer_initpara.repetitioncounter = 0;
+    timer_init(TIMER0, &timer_initpara);
+
+    /* CH0~3 & MCH0~3 configuration in PWM mode */
+    timer_channel_output_struct_para_init(&timer_ocinitpara);
+    timer_ocinitpara.outputstate  = TIMER_CCX_ENABLE;
+    timer_ocinitpara.outputnstate = TIMER_CCXN_ENABLE;
+    timer_ocinitpara.ocpolarity   = TIMER_OC_POLARITY_LOW;
+    timer_ocinitpara.ocnpolarity  = TIMER_OCN_POLARITY_LOW;
+    timer_ocinitpara.ocidlestate  = TIMER_OC_IDLE_STATE_HIGH;
+    timer_ocinitpara.ocnidlestate = TIMER_OCN_IDLE_STATE_LOW;
+
+    /* config CH0~3 & MCH0~3 as output*/
+    timer_channel_output_config(TIMER0, TIMER_CH_0, &timer_ocinitpara);
+    timer_channel_output_config(TIMER0, TIMER_CH_1, &timer_ocinitpara);
+    timer_channel_output_config(TIMER0, TIMER_CH_2, &timer_ocinitpara);
+    timer_channel_output_config(TIMER0, TIMER_CH_3, &timer_ocinitpara);
+
+    /* config MCH0~3 output complementary */
+    timer_multi_mode_channel_mode_config(TIMER0, TIMER_CH_0, TIMER_MCH_MODE_COMPLEMENTARY);
+    timer_multi_mode_channel_mode_config(TIMER0, TIMER_CH_1, TIMER_MCH_MODE_COMPLEMENTARY);
+    timer_multi_mode_channel_mode_config(TIMER0, TIMER_CH_2, TIMER_MCH_MODE_COMPLEMENTARY);
+    timer_multi_mode_channel_mode_config(TIMER0, TIMER_CH_3, TIMER_MCH_MODE_COMPLEMENTARY);
+
+    /* CH0 configuration in PWM mode 0, duty cycle 20% */
+    timer_channel_output_pulse_value_config(TIMER0, TIMER_CH_0, 200);
+    timer_channel_output_mode_config(TIMER0, TIMER_CH_0, TIMER_OC_MODE_PWM0);
+    timer_channel_output_shadow_config(TIMER0, TIMER_CH_0, TIMER_OC_SHADOW_DISABLE);
+
+    /* CH1 configuration in PWM mode 0, duty cycle 40% */
+    timer_channel_output_pulse_value_config(TIMER0, TIMER_CH_1, 400);
+    timer_channel_output_mode_config(TIMER0, TIMER_CH_1, TIMER_OC_MODE_PWM0);
+    timer_channel_output_shadow_config(TIMER0, TIMER_CH_1, TIMER_OC_SHADOW_DISABLE);
+
+    /* CH2 configuration in PWM mode 0, duty cycle 60% */
+    timer_channel_output_pulse_value_config(TIMER0, TIMER_CH_2, 600);
+    timer_channel_output_mode_config(TIMER0, TIMER_CH_2, TIMER_OC_MODE_PWM0);
+    timer_channel_output_shadow_config(TIMER0, TIMER_CH_2, TIMER_OC_SHADOW_DISABLE);
+
+    /* CH3 configuration in PWM mode 0, duty cycle 80% */
+    // timer_channel_output_pulse_value_config(TIMER0, TIMER_CH_3, 20);
+    timer_channel_output_pulse_value_config(TIMER0, TIMER_CH_3, 5399-800);
+    timer_channel_output_mode_config(TIMER0, TIMER_CH_3, TIMER_OC_MODE_PWM0);
+    timer_channel_output_shadow_config(TIMER0, TIMER_CH_3, TIMER_OC_SHADOW_DISABLE);
+
+    /* BREAK configuration */
+    timer_break_struct_para_init(&timer_breakpara);
+    
+
+    timer_breakpara.runoffstate         = TIMER_ROS_STATE_ENABLE;
+    timer_breakpara.ideloffstate        = TIMER_IOS_STATE_ENABLE;
+    timer_breakpara.deadtime            = 0U;
+    timer_breakpara.outputautostate     = TIMER_OUTAUTO_DISABLE;
+    timer_breakpara.protectmode         = TIMER_CCHP0_PROT_OFF;
+    timer_breakpara.break0state         = TIMER_BREAK0_ENABLE;
+    timer_breakpara.break0filter        = 30U;
+    timer_breakpara.break0polarity      = TIMER_BREAK0_POLARITY_LOW;
+    timer_breakpara.break0lock          = TIMER_BREAK0_LK_DISABLE;
+    timer_breakpara.break0release       = TIMER_BREAK0_UNRELEASE;
+    timer_breakpara.break1state         = TIMER_BREAK1_DISABLE;
+    timer_breakpara.break1filter        = 0U;
+    timer_breakpara.break1polarity      = TIMER_BREAK1_POLARITY_HIGH;
+    timer_breakpara.break1lock          = TIMER_BREAK1_LK_DISABLE;
+    timer_breakpara.break1release       = TIMER_BREAK1_UNRELEASE;
+    timer_break_config(TIMER0, &timer_breakpara);
+
+    /* auto-reload preload enable */
+    timer_auto_reload_shadow_enable(TIMER0);
+    timer_primary_output_config(TIMER0, ENABLE);
+
+    /* auto-reload preload enable */
+    timer_enable(TIMER0);
+}
+
+
+  void TIMER1_init(void)
+{
+     rcu_periph_clock_enable(RCU_TIMER1);
+
+    // TIMER1CLK = SystemCoreClock/2/60000 = 1KHz
+    timer_parameter_struct timer_initpara;
+
+    timer_deinit(TIMER1);
+    timer_struct_para_init(&timer_initpara);
+    timer_initpara.prescaler        = 1;
+    timer_initpara.alignedmode      = TIMER_COUNTER_EDGE;
+    timer_initpara.counterdirection = TIMER_COUNTER_UP;
+    timer_initpara.period           = 108000 - 1;
+    timer_initpara.clockdivision    = TIMER_CKDIV_DIV1;
+    timer_init(TIMER1, &timer_initpara);
+
+    /* enable the TIMER interrupt */
+    timer_interrupt_flag_clear(TIMER1, TIMER_INT_FLAG_UP);
+    timer_interrupt_enable(TIMER1, TIMER_INT_UP);
+
+    timer_enable(TIMER1);
+}
+
+
+  void NVIC_init(void)
+{
+    nvic_priority_group_set(NVIC_PRIGROUP_PRE4_SUB0);
+
+    // ADC01 insert convert complete interrupt NVIC
+    NVIC_SetPriority(ADC0_1_IRQn, 1);
+    NVIC_EnableIRQ(ADC0_1_IRQn);
+
+    // TIM1 interrupt NVIC
+    NVIC_SetPriority(TIMER1_IRQn, 1);
+    NVIC_EnableIRQ(TIMER1_IRQn);
+
+
+    // CAN0 Rx interrupt NVIC
+    NVIC_SetPriority(CAN0_Message_IRQn, 0);
+    NVIC_EnableIRQ(CAN0_Message_IRQn);
+
+    NVIC_SetPriority(CAN2_Message_IRQn, 0);
+    NVIC_EnableIRQ(CAN2_Message_IRQn);
+
+}
+
+
+
+
+void WATCH_DOG_init(void)
+{
+
+
+    /* enable IRC32K */
+    rcu_osci_on(RCU_IRC32K);
+    
+    /* wait till IRC32K is ready */
+    while(SUCCESS != rcu_osci_stab_wait(RCU_IRC32K)){
+    }
+    
+    /* configure FWDGT counter clock: 32KHz(IRC32K) / 64 = 0.5 KHz */
+    fwdgt_config(2*500, FWDGT_PSC_DIV64);
+    
+    /* after 2 seconds to generate a reset */
+//    fwdgt_enable();
+
+
+}
+
+ void msd_can0_init(void)
+{
+     /* user code [can0_init local 0] begin */
+
+    /* user code [can0_init local 0] end */
+
+    /* enable CAN port clock */
+    rcu_periph_clock_enable(RCU_GPIOA);
+
+    /* configure CAN0_TX GPIO */
+    gpio_mode_set(GPIOA, GPIO_MODE_AF, GPIO_PUPD_PULLUP, GPIO_PIN_12);
+    gpio_output_options_set(GPIOA, GPIO_OTYPE_PP, GPIO_OSPEED_60MHZ, GPIO_PIN_12);
+    gpio_af_set(GPIOA, GPIO_AF_9, GPIO_PIN_12);
+
+    /* configure CAN0_RX GPIO */
+    gpio_mode_set(GPIOA, GPIO_MODE_AF, GPIO_PUPD_NONE, GPIO_PIN_11);
+    gpio_output_options_set(GPIOA, GPIO_OTYPE_PP, GPIO_OSPEED_60MHZ, GPIO_PIN_11);
+    gpio_af_set(GPIOA, GPIO_AF_9, GPIO_PIN_11);
+
+    can_parameter_struct can_parameter;
+    can_fd_parameter_struct fd_parameter;
+
+    /* select CK_APB2 as CAN's clock source */
+    rcu_can_clock_config(IDX_CAN0, RCU_CANSRC_APB2);
+    /* enable CAN clock */
+    rcu_periph_clock_enable(RCU_CAN0);
+    /* initialize CAN register */
+    can_deinit(CAN0);
+    /* initialize CAN */
+    can_struct_para_init(CAN_INIT_STRUCT, &can_parameter);
+    can_struct_para_init(CAN_FD_INIT_STRUCT, &fd_parameter);
+
+    /* initialize CAN parameters */
+    can_parameter.internal_counter_source = CAN_TIMER_SOURCE_BIT_CLOCK;
+    can_parameter.self_reception = DISABLE;
+    can_parameter.mb_tx_order = CAN_TX_HIGH_PRIORITY_MB_FIRST;
+    can_parameter.mb_tx_abort_enable = ENABLE;
+    can_parameter.local_priority_enable = DISABLE;
+    can_parameter.mb_rx_ide_rtr_type = CAN_IDE_RTR_FILTERED;
+    can_parameter.mb_remote_frame = CAN_STORE_REMOTE_REQUEST_FRAME;
+    can_parameter.rx_private_filter_queue_enable = DISABLE;
+    can_parameter.edge_filter_enable = DISABLE;
+    can_parameter.protocol_exception_enable = DISABLE;
+    can_parameter.rx_filter_order = CAN_RX_FILTER_ORDER_MAILBOX_FIRST;
+    can_parameter.memory_size = CAN_MEMSIZE_32_UNIT;
+    /* filter configuration */
+    can_parameter.mb_public_filter = 0U;
+    /* baud rate 1Mbps */
+    can_parameter.resync_jump_width = 1U;
+    can_parameter.prop_time_segment = 2U;
+    can_parameter.time_segment_1 = 4U;
+    can_parameter.time_segment_2 = 1U;
+    can_parameter.prescaler = 27U;
+
+    /* initialize CAN */
+    can_init(CAN0, &can_parameter);
+
+    /* FD parameter configurations */
+    fd_parameter.bitrate_switch_enable = ENABLE;
+    fd_parameter.iso_can_fd_enable = ENABLE;
+    fd_parameter.mailbox_data_size = CAN_MAILBOX_DATA_SIZE_64_BYTES;
+    fd_parameter.tdc_enable = DISABLE;
+    fd_parameter.tdc_offset = 0U;
+    /* FD baud rate 1Mbps */
+    fd_parameter.resync_jump_width = 1U;
+    fd_parameter.prop_time_segment = 2U;
+    fd_parameter.time_segment_1 = 4U;
+    fd_parameter.time_segment_2 = 1U;
+    fd_parameter.prescaler = 27U;
+
+    can_fd_config(CAN0, &fd_parameter);
+
+    /* configure CAN0 NVIC */
+    nvic_irq_enable(CAN0_Message_IRQn, 0U, 0U);
+
+    /* enable CAN MB0 interrupt */
+    can_interrupt_enable(CAN0, CAN_INT_MB0);
+
+    can_operation_mode_enter(CAN0, CAN_NORMAL_MODE);
+
+    receive_message.rtr = 0U;
+    receive_message.ide = 0U;
+    receive_message.code = CAN_MB_RX_STATUS_EMPTY;
+    /* rx mailbox */
+    receive_message.id = 0x55U;
+    can_mailbox_config(CAN0, 0U, &receive_message);
+ 
+}
+
+void msd_can2_init(void)
+{
+    /* user code [can0_init local 0] begin */
+
+    /* user code [can0_init local 0] end */
+
+    rcu_periph_clock_enable(RCU_GPIOB);
+
+    /* configure CAN0_TX GPIO */
+    gpio_mode_set(GPIOB, GPIO_MODE_AF, GPIO_PUPD_PULLUP, GPIO_PIN_4);
+    gpio_output_options_set(GPIOB, GPIO_OTYPE_PP, GPIO_OSPEED_60MHZ, GPIO_PIN_4);
+    gpio_af_set(GPIOB, GPIO_AF_11, GPIO_PIN_4);
+
+    /* configure CAN0_RX GPIO */
+	gpio_mode_set(GPIOB, GPIO_MODE_AF, GPIO_PUPD_NONE, GPIO_PIN_3);
+    gpio_output_options_set(GPIOB, GPIO_OTYPE_PP, GPIO_OSPEED_60MHZ, GPIO_PIN_3);
+    gpio_af_set(GPIOB, GPIO_AF_11, GPIO_PIN_3);
+   
+	can_parameter_struct can2_parameter;
+    //can_fd_parameter_struct fd2_parameter;
+
+    /* select CK_APB2 as CAN's clock source */
+    rcu_can_clock_config(IDX_CAN2, RCU_CANSRC_APB2);
+    /* enable CAN clock */
+    rcu_periph_clock_enable(RCU_CAN2);
+    /* initialize CAN register */
+    can_deinit(CAN2);
+    /* initialize CAN */
+    can_struct_para_init(CAN_INIT_STRUCT, &can2_parameter);
+    //can_struct_para_init(CAN_FD_INIT_STRUCT, &fd2_parameter);
+
+    /* initialize CAN parameters */
+    can2_parameter.internal_counter_source = CAN_TIMER_SOURCE_BIT_CLOCK;
+    can2_parameter.self_reception = DISABLE;
+    can2_parameter.mb_tx_order = CAN_TX_HIGH_PRIORITY_MB_FIRST;
+    can2_parameter.mb_tx_abort_enable = ENABLE;
+    can2_parameter.local_priority_enable = DISABLE;
+    can2_parameter.mb_rx_ide_rtr_type = CAN_IDE_RTR_FILTERED;
+    can2_parameter.mb_remote_frame = CAN_STORE_REMOTE_REQUEST_FRAME;
+    can2_parameter.rx_private_filter_queue_enable = DISABLE;
+    can2_parameter.edge_filter_enable = DISABLE;
+    can2_parameter.protocol_exception_enable = DISABLE;
+    can2_parameter.rx_filter_order = CAN_RX_FILTER_ORDER_MAILBOX_FIRST;
+    can2_parameter.memory_size = CAN_MEMSIZE_32_UNIT;
+    /* filter configuration */
+    can2_parameter.mb_public_filter = 0U;
+    /* baud rate 1Mbps */
+    can2_parameter.resync_jump_width = 1U;
+    can2_parameter.prop_time_segment = 2U;
+    can2_parameter.time_segment_1 = 4U;
+    can2_parameter.time_segment_2 = 1U;
+    can2_parameter.prescaler = 54U;
+
+    /* initialize CAN */
+    can_init(CAN2, &can2_parameter);
+
+    /* configure CAN0 NVIC */
+    nvic_irq_enable(CAN2_Message_IRQn, 0U, 0U);
+
+    /* enable CAN MB0 interrupt */
+    can_interrupt_enable(CAN2, CAN_INT_MB2);
+
+    can_operation_mode_enter(CAN2, CAN_NORMAL_MODE);
+
+    can2receive_message.rtr = 0U;
+    can2receive_message.ide = 0U;
+    can2receive_message.code = CAN_MB_RX_STATUS_EMPTY;
+    /* rx mailbox */
+    can2receive_message.id = 0x01U;
+    can_mailbox_config(CAN2, 2U, &can2receive_message);
+}
+
+void msd_can2_fifo_init(void)
+{
+    /* user code [can0_init local 0] begin */
+
+    /* user code [can0_init local 0] end */
+
+    rcu_periph_clock_enable(RCU_GPIOB);
+
+    /* configure CAN0_TX GPIO */
+    gpio_mode_set(GPIOB, GPIO_MODE_AF, GPIO_PUPD_PULLUP, GPIO_PIN_4);
+    gpio_output_options_set(GPIOB, GPIO_OTYPE_PP, GPIO_OSPEED_60MHZ, GPIO_PIN_4);
+    gpio_af_set(GPIOB, GPIO_AF_11, GPIO_PIN_4);
+
+    /* configure CAN0_RX GPIO */
+	gpio_mode_set(GPIOB, GPIO_MODE_AF, GPIO_PUPD_NONE, GPIO_PIN_3);
+    gpio_output_options_set(GPIOB, GPIO_OTYPE_PP, GPIO_OSPEED_60MHZ, GPIO_PIN_3);
+    gpio_af_set(GPIOB, GPIO_AF_11, GPIO_PIN_3);
+   
+	can_parameter_struct can2_parameter;
+    can_fifo_parameter_struct fifo_parameter;  
+    //can_fd_parameter_struct fd2_parameter;
+
+    /* select CK_APB2 as CAN's clock source */
+    rcu_can_clock_config(IDX_CAN2, RCU_CANSRC_APB2);
+    /* enable CAN clock */
+    rcu_periph_clock_enable(RCU_CAN2);
+    /* initialize CAN register */
+    can_deinit(CAN2);
+    /* initialize CAN */
+    can_struct_para_init(CAN_INIT_STRUCT, &can2_parameter);
+    can_struct_para_init(CAN_FIFO_INIT_STRUCT, &fifo_parameter);
+    //can_struct_para_init(CAN_FD_INIT_STRUCT, &fd2_parameter);
+
+    /* initialize CAN parameters */
+    can2_parameter.internal_counter_source = CAN_TIMER_SOURCE_BIT_CLOCK;
+    can2_parameter.self_reception = DISABLE;
+    can2_parameter.mb_tx_order = CAN_TX_HIGH_PRIORITY_MB_FIRST;
+    can2_parameter.mb_tx_abort_enable = ENABLE;
+    can2_parameter.local_priority_enable = DISABLE;
+    can2_parameter.mb_rx_ide_rtr_type = CAN_IDE_RTR_FILTERED;
+    can2_parameter.mb_remote_frame = CAN_STORE_REMOTE_REQUEST_FRAME;
+    can2_parameter.rx_private_filter_queue_enable = DISABLE;
+    can2_parameter.edge_filter_enable = DISABLE;
+    can2_parameter.protocol_exception_enable = DISABLE;
+    can2_parameter.rx_filter_order = CAN_RX_FILTER_ORDER_FIFO_FIRST;  // 闂傚倸鍊搁崐鎼佸磹閹间礁纾归柟闂寸绾惧綊鏌熼梻瀵割槮缁炬儳缍婇弻鐔兼⒒鐎靛壊妲紒鐐劤缂嶅﹪寮婚悢鍏尖拻閻庨潧澹婂Σ顔剧磼閻愵剙鍔ゆ繝鈧柆宥呯劦妞ゆ帒鍊归崵鈧柣搴㈠嚬閸欏啫鐣峰畷鍥ь棜閻庯絻鍔嬪Ч妤呮⒑閸︻厼鍔嬮柛銊ョ秺瀹曟劙鎮欓悜妯轰画濠电姴锕ら崰姘熼埀顒勬倵濞堝灝鏋熼柟顔煎€搁锝嗙鐎ｅ灚鏅ｉ梺缁樻煥閹碱偊鐛幇鐗堚拻濞达綀顫夐崑鐘绘煕鎼搭喖鐏︾€规洘娲熼弻鍡楊吋閸℃せ鍋撻崼鏇熺厓闁告繂瀚弳鐔虹棯閹佸仮闁哄瞼鍠栭弻鍥晝閳ь剙顕ｉ悙顒傜闁割偆鍠撻惌鎺楁煛鐏炵硶鍋撳畷鍥ㄦ畷闂侀€炲苯澧寸€规洑鍗冲浠嬵敇閻愮數鏆柣鐔哥矋閺屻劑鎮鹃柨瀣檮闁告稑锕ゆ禍婊堟⒑閸涘﹦绠撻悗姘煎墮閳绘捇濡烽埡鍌楁嫽闂佺ǹ鏈悷褔藝閿曞倹鐓欓悹鍥囧懐鐦堥悗瑙勬礀濠€閬嶅箟閹绢喖绀嬫い鎺嗗亾鐎殿喖娼″娲捶椤撯剝顎楅梺鍝ュУ閻楃娀骞冮垾鎰佹建闁逞屽墴瀵鎮㈤崨濠勭Ф婵°倧绲介崯顖烆敁瀹ュ鈷戠紒瀣儥閸庢劙鏌涢弮鈧悷鈺呯嵁閸愩剮鏃堝川椤撶喎绁舵俊鐐€栭幐楣冨磹椤愶箑顫呴幒铏濠婂牊鐓忓鑸电☉椤╊剛绱掗悩鎰佺劷缂佽鲸甯楀蹇涘Ω閿曗偓闂夊秹姊洪悷鏉挎Щ闁硅櫕锚閻ｇ兘顢曢敃鈧粈瀣棯閻楀煫顏呯閸撗€鍋撻崗澶婁壕闂佸憡娲﹂崜娑㈠储闁秵鈷戦梻鍫熻儐瑜版帒纾块柟鎯版閺勩儵鏌ㄥ┑鍡樼闁稿鎸搁埢鎾诲垂椤旂晫浜舵繝纰樷偓鍐茬骇閻㈩嚪銈嗩棨闂備礁鎲￠悷銉┧囬鐔侯洸婵犲﹤瀚ㄦ禍婊堟煙閺夊灝顣抽柟顔垮亹缁辨帡鎮╅棃娑楁勃闂侀潧娲ょ€氱増鎱ㄩ埀顒勬煃閽樺顥為柣銈勭窔濮婅櫣鍖栭弴鐔告緬闂佺ǹ顑嗛幐鎼佲€旈崘顔嘉ч柛鈩冾殘閻熴劑鏌ｆ惔銏犲毈闁告挾鍠栭獮鍐倷閸濆嫬鐎銈嗗姉婵磭鑺辨繝姘拺闁革富鍘奸崝瀣煕閵娧勬毈闁糕斁鍋撳銈嗗笒閸婂綊宕甸埀顒勬⒑鐎圭媭鍤欑紒澶屾嚀椤曪綁骞橀钘変汗闂佹眹鍨婚。顔炬閸欏绻嗛柣鎰典簻閳ь剚鐗曡灋濞撴埃鍋撶€规洘鍨块獮鍥敇閻斿摜褰挎繝鐢靛仦閸ㄨ泛顫濋妸褍顥氶柤娴嬫櫇绾捐棄霉閿濆牜鍤冮柣鎺旀櫕缁辨帡鎮╅棃娑楃捕闂佸疇顫夐崹鍧椼€佸▎鎾村亗閹煎瓨锚娴滈箖鏌ら幇浣哥仯闁绘柨鎳樺铏规嫚閹绘帩鍔夋繛鎾寸椤ㄥ﹤鐣烽幋鐐电瘈闁稿被鍊栫紞搴㈢節閻㈤潧校闁肩懓澧芥竟鏇㈠礂閸忕厧寮垮┑顔筋殔濡宕㈤幘顔界厱閻庯綆鍋呭畷灞绢殽閻愬澧柟宄版嚇瀹曨偊濡烽婊€瑕嗛梻浣筋嚙濞寸兘骞婇幘鍨涘亾濮樼厧寮€规洖纾竟鏇犫偓锝冨妺濮规姊洪崷顓炲妺闁搞劌缍婂畷鎰版倷閻戞ê浠┑鐘诧工閸犳艾螣閳ь剟鎮楀▓鍨灍闁诡喖鍊搁锝嗙鐎ｅ灚鏅ｉ梺缁樻煥閹碱偊鐛幇鐗堚拻濞达綀顫夐崑鐘绘煕鎼搭喖鐏︾€规洘娲熼弻鍡楊吋閸℃せ鍋撻崼鏇熺厓闁告繂瀚弳鐔虹棯閹佸仮闁哄瞼鍠栭弻鍥晝閳ь剙顕ｉ悙顒傜闁割偆鍠撻惌鎺楁煛鐏炵硶鍋撳畷鍥ㄦ畷闂侀€炲苯澧寸€规洑鍗冲浠嬵敇閻愮數鏆柣鐔哥矋閺屻劑鎮鹃柨瀣檮闁告稑锕ゆ禍婊堟⒑閸涘﹦绠撻悗姘煎墮閳绘捇濡烽埡鍌楁嫽闂佺ǹ鏈悷褔藝閿曞倹鐓欓悹鍥囧懐鐦堥悗瑙勬礀濠€閬嶅箟閹绢喖绀嬫い鎺嗗亾鐎殿喖娼″娲捶椤撯剝顎楅梺鍝ュУ閻楃娀骞冮垾鎰佹建闁逞屽墴瀵鎮㈤崨濠勭Ф婵°倧绲介崯顖烆敁瀹ュ鈷戠紒瀣儥閸庢劙鏌涢弮鈧悷鈺呯嵁閸愩剮鏃堝川椤撶喎绁舵俊鐐€栭幐楣冨磹椤愶箑顫呴幒铏濠婂牊鐓忓鑸电☉椤╊剛绱掗悩鎰佺劷缂佽鲸甯楀蹇涘Ω閿曗偓闂夊秹姊洪悷鏉挎Щ闁硅櫕锚閻ｇ兘顢曢敃鈧粈瀣棯閻楀煫顏呯閸撗€鍋撻崗澶婁壕闂佸憡娲﹂崜娑㈠储闁秵鈷戦梻鍫熻儐瑜版帒纾块柟鎯版閺勩儵鏌ㄥ┑鍡樼闁稿鎸搁埢鎾诲垂椤旂晫浜俊鐐€ら崢楣冨礂濡警鍤曟い鎰剁畱缁犳稒銇勯幘璺轰户缂佹劗鍋炵换婵嬫偨闂堟刀銏ゆ倵濮樺崬鍘寸€规洏鍎靛畷銊р偓娑櫱氶幏缁樼箾鏉堝墽鎮奸柟铏崌椤㈡艾饪伴崨顖滐紲闁荤姴娲﹁ぐ鍐焵椤掆偓濞硷繝鎮伴钘夌窞濠电偟鍋撻～宥夋⒑闂堟稓绠冲┑顔惧厴椤㈡瑩骞掗弮鍌滐紳闂佺ǹ鏈悷褔宕濆鍡愪簻妞ゆ挾鍋為崰妯尖偓瑙勬磸閸ㄤ粙鐛弽銊﹀闁稿繐顦扮€氬ジ姊绘担鍛婂暈缂佸鍨块弫鍐晲閸ヮ煈鍋ㄩ梻渚囧墮缁夌敻鎮￠弴銏＄厽婵☆垵顕ф晶顖涚箾閸喓鐭岄柍褜鍓濋～澶娒哄鈧畷婵嗏枎閹捐泛绁﹂梺鎼炲労閸撴岸宕戠€ｎ喗鐓曟い鎰Т閻忊晜顨ラ悙鏉戝闁哄矉绲鹃幆鏃堝灳閸愯尪绶熼梻浣呵归鍡涘箲閸ヮ剙绠栨俊銈呮噺閺呮煡骞栫划鍏夊亾閹颁焦楠勯梻鍌欐缁鳖喚绮婚幋锔藉亱闁规崘顕х粻鏍ㄤ繆閵堝懎鏆為柛鐘叉閺屾盯寮撮妸銉ヮ潾濡炪倧璐熼崝鎴﹀蓟閿濆顫呴柍杞拌兌娴狀參鏌ｉ姀鈺佺仯闁哥姵鐗犻獮鍐潨閳ь剟鐛幒鎳虫梹鎷呴崫鍕闂傚倷鑳剁划顖炲礉閺囥埄鏁嬫い鎾卞灩閻撴繈鏌熼崜褏甯涢柣鎾冲暟閹茬ǹ饪伴崼婵堫槶濠电偛妫欓幐鎼佸磼閵娾晜鐓涚€广儱鍟俊鍧楁煟濠靛棛鍩ｉ柡宀嬬節瀹曞爼濡烽妷褌鐥梻浣瑰▕閺€閬嶅垂閸ф钃熸繛鎴炃氶弨浠嬫煕閳╁喚娈㈠ù灏栧亾闂傚倷绀侀悿鍥敋瑜旇棟闁汇垻枪閽冪喐绻涢幋鐐茬劰闁稿鎹囬弫宥夊础閻愬弶娈ㄦ繝銏ｎ潐濞茬喎顫忔繝姘＜婵炲棙甯掗崢锟犳煛鐎ｅ吀绨奸柕鍥у楠炲鈹戦崶鑸碉紗婵°倗濮烽崑鐐哄礉濞嗘挾宓侀柡宥冨妿閻熺懓鈹戦悩鎻掝伀闁崇鍊栫换婵嬫偨闂堟稈鏋呭┑鐐板尃閸ヨ埖鏅為梺绯曞墲缁嬫垹澹曡ぐ鎺撯拺闁割煈鍣崕宥吤瑰⿰鍕煉闁哄瞼鍠栧畷顐﹀礋椤掑顥ｅ┑鐐茬摠缁秹宕曢幎瑙ｂ偓鏃堝礃椤斿槈褔鏌涘☉姗嗗殶鐎规洦浜娲偡閺夋寧顔€闂佺懓鍤栭幏锟�
+    can2_parameter.memory_size = CAN_MEMSIZE_32_UNIT;
+    /* filter configuration */
+    can2_parameter.mb_public_filter = 0U;
+    /* baud rate 1Mbps */
+    can2_parameter.resync_jump_width = 1U;
+    can2_parameter.prop_time_segment = 2U;
+    can2_parameter.time_segment_1 = 4U;
+    can2_parameter.time_segment_2 = 1U;
+    can2_parameter.prescaler = 54U;
+
+    /* initialize CAN */
+    can_init(CAN2, &can2_parameter);
+
+    fifo_parameter.dma_enable = DISABLE;
+    fifo_parameter.filter_format_and_number = CAN_RXFIFO_FILTER_A_NUM_8;  // 8闂傚倸鍊搁崐鎼佸磹閹间礁纾归柟闂寸绾惧綊鏌熼梻瀵割槮缁炬儳缍婇弻鐔兼⒒鐎靛壊妲紒鐐劤缂嶅﹪寮婚悢鍏尖拻閻庨潧澹婂Σ顔剧磼閻愵剙鍔ゆ繝鈧柆宥呯劦妞ゆ帒鍊归崵鈧柣搴㈠嚬閸欏啫鐣峰畷鍥ь棜閻庯絻鍔嬪Ч妤呮⒑閸︻厼鍔嬮柛銊ョ秺瀹曟劙鎮欓悜妯轰画濠电姴锕ら崰姘熼埀顒勬倵濞堝灝鏋熼柟顔煎€搁锝嗙鐎ｅ灚鏅ｉ梺缁樻煥閹碱偊鐛幇鐗堚拻濞达綀顫夐崑鐘绘煕鎼搭喖鐏︾€规洘娲熼弻鍡楊吋閸℃せ鍋撻崼鏇熺厓闁告繂瀚弳鐔虹棯閹佸仮闁哄瞼鍠栭弻鍥晝閳ь剙顕ｉ悙顒傜闁割偆鍠撻惌鎺楁煛鐏炵硶鍋撳畷鍥ㄦ畷闂侀€炲苯澧寸€规洑鍗冲浠嬵敇閻愮數鏆柣鐔哥矋閺屻劑鎮鹃柨瀣檮闁告稑锕ゆ禍婊堟⒑閸涘﹦绠撻悗姘煎墮閳绘捇濡烽埡鍌楁嫽闂佺ǹ鏈悷褔藝閿曞倹鐓欓悹鍥囧懐鐦堥悗瑙勬礀濠€閬嶅箟閹绢喖绀嬫い鎺嗗亾鐎殿喖娼″娲捶椤撯剝顎楅梺鍝ュУ閻楃娀骞冮垾鎰佹建闁逞屽墴瀵鎮㈤崨濠勭Ф婵°倧绲介崯顖烆敁瀹ュ鈷戠紒瀣儥閸庢劙鏌涢弮鈧悷鈺呯嵁閸愩剮鏃堝川椤撶喎绁舵俊鐐€栭幐楣冨磹椤愶箑顫呴幒铏濠婂牊鐓忓鑸电☉椤╊剛绱掗悩鎰佺劷缂佽鲸甯楀蹇涘Ω閿曗偓闂夊秹姊洪悷鏉挎Щ闁硅櫕锚閻ｇ兘顢曢敃鈧粈瀣棯閻楀煫顏呯閸撗€鍋撻崗澶婁壕闂佸憡娲﹂崜娑㈠储闁秵鈷戦梻鍫熻儐瑜版帒纾块柟鎯版閺勩儵鏌ㄥ┑鍡樼闁稿鎸搁埢鎾诲垂椤旂晫浜俊鐐€ら崢楣冨礂濡警鍤曟い鎰剁畱缁犳稒銇勯幘璺轰户缂佹劗鍋炵换婵嬫偨闂堟刀銏ゆ倵濮樺崬鍘寸€规洏鍎靛畷銊р偓娑櫱氶幏缁樼箾鏉堝墽鎮奸柟铏崌椤㈡艾饪伴崨顖滐紲闁荤姴娲﹁ぐ鍐焵椤掆偓濞硷繝鎮伴钘夌窞濠电偟鍋撻～宥夋⒑闂堟稓绠冲┑顔惧厴椤㈡瑩骞掗弮鍌滐紳闂佺ǹ鏈悷褔宕濆鍡愪簻妞ゆ挾鍋為崰妯尖偓瑙勬磸閸ㄤ粙鐛弽銊﹀闁稿繐顦扮€氬ジ姊绘担鍛婂暈缂佸鍨块弫鍐晲閸ヮ煈鍋ㄩ梻渚囧墮缁夌敻鎮￠弴銏＄厽婵☆垵顕ф晶顖涚箾閸喓鐭岄柍褜鍓濋～澶娒哄鈧畷婵嗏枎閹捐泛绁﹂梺鎼炲労閸撴岸宕戠€ｎ喗鐓曟い鎰Т閻忊晜顨ラ悙鏉戝闁哄矉绲鹃幆鏃堝灳閸愯尪绶熼梻浣呵归鍡涘箲閸ヮ剙绠栨俊銈呮噺閺呮煡骞栫划鍏夊亾閹颁焦楠勯梻鍌欐缁鳖喚绮婚幋锔藉亱闁规崘顕х粻鏍ㄤ繆閵堝懎鏆為柛鐘叉閺屾盯寮撮妸銉ヮ潾濡炪倧璐熼崝鎴﹀蓟閿濆顫呴柍杞拌兌娴狀參鏌ｉ姀鈺佺仯闁哥姵鐗犻獮鍐潨閳ь剟鐛幒鎳虫梹鎷呴崫鍕闂傚倷鑳剁划顖炲礉閺囥埄鏁嬫い鎾卞灩閻撴繈鏌熼崜褏甯涢柣鎾冲暟閹茬ǹ饪伴崼婵堫槶濠电偛妫欓幐鎼佸磼閵娾晜鐓涚€广儱鍟俊鍧楁煟濠靛棛鍩ｉ柡宀嬬節瀹曞爼濡烽妷褌鐥梻浣瑰▕閺€閬嶅垂閸ф钃熸繛鎴炃氶弨浠嬫煕閳╁喚娈㈠ù灏栧亾闂傚倷绀侀悿鍥敋瑜旇棟闁汇垻枪閽冪喐绻涢幋鐐茬劰闁稿鎹囬弫宥夊础閻愬弶娈ㄦ繝銏ｎ潐濞茬喎顫忔繝姘＜婵炲棙甯掗崢锟犳煛鐎ｅ吀绨奸柕鍥у楠炲鈹戦崶鑸碉紗婵°倗濮烽崑鐐哄礉濞嗘挾宓侀柡宥冨妿閻熺懓鈹戦悩鎻掝伀闁崇鍊栫换婵嬫偨闂堟稈鏋呭┑鐐板尃閸ヨ埖鏅為梺鍦濠㈡﹢寮告笟鈧弻娑㈠焺閸愵亖濮囬梺缁樻尰濞茬喖骞冨鈧幃娆撳箵閹哄棙瀵栭梻浣芥〃閻掞箓鎮ч悩璇茶摕闁哄洨鍠撶粻楣冩煟閹伴潧澧柣婵囨礋濮婃椽骞庨懞銉︽殸闂佹悶鍔屽鈥愁嚕鐠囨祴妲堟俊顖炴敱閺傗偓闂備胶纭堕崜婵嬨€冭箛鏂款嚤闁稿本鍑瑰〒濠氭煏閸繈顎楀ù婊冨⒔缁辨帡鎮╅搹顐㈢３閻庢鍠涢褔鍩ユ径鎰潊闁绘鏁稿澶愭⒒娓氣偓閳ь剛鍋涢懟顖涙櫠鐎电硶鍋撶憴鍕缂傚秴锕ら悾椋庣矙鐠囩偓妫冨畷姗€濡歌閸嬪﹪姊婚崒娆戭槮闁硅绻濆畷婵嬫晝閸屾氨鐛ラ梺鍝勭▉閸欏繒绱為弽顓熺厱婵炴垶顭囬幗鐘绘煟閹惧磭绠婚柡灞剧洴椤㈡洟鏁愰崶鈺冩毇闂備線娼荤徊钘夛耿鏉堚晜顫曢柟鐑橆殔缁犳稒銇勯幘璺盒涘┑顔兼川缁辨挻鎷呴搹鐟扮缂備浇顕ч悧鎾荤嵁閸愨晝顩烽悗锝庡亽濡啫鈹戦悙娈挎缂傚牅鍗冲畷瑙勭鐎ｎ亞鐣哄┑掳鍊愰崑鎾淬亜椤愶絿绠炴慨濠呭吹閳ь剟娼ч幉锟犲疾閸忚偐绡€缁剧増菤閸嬫捇宕橀懠顒勭崜闂備礁鎲″褰掓偡閵夆晩鏁嬮柨婵嗩槸缁犵粯銇勯弮鍌楁嫛婵炵厧锕娲箮閼恒儲娈伴梺绋款儐閹瑰洭寮婚悢鍓叉Ч閹艰揪绲界粭锛勭磽娴ｈ櫣甯涚紒瀣笒椤洩绠涘☉妯碱槶閻熸粌绉瑰畷鍝勭暆閸曨兘鎷虹紒缁㈠幖閹冲氦顣跨紓鍌欑贰閸犳牕霉閻戣棄绀嗛柟鐑橆殔缁秹鏌涢銈呮瀻闁逞屽墰缁垱绌辨繝鍥舵晬闁绘劕鐡ㄩ悵宕囩磽娴ｉ潧濡兼い顓炲槻椤繐煤椤忓拋妫冨┑鐐村灱妞存悂顢撻崱娑欌拻闁稿本鑹鹃鈺呮倵濮樼厧澧撮柟顔藉劤閻ｏ繝骞嶉鑺ョ暦闂備線鈧偛鑻晶鎾煕閳规儳浜炬俊鐐€栫敮鎺楀窗濮橆剦鐒介柟閭﹀幘缁犻箖鏌涘▎蹇ｆ闁兼澘娼￠弻鏇㈠幢濡も偓閺嗭絿鈧娲忛崝宥咁焽韫囨稑绀堢憸蹇涘煟閵堝棛绡€闁汇垽娼у瓭闂佹寧娲忛崐婵嬪箖瑜斿畷鍗炩槈濞嗗繆鍋撻崸妤佺厱妞ゎ厽鍨垫禍鏍瑰⿰鍕煉闁哄瞼鍠栧畷顐﹀礋椤掑顥ｅ┑鐐茬摠缁秹宕曢幎瑙ｂ偓鏃堝礃椤斿槈褔鏌涢埄鍐剧劷闁宠绋撶槐鎾诲磼濮樻瘷锛勭磼閼搁潧鍝哄┑鈥崇摠缁楃喖鍩€椤掆偓椤曪綁骞橀纰辨綂闂佹枼鏅涢崯顖炴偟閺嶎厽鈷掑〒姘ｅ亾闁逞屽墰閸嬫盯鎳熼娑欐珷闁规鍠氱壕鍏笺亜閺傚灝鈷旈悽顖涚〒缁辨帞绱掑Ο鑲╃暤濡炪値鍋呯换鍫ャ€佸鈧幃娆撳级閸噮鍤欓梻鍌氬€搁崐鐑芥倿閿曞倸绠栭柛顐ｆ礀绾炬寧绻濇繝鍌滃缂佲偓閸愨斂浜滈煫鍥ㄦ尵婢с垻鈧娲樼划宀勫煘閹达附鏅柛鏇ㄥ亗閺夘參姊虹粙鍖℃敾闁搞劌鐏濋悾鐑藉即閵忊€虫濡炪倖甯婄粈浣规償婵犲洦鈷戦柛鎾村絻娴滄繄绱掔拠鑼㈡い顓炴喘瀵粙濡歌椤旀洟鎮楅悷鏉款棌闁哥姵娲滈懞閬嶅礂缁楄桨绨婚梺闈涱槶閸庤櫕鏅跺☉姘辩＜缂備焦顭囧ú瀛橆殽閻愬樊鍎旈柟顔界懅閹瑰嫭绗熼娑辨（婵犵绱曢崑鎴﹀磹瑜忓濠冪鐎ｎ亞顔愬銈嗗姧缁犳垿鎮″鈧弻鐔告綇閸撗呮殸闂佺粯鎼换婵嬪蓟濞戙垹鐒洪柛鎰剁細濞岊亞绱撴担闈涘闁告鍥ｂ偓鏃堝礃椤斿槈褔鏌涢幇鈺佸妞ゎ剙鐗撳娲箰鎼淬垹顦╂繛瀛樼矤娴滄繃绌辨繝鍕ㄥ亾濞戞瑯鐒介柣鐔风秺閺屽秷顧侀柛鎾寸懇椤㈡岸鏁愭径妯绘櫔闂侀€炲苯澧柣锝夋敱缁轰粙宕ㄦ繝鍌欑盎闂備礁鎲＄粙鎴︺偑鐎涙顩风憸鏂款潖婵犳艾纾兼繛鍡樺姉閵堟澘鈹戦悙宸Ч婵炶尙鍠庨悾鐑藉箮閼恒儲娅囬梺绋挎湰濮樸劑顢欓崱娑欌拺閻犳亽鍔屽▍鎰版煙閸戙倖瀚�
+    fifo_parameter.fifo_public_filter = 0x00000000U;
+
+    can_rx_fifo_config(CAN2, &fifo_parameter);
+    can_rx_fifo_id_filter_struct id_filter_table[8];
+
+    for(uint8_t i = 0; i < 8; i++) 
+    {
+        id_filter_table[i].remote_frame = CAN_DATA_FRAME_ACCEPTED;    // 闂傚倸鍊搁崐鎼佸磹閹间礁纾归柟闂寸绾惧綊鏌熼梻瀵割槮缁炬儳缍婇弻鐔兼⒒鐎靛壊妲紒鎯у⒔閹虫捇鈥旈崘顏佸亾閿濆簼绨奸柟鐧哥秮閺岋綁顢橀悙鎼闂侀潧妫欑敮鎺楋綖濠靛鏅查柛娑卞墮椤ユ艾鈹戞幊閸婃鎱ㄩ悜钘夌；婵炴垟鎳為崶顒佸仺缂佸瀵ч悗顒勬⒑閻熸澘鈷旂紒顕呭灦瀹曟垿骞囬悧鍫㈠幈闂佸綊鍋婇崹鎵閿曞倹鐓熼柕蹇嬪灮鐢稑菐閸パ嶈含闁诡喗鐟╅、鏃堝礋閵娿儰澹曢梺鍝勭▉閸樹粙宕戠€ｎ偂绻嗛柕鍫濇噹閺嗙喖鏌ｉ鐔烘噰闁哄瞼鍠栭幃娆擃敆閸屾稖寮撮梻渚€鈧偛鑻晶顕€鏌熼搹顐€顏堟偩閻戣姤鏅查柛鈩冾殘缁愮偤姊洪崜鎻掍簼缂侇喖閰ｉ幆鍕償閵婏腹鎷绘繝鐢靛Т妤犲憡绂嶅⿰鍕閻犲泧鍛殼濡ょ姷鍋為崝娆撳箖濞嗘搩鏁嗗ù锝呮贡瑜板潡姊绘担鍛婃儓婵炲眰鍨藉畷鐟懊洪鍛簵濠电偞鍨崹娲磹閻㈠憡鐓ユ繝闈涙閳ь剛鎳撻埢宥夊炊閳哄啰锛滈梺褰掑亰閸樹粙藟閸儲鐓涢悘鐐电《閸嬫挸鐣烽崶銊︾暦闂備線鈧偛鑻晶瀵糕偓瑙勬磻閸楀啿顕ｆ禒瀣垫晣闁绘ǹ灏欓妶锕傛⒒娴ｄ警鏀伴柟娲讳簽缁骞嬮悩鍏哥瑝濠电偞鍨崹娲煕閹烘鐓曟い鎰╁€曢弸鏃堟煃椤栨稒绀冮柕鍥у瀵剟宕归鍛棯缂傚倷鑳剁划顖滄崲閸曨垰绐楀┑鐘蹭迹閻旇铏圭磼濡偐效闂傚倸鍊烽懗鑸电仚濡炪倖鍨甸幊姗€鐛繝鍌ゆ建闁逞屽墮椤曪綁顢曢敃鈧粈鍐┿亜閺冨倵鎷℃繛鐓庯躬濮婃椽妫冨☉姘暫闂佺娅曢幑鍥嵁濡ゅ懎鍗抽柕蹇婃閹锋椽姊洪崨濠勭畵閻庢凹鍙冨畷鎺楀Ω閳哄倻鍘遍梺闈浨归崕宕囩矓濞差亝鐓涢悘鐐电摂閸庢梻鈧娲栭悥鍏间繆濮濆矈妲鹃梺浼欑畱閻楁挸顫忔繝姘＜婵ê宕·鈧紓鍌欑椤戝棛鏁悙闈涘灊濠电姴娲ら悡娑㈡煕鐏炲墽鎳呯紒鐘宠壘椤啴濡堕崱妤€顫囬梺绋匡攻濞叉绮嬮幒鎴斿牚闁告洍鏅欑花璇差渻閵堝懐绠伴悗姘煎墴瀵娊鏁愰崨顏呮杸闂佺偨鍎辩壕顓㈠春閿濆洠鍋撶憴鍕８闁告梹鍨块妴浣糕槈濡嘲鐗氶柟鑲╄ˉ閸撴繈寮抽鍫熲拻闁稿本鑹鹃埀顒傚厴閹虫宕滄担绋跨亰濡炪倖鐗滈崑鐐哄磻鐎ｎ偆绡€濠电姴鍊绘晶鏇㈡煕鐏炶濡块柟鍙夋倐瀵噣宕奸悢鍛婄彸闂備胶绮崝鏇熸櫠鎼淬劍鍋柍褜鍓欓埞鎴︽倷閺夋垹浠搁梺鑽ゅ櫐缁犳挸鐣烽弴銏╂晜闁割偆鍠撻崢浠嬫⒑缂佹ɑ鐓ラ柟鑺ョ矒楠炲﹪宕橀钘夆偓鍨叏濡厧甯跺褎婢橀…璺ㄦ喆閸曨剛顦板銈冨灪閻╊垶骞冨▎鎴濆灊閻熸瑥瀚褰掓⒒閸屾艾鈧悂宕愰幖浣瑰亱濠电姴娲﹂崵鍕煕閳╁啫鎼稿ù婊冪秺閺岀喖鎮滃Ο铏逛患闂佹寧绋撻崰鏍ь潖濞差亜浼犻柛鏇ㄥ櫘濞煎爼姊虹粙鍨劉闁绘挴鈧磭鏆﹂柟鎵椤ュ牊绻涚壕瀣彧婵☆偄鍟村顐﹀箛閺夊灝绐涘銈嗘尵閸犳劙顢欐径鎰拻濞达絿鎳撻埢鏇㈡煛閳ь剟鏌嗗鍛€梺绉嗗嫷娈旈柦鍐枑缁绘盯骞嬮悙鍐╁哺瀵劍绂掔€ｎ偆鍘遍梺鏂ユ櫅閸犳艾鈻撻姀鐘嗗綊鎮℃惔锝囧姱濠殿喖锕ㄥ▍锝囧垝濞嗘挸閿ゆ俊銈吪堥崑鎾澄旈崘顏嗭紲缂傚倷鐒﹂敋闁诲繑娼欓埞鎴︽晬閸曨剚姣堥悗瑙勬礈閸犳牠銆佸☉銏℃櫜闁糕剝蓱閻濇繈姊婚崒娆掑厡缂侇噮鍨甸幗顐︽偡濠婂嫭绶查柛鐔告尦閹即顢欓柨顖氫壕闁挎繂楠搁弸鐔兼煃闁垮鐏╃紒杈ㄦ尰閹峰懏鎱ㄩ幋锝呬汗婵炲棎鍨介弻鍡楊吋閸℃瑥骞堥梻浣虹帛閿氱痪缁㈠弮婵℃挳骞掗弮鍌滐紲濡炪倖姊归娆撳吹濞嗘挻鐓冮柦妯侯樈濡叉悂鎽堕敐澶嬧拺闁割煈鍣崕娑欑箾閸忓吋鈷愮紒缁樼箞閹粙妫冨☉妤冩崟婵犵妲呴崑鍛淬€冮崼銉ョ闁靛繈鍊曢獮銏＄箾閹寸儐鐒介柨娑欑洴濮婅櫣鎲撮崟顐㈠Б濡炪倖娲﹂崢鎯ь嚕瑜旈崺鈧い鎺嗗亾闁宠鍨块、娆撳棘閵堝嫮杩旈梻浣告啞閿曘垻绮婚弽褏鏆﹂柕寰涙澘浜濋梺鍛婂姀閺備線骞忓ú顏呯厽闁绘ê寮剁粈宀勬煃瑜滈崜娆撳疮鐠恒劎涓嶆繛宸簼閻撶喖鏌曡箛濠冩珔闁诲骏绻濋幃浠嬵敍濡炶浜剧€规洖娲﹀▓鎯р攽閻樼粯娑ф俊顐㈢焸瀹曞ジ顢旈崼鐔哄幈闂佸搫娲㈤崝宀勭嵁濡眹浜滈柡鍐ｅ亾婵炶尙鍠庨～蹇撁洪鍕獩婵犵數濮抽懗鍓佹崲娓氣偓濮婅櫣绮欏▎鎯у壈闁诲孩鐭崡鎶界嵁閸愵煈娼ㄩ柍褜鍓欓悾鐑芥晲閸℃绐為柣搴秵娴滄粍瀵兼惔鈾€鏀介柣妯虹仛閺嗏晛鈹戦鑺ュ唉鐎规洦鍨堕、娑㈡倷閸欏偊闄勭换婵嬫濞戞艾顣甸梺绋款儐閹搁箖骞夐幘顔肩妞ゆ巻鍋撴い锔规櫊濮婅櫣绮欏▎鎯у壈闂佹寧娲忛崐婵嬪箖妤ｅ啯鍊婚柤鎭掑劚娴滄粎绱掗悙顒€顎滃瀛樻倐瀵彃鈹戠€ｎ偀鎷虹紓鍌欑劍钃辨い銉ユ缁绘盯骞樼拠鈩冪秷缂備焦姊婚崰鏍ь嚕閹绢喖顫呴柍閿亾闁归攱妞藉娲川婵犲啫闉嶉悷婊勬緲閸燁垳绮嬪鍛斀闁搞儮鏅濋鏇㈡⒑閸涘﹦鎳冩い锕侀哺閺呭爼宕￠悜鍡欏數闁荤喐鐟ョ€氼厾绮堟径鎰厪闁搞儯鍔屾慨宥嗩殽閻愭潙娴鐐搭焽閹瑰嫰宕崟顓у敹闂傚倷娴囬褎顨ラ崫銉т笉鐎广儱顦壕鍧楀级閸偆鍘涙繛鍫滅矙閺屾稑鈽夊鍫濆濡炪倐鏅滈悡锟犲蓟閻旂厧绠ユい鏃傗拡閺嗩參姊虹紒妯诲鞍婵炶尙鍠栭獮鍐ㄎ旈崨顔芥珳闁硅偐琛ラ埀顒冨皺閸戝綊姊虹拠鑼婵炲瓨宀稿畷銏＄鐎ｎ€箓鏌涢弴銊ョ伇闁轰礁鍟撮弻銊モ攽閸℃ê绐涢梺姹囧€曠€氼剟鈥旈崘顔嘉ч柛鎰╁妿娴犳儳顪冮妶鍐ㄥ闁挎洏鍊濋幃楣冩倻閽樺顔婇梺鐟扮摠濮婂綊寮悩缁樷拺缂備焦锚婵箑霉濠婂嫮鐭嬮柟渚垮姂瀹曟帒鈽夊▎蹇撲紟濠电姷鏁告慨鎾疮椤栫偛桅婵犻潧鐗冮崑鎾舵喆閸曨剙顦╅梺绋款儏閿曘倝鎮鹃悜鑺ュ亜缁炬媽椴搁弲顏堟⒑閸涘﹣绶遍柛鐘崇洴瀵尪顦规慨濠傤煼瀹曟帒鈻庨幋顓熜滈梻浣筋潐缁佹挳鍩€椤掍礁澧繛鍏肩墱閹叉悂鎮ч崼婵堢懆闂佹悶鍔岄崐鍧楀蓟濞戞粠妲煎銈冨妼閻楀棝鎮鹃崹顐ょ懝闁逞屽墴瀵鈽夐姀鐘电杸闂傚倸鐗婄粙鎺楁倶閸繍娓婚柕鍫濋娴滄粓鏌熼搹顐€跨€殿喖顭峰鎾閻樿鏁规繝鐢靛█濞佳兠洪妶鍛瀺闁挎繂娲ㄧ壕钘壝归敐鍥ㄥ殌濠殿喖鐗忕槐鎺斺偓锝庡亜缁椦囨煙楠炲灝鐏╅柍瑙勫灩閳ь剨缍嗛崑鍕濞差亝鈷掗柛灞炬皑婢ф盯鏌涢幒鍡椾壕闂備線娼х换鍫ュ磹閺嶎厼纾归柛顭戝亝閸欏繑鎱ㄥ璇蹭壕濠碘槅鍋夊▔鏇㈡嚍闁秵鍤嶉柕澶堝€楃粻姘舵⒑閸涘﹦鎳冩い锔诲灡閹便劌顓奸崶锝呬壕婵炲牆鐏濋弸鐔兼煙濮濆本鐝柟渚垮姂閸┾偓妞ゆ帒瀚悡鍐⒑濞嗘儳鐏犲ù婊堢畺濮婇缚銇愰幒婵囶棖缂備緡鍣崹鎶藉箲閵忕姭妲堟繛鍡樺姉缁夊爼姊洪崨濠冨瘷闁告洦鍋傛潻姗€姊婚崒娆掑厡閺嬵亞绱掗妸锔姐仢鐎规洘鍔曢埞鎴﹀幢濞嗘劖顔曢梻浣圭湽閸ㄧ粯鐏欓梺缁樺笒閻忔岸濡甸崟顖氱闁瑰瓨绻嶆禒楣冩⒑閹惰姤鏁遍柛銊ユ健瀵鎮㈤崗鐓庢異闂佸疇妗ㄥ鎺斿垝閸洘鈷戦悹鍥у级缁傚霉濠婂簼閭€殿喖顭烽弫鎰緞婵犲嫷鍟嬫俊鐐€栭悧妤呫€冮崨顔绢洸闁告挆鈧崑鎾舵喆閸曨剛顦ュ┑鐐额嚋缁犳垿鍩㈤幘娣亝闁告劏鏂侀幏娲⒑閸涘﹦绠撻悗姘煎灦閿濈偤鏁冮崒娑氬幈闁瑰吋鐣崝瀣箟妤ｅ啯鐓欓梺鍨儏閻忔挳鏌熼鍝勭伈鐎规洘顨婇幊鏍煛娴ｇǹ顩┑鐘垫暩婵即宕归悡搴樻灃婵炴垯鍨洪崑瀣煕閳╁啰鈽夌紒鈧径鎰厪闁割偅绻冮ˉ鎾趁瑰⿰鍕煉闁哄矉绻濆畷鎺戔槈濮楀棗娈濋梻浣规偠閸婃洖煤閿曞倸绠為柕濠忓缁♀偓闂佸憡渚楅崳顔界閳哄懏鈷戦柛锔诲幗閸も偓闁诲孩姘ㄦ晶妤佺┍婵犲洤绠瑰ù锝堝€介妸鈺傜叆闁哄啠鍋撻柛搴＄－缁辩偤骞掑Δ浣叉嫽闂佺ǹ鏈悷銊╁礂瀹€鍕厵闁惧浚鍋呭畷宀€鈧娲滈弫璇差嚕娴犲鏁囬柣鎰問閸炵敻姊绘担鑺ョ《闁革綇绠撻獮蹇涙晸閿燂拷
+        id_filter_table[i].extended_frame = CAN_STANDARD_FRAME_ACCEPTED; // 闂傚倸鍊搁崐鎼佸磹閹间礁纾归柟闂寸绾惧綊鏌熼梻瀵割槮缁炬儳缍婇弻鐔兼⒒鐎靛壊妲紒鎯у⒔閹虫捇鈥旈崘顏佸亾閿濆簼绨奸柟鐧哥秮閺岋綁顢橀悙鎼闂侀潧妫欑敮鎺楋綖濠靛鏅查柛娑卞墮椤ユ艾鈹戞幊閸婃鎱ㄩ悜钘夌；婵炴垟鎳為崶顒佸仺缂佸瀵ч悗顒勬⒑閻熸澘鈷旂紒顕呭灦瀹曟垿骞囬悧鍫㈠幈闂佸綊鍋婇崹鎵閿曞倹鐓熼柕蹇嬪灮鐢稑菐閸パ嶈含闁诡喗鐟╅、鏃堝礋閵娿儰澹曢梺鍝勭▉閸樹粙宕戠€ｎ偂绻嗛柕鍫濇噹閺嗙喖鏌ｉ鐔烘噰闁哄瞼鍠栭幃娆擃敆閸屾稖寮撮梻渚€鈧偛鑻晶顕€鏌熼搹顐€顏堟偩閻戣姤鏅查柛鈩冾殘缁愮偤姊洪崜鎻掍簼缂侇喖閰ｉ幆鍕償閵婏腹鎷绘繝鐢靛Т妤犲憡绂嶅⿰鍕閻犲泧鍛殼濡ょ姷鍋為崝娆撳箖濞嗘搩鏁嗗ù锝呮贡瑜板潡姊绘担鍛婃儓婵炲眰鍨藉畷鐟懊洪鍛簵濠电偞鍨崹娲磹閻㈠憡鐓ユ繝闈涙閳ь剛鎳撻埢宥夊炊閳哄啰锛滈梺褰掑亰閸樹粙藟閸儲鐓涢悘鐐电《閸嬫挸鐣烽崶銊︾暦闂備線鈧偛鑻晶瀵糕偓瑙勬磻閸楀啿顕ｆ禒瀣垫晣闁绘ǹ灏欓妶锕傛⒒娴ｄ警鏀伴柟娲讳簽缁骞嬮悩鍏哥瑝濠电偞鍨崹娲煕閹烘鐓曟い鎰╁€曢弸鏃堟煃椤栨稒绀冮柕鍥у瀵剟宕归鍛棯缂傚倷鑳剁划顖滄崲閸曨垰绐楀┑鐘蹭迹閻旇铏圭磼濡偐效闂傚倸鍊烽懗鑸电仚濡炪倖鍨甸幊姗€鐛繝鍌ゆ建闁逞屽墮椤曪綁顢曢敃鈧粈鍐┿亜閺冨倵鎷℃繛鐓庯躬濮婃椽妫冨☉姘暫闂佺娅曢幑鍥嵁濡ゅ懎鍗抽柕蹇婃閹锋椽姊洪崨濠勭畵閻庢凹鍙冨畷鎺楀Ω閳哄倻鍘遍梺闈浨归崕宕囩矓濞差亝鐓涢悘鐐电摂閸庢梻鈧娲栭悥鍏间繆濮濆矈妲鹃梺浼欑畱閻楁挸顫忔繝姘＜婵ê宕·鈧紓鍌欑椤戝棛鏁悙闈涘灊濠电姴娲ら悡娑㈡煕鐏炲墽鎳呯紒鐘宠壘椤啴濡堕崱妤€顫囬梺绋匡攻濞叉绮嬮幒鎴斿牚闁告洍鏅欑花璇差渻閵堝懐绠伴悗姘煎墴瀵娊鏁愰崨顏呮杸闂佺偨鍎辩壕顓㈠春閿濆洠鍋撶憴鍕８闁告梹鍨块妴浣糕槈濡嘲鐗氶柟鑲╄ˉ閸撴繈寮抽鍫熲拻闁稿本鑹鹃埀顒傚厴閹虫宕滄担绋跨亰濡炪倖鐗滈崑鐐哄磻鐎ｎ偆绡€濠电姴鍊绘晶鏇㈡煕鐏炶濡块柟鍙夋倐瀵噣宕奸悢鍛婄彸闂備胶绮崝鏇熸櫠鎼淬劍鍋柍褜鍓欓埞鎴︽倷閺夋垹浠搁梺鑽ゅ櫐缁犳挸鐣烽弴銏╂晜闁割偆鍠撻崢浠嬫⒑缂佹ɑ鐓ラ柟鑺ョ矒楠炲﹪宕橀钘夆偓鍨叏濡厧甯跺褎婢橀…璺ㄦ喆閸曨剛顦板銈冨灪閻╊垶骞冨▎鎴濆灊閻熸瑥瀚褰掓⒒閸屾艾鈧悂宕愰幖浣瑰亱濠电姴娲﹂崵鍕煕閳╁啫鎼稿ù婊冪秺閺岀喖鎮滃Ο铏逛患闂佹寧绋撻崰鏍ь潖濞差亜浼犻柛鏇ㄥ櫘濞煎爼姊虹粙鍨劉闁绘挴鈧磭鏆﹂柟閭﹀枟瀹曞鈹戦崒婵囶棄缂傚秴锕顐﹀箛閺夊潡鍞堕梺缁樻磻濡炴帡宕Δ鍐＝濞达絽鎼禍楣冩煕鎼淬垹鈻曠€规洏鍎抽埀顒婄秵閸嬪棝鍩炲鍛斀闁绘ê寮堕幖鎰板炊閹绢喗鈷戦柛娑橈攻婢跺嫰鏌涘▎蹇涱€楅崡杈ㄣ亜閺囨浜惧┑顔硷龚濞咃綁骞忛悩缁樺殤妞ゆ帒鍋嗛崬褰掓⒒娴ｇ儤鍤€闁规祴鍓濈换娑欑節閸屻倕娈ㄦ繝鐢靛У閼归箖鎮樺畷鍥ｅ亾鐟欏嫭绀€婵炶绠戦埢鎾诲即閵忊檧鎷洪梻渚囧亞閸嬫盯鎳熼娑欐珷閻庣數纭堕崑鎾舵喆閸曨剛锛涢梺鍛婎殔閸熷潡顢氶敐鍡欘浄閻庯絽鐏氶弲锝夋⒑缂佹〒鍦焊濞嗘挸围闁挎洖鍊归埛鎺懨归敐鍥╂憘婵炲吋鍔楅埀顒冾潐濞叉﹢鏁冮姀銈冣偓浣割潩閹颁焦鞋缂傚倷绶￠崰鏍€﹂悜钘夌鐟滅増甯╅弫鍐煏閸繃宸濇俊鎻掓喘濮婂宕掑顑藉亾閹间焦鍋嬪┑鐘插閻瑩鏌熼悜姗嗘濠㈣泛艌閸亪鏌涢幇顒€鈷旈柛鐐垫暬濮婃椽鎳￠妶鍛亪闂佺ǹ顑呴敃銈堢亽闂侀€炲苯澧柍瑙勫灴椤㈡瑧娑甸悜鐣屽弽婵犵數鍋涢幏鎴犵礊娓氣偓閻涱喛绠涘☉娆忎汗闁荤姴娲╃亸娆擃敊瀹€鍕拺闁革富鍘奸崝瀣磼鐠囨彃鈧绌辨繝鍥ㄥ€婚柤鎭掑劗閹风粯绻涙潏鍓хК婵☆偄瀚粋宥堛亹閹烘挾鍘甸梺鎯ф禋閸嬪懐浜告导瀛樼厸闁告侗鍘鹃崺锝夋煙椤旂厧鈷斿ù鐙呭缁辨帡濮€閿涘嫮鈼ラ梻鍌氬€烽懗鍓佸垝椤栫偛绀夐柡鍥ュ焺閺佸銇勯幘璺盒㈠┑顕呭墴閺屽秷顧侀柛鎾跺枎椤繘鎼归崷顓犵厯闂佸湱枪鐎涒晠骞忔潏鈺冪＝濞撴艾娲ら弸娑氱磼婢跺灏﹂柛鈹垮灲楠炴鎷犻懠顒傛毎闁荤喐绮岄ˇ闈涱嚕閵婏妇顩烽悗锝庡亞閸樹粙姊鸿ぐ鎺戜喊闁告挻鐟ч惀顏囶槼闁靛洤瀚版俊鐤槻濞寸娀浜堕弻鈥崇暆閳ь剟宕伴弽褏鏆﹂柕濠忓缁♀偓闂佸憡鍔戦崝澶愬磻閹捐绠涢柣妤€鐗忛崢钘夆攽閻愭潙鐏ョ€规洦鍓欓埢宥咁吋閸涱亝鏂€濡炪倖姊婚幊鎾寸妤ｅ啯鈷掑ù锝呮惈娴犳椽鏌涙惔鈽嗗殶濞存粎枪閳诲酣骞嬮悩杈╃憹婵犳鍠楁灙闁糕晜鐗犻崺娑㈠箣閿旇В鎷婚梺鍓插亞閸犳捇濡撮幒鎴唵鐟滃骸煤閻旂厧绠栨俊銈傚亾妞ゎ偅绻堥幃鈩冩償閵忋垹缍嗛梻浣藉Г钃辩紒璇茬墦瀵濡搁埡浣诡棟濠电偛妫涢崑鎾剁礊濡や胶绠鹃悗娑欘焽閻绱掗鑲┬у┑锛勬暬瀹曠喖顢涘杈╂澑闂傚倸鍊搁悧濠勭矙閹达讣缍栨い蹇撶墛閻撶喖骞栧ǎ顒€鐏柛鐔哥叀閺岀喖宕欓妶鍡楊伓
+        id_filter_table[i].id = 0x01U;  // 闂傚倸鍊搁崐鎼佸磹閹间礁纾归柟闂寸绾惧綊鏌熼梻瀵割槮缁炬儳缍婇弻鐔兼⒒鐎靛壊妲紒鐐劤缂嶅﹪寮婚悢鍏尖拻閻庨潧澹婂Σ顔剧磼閻愵剙鍔ゆ繝鈧柆宥呯劦妞ゆ帒鍊归崵鈧柣搴㈠嚬閸欏啫鐣峰畷鍥ь棜閻庯絻鍔嬪Ч妤呮⒑閸︻厼鍔嬮柛銊ョ秺瀹曟劙鎮欓悜妯轰画濠电姴锕ら崰姘熼埀顒勬倵濞堝灝鏋熼柟顔煎€搁锝嗙鐎ｅ灚鏅ｉ梺缁樻煥閹碱偊鐛幇鐗堚拻濞达綀顫夐崑鐘绘煕鎼搭喖鐏︾€规洘娲熼弻鍡楊吋閸℃せ鍋撻崼鏇熺厓闁告繂瀚弳鐔虹棯閹佸仮闁哄瞼鍠栭弻鍥晝閳ь剙顕ｉ悙顒傜闁割偆鍠撻惌鎺楁煛鐏炵硶鍋撳畷鍥ㄦ畷闂侀€炲苯澧寸€规洑鍗冲浠嬵敇閻愮數鏆柣鐔哥矋閺屻劑鎮鹃柨瀣檮闁告稑锕ゆ禍婊堟⒑閸涘﹦绠撻悗姘煎墮閳绘捇濡烽埡鍌楁嫽闂佺ǹ鏈悷褔藝閿曞倹鐓欓悹鍥囧懐鐦堥悗瑙勬礀濠€閬嶅箟閹绢喖绀嬫い鎺嗗亾鐎殿喖娼″娲捶椤撯剝顎楅梺鍝ュУ閻楃娀骞冮垾鎰佹建闁逞屽墴瀵鎮㈤崨濠勭Ф婵°倧绲介崯顖烆敁瀹ュ鈷戠紒瀣儥閸庢劙鏌涢弮鈧悷鈺呯嵁閸愩剮鏃堝川椤撶喎绁舵俊鐐€栭幐楣冨磹椤愶箑顫呴幒铏濠婂牊鐓忓鑸电☉椤╊剛绱掗悩鎰佺劷缂佽鲸甯楀蹇涘Ω閿曗偓闂夊秹姊洪悷鏉挎Щ闁硅櫕锚閻ｇ兘顢曢敃鈧粈瀣棯閻楀煫顏呯閸撗€鍋撻崗澶婁壕闂佸憡娲﹂崜娑㈠储闁秵鈷戦梻鍫熻儐瑜版帒纾块柟鎯版閺勩儵鏌ㄥ┑鍡樼闁稿鎸搁埢鎾诲垂椤旂晫浜俊鐐€ら崢楣冨礂濡警鍤曟い鎰剁畱缁犳稒銇勯幘璺轰户缂佹劗鍋炵换婵嬫偨闂堟刀銏ゆ倵濮樺崬鍘寸€规洏鍎靛畷銊р偓娑櫱氶幏缁樼箾鏉堝墽鎮奸柟铏崌椤㈡艾饪伴崨顖滐紲闁荤姴娲﹁ぐ鍐焵椤掆偓濞硷繝鎮伴钘夌窞濠电偟鍋撻～宥夋⒑闂堟稓绠冲┑顔惧厴椤㈡瑩骞掗弮鍌滐紳闂佺ǹ鏈悷褔宕濆鍡愪簻妞ゆ挾鍋為崰妯尖偓瑙勬磸閸ㄤ粙鐛弽銊﹀闁稿繐顦扮€氬ジ姊绘担鍛婂暈缂佸鍨块弫鍐晲閸ヮ煈鍋ㄩ梻渚囧墮缁夌敻鎮￠弴銏＄厽婵☆垵顕ф晶顖涚箾閸喓鐭岄柍褜鍓濋～澶娒哄鈧畷婵嗏枎閹捐泛绁﹂梺鎼炲労閸撴岸宕戠€ｎ喗鐓曟い鎰Т閻忊晜顨ラ悙鏉戝闁哄矉绲鹃幆鏃堝灳閸愯尪绶熼梻浣呵归鍡涘箲閸ヮ剙绠栨俊銈呮噺閺呮煡骞栫划鍏夊亾閹颁焦楠勯梻鍌欐缁鳖喚绮婚幋锔藉亱闁规崘顕х粻鏍ㄤ繆閵堝懎鏆為柛鐘叉閺屾盯寮撮妸銉ヮ潾濡炪倧璐熼崝鎴﹀蓟閿濆顫呴柍杞拌兌娴狀參鏌ｉ姀鈺佺仯闁哥姵鐗犻獮鍐潨閳ь剟鐛幒鎳虫梹鎷呴崫鍕闂傚倷鑳剁划顖炲礉閺囥埄鏁嬫い鎾卞灩閻撴繈鏌熼崜褏甯涢柣鎾冲暟閹茬ǹ饪伴崼婵堫槶濠电偛妫欓幐鎼佸磼閵娾晜鐓涚€广儱鍟俊鍧楁煟濠靛棛鍩ｉ柡宀嬬節瀹曞爼濡烽妷褌鐥梻浣瑰▕閺€閬嶅垂閸ф钃熸繛鎴炃氶弨浠嬫煕閳╁喚娈㈠ù灏栧亾闂傚倷绀侀悿鍥敋瑜旇棟闁汇垻枪閽冪喐绻涢幋鐐茬劰闁稿鎹囬弫宥夊础閻愬弶娈ㄦ繝銏ｎ潐濞茬喎顫忔繝姘＜婵炲棙甯掗崢锟犳煛鐎ｅ吀绨奸柕鍥у楠炲鈹戦崶鑸碉紗婵°倗濮烽崑鐐哄礉濞嗘挾宓侀柡宥冨妿閻熺懓鈹戦悩鎻掝伀闁崇鍊栫换婵嬫偨闂堟稈鏋呭┑鐐板尃閸ヨ埖鏅為梺鍦濠㈡﹢寮告笟鈧弻娑㈠焺閸愵亖濮囬梺缁樻尰濞茬喖骞冨鈧幃娆撳箵閹哄棙瀵栭梻浣芥〃閻掞箓鎮ч悩璇茶摕闁哄洨鍠撶粻楣冩煟閹伴潧澧柣婵囨礋濮婃椽骞庨懞銉︽殸闂佹悶鍔屽锟犵嵁閸愵厹浜归柟鐑樺灩閸婄偤姊洪幐搴ｇ畵闁稿﹤鎲＄粋宥夊礈瑜夐崑鎾舵喆閸曨剛顦ュ┑鐐额嚋缂嶄礁鐣烽鈶芥棃宕ㄩ瑙勫闂佽崵濮村ú锕併亹閸愵噮鏁嗛柕蹇嬪€栭悡鐔搞亜閹炬鍟悵婵嬫倵鐟欏嫭绌跨紒缁樼箞閻涱喗鎯旈妸锕€鐧勬繝銏犲帨閺傚倿宕曢柆宥嗙畳闂備焦瀵х换鍌炲箠鎼淬剫澶庣疀閺冨倻顔曢柣蹇撶箲閻楁鈻嶆繝鍥ㄧ厵妞ゆ梹顑欏鎰版煏閸剛鐣垫鐐村姈閹棃顢欑拠鍙夋啟闂傚倸鍊风粈渚€骞夐垾婢勬盯骞嬮悩鍏哥瑝闂佺鎻懙褰掑焵椤掍焦顥堢€规洘锕㈤、娆撳床婢诡垰娲﹂悡鏇㈡煃閳轰礁鏋ゆ繛鍫燂耿閺岋綁鎮㈤弶鎴濐潎闂佸搫鐭夌徊楣冨箚閺冨牆顫呴柣妯哄级閻︽捇姊绘担鍛婂暈闁规悂绠栧畷鐗堟償椤垶鏅梺鎸庣箓椤︻垰顔忓┑鍡忔斀闁绘ɑ褰冮顐︽煙閾忣偆绠炴慨濠冩そ閺屽懘鎮欓懠璺侯伃婵犫拃鍐惧殶闁逞屽墯椤旀牠宕伴弽顓涒偓锕傛倻閽樺鐣洪梺闈涚箞閸婃牠宕戦崒鐐茬閺夊牆澧界粔鐢告煕閻愯尙绉烘慨濠勭帛缁楃喖鍩€椤掑嫬鐒垫い鎺嶈兌閳藉鈧鎸稿Λ娆戞崲濞戞瑦濯撮柛鎰絻閺嗗﹪鏌＄€ｎ偅鈷愰柕鍥у楠炴鎹勬潪鐗堢潖闂備浇銆€閸嬫挸霉閻樺樊鍎愰柣鎾冲暣閺岋箑螣娓氼垱效濡炪們鍎茬划宀勬箒濠电姴锕ょ€氼喚绮婚悙鐑樼厸閻忕偠顕ф慨鍌溾偓娈垮枟濞兼瑨鐏掗梺鎯х箻閳ь剚绋撶粈鍕⒑鐠囨彃顒㈡い鏃€鐗犲畷浼村冀椤撴稈鍋撻敃鈧悾锟犳焽閿曗偓濞堛劑姊洪崷顓℃闁哥姵鐗犻敐鐐哄川鐎涙鍘藉┑鈽嗗灡椤戞瑩宕靛▎鎾寸厸濞达絿鐡斿鎰磼缂佹绠為柟顔荤矙濡啫鈽夐幒鎾垛偓鐗堢節閻㈤潧浠掗柛鏍█瀹曟鎮╅懠顒傂ㄩ悗瑙勬礃鐢帟顣鹃梺绋跨箺閸嬫劕煤閹绢喗鐓欐い鏃傛櫕閹冲啯銇勯弬璺ㄧ妞ゃ垺鐟╅幐濠冨緞鐏炴嫎鎺楁⒒閸屾艾鈧娆㈠顒夌劷鐟滄棃骞冭瀹曞崬鈽夊Ο鑲╂瀮闂備礁缍婇崑濠囧窗濮橆厾鈻旂€广儱顦伴悡锝夌叓閸ラ鍒板ù婊勭墪闇夋繝濠傚閻鏌曢崶褍顏紒鐘崇洴楠炴﹢鎼归锝庡晪濠碉紕鍋戦崐褏绱為崶顒€绠柨鐕傛嫹
+    }
+
+    can_rx_fifo_filter_table_config(CAN2, id_filter_table);
+
+    /* configure CAN0 NVIC */
+    nvic_irq_enable(CAN2_Message_IRQn, 0U, 0U);
+
+    /* enable CAN MB0 interrupt */
+    can_interrupt_enable(CAN2, CAN_INT_FIFO_AVAILABLE);  // FIFO闂傚倸鍊搁崐鎼佸磹閹间礁纾归柟闂寸绾惧綊鏌熼梻瀵割槮缁炬儳缍婇弻鐔兼⒒鐎靛壊妲紒鐐劤缂嶅﹪寮婚悢鍏尖拻閻庨潧澹婂Σ顔剧磼閻愵剙鍔ゆ繝鈧柆宥呯劦妞ゆ帒鍊归崵鈧柣搴㈠嚬閸欏啫鐣峰畷鍥ь棜閻庯絻鍔嬪Ч妤呮⒑閸︻厼鍔嬮柛銊ョ秺瀹曟劙鎮欓悜妯轰画濠电姴锕ら崰姘熼埀顒勬倵濞堝灝鏋熼柟顔煎€搁锝嗙鐎ｅ灚鏅ｉ梺缁樻煥閹碱偊鐛幇鐗堚拻濞达綀顫夐崑鐘绘煕鎼搭喖鐏︾€规洘娲熼弻鍡楊吋閸℃せ鍋撻崼鏇熺厓闁告繂瀚弳鐔虹棯閹佸仮闁哄瞼鍠栭弻鍥晝閳ь剙顕ｉ悙顒傜闁割偆鍠撻惌鎺楁煛鐏炵硶鍋撳畷鍥ㄦ畷闂侀€炲苯澧寸€规洑鍗冲浠嬵敇閻愮數鏆柣鐔哥矋閺屻劑鎮鹃柨瀣檮闁告稑锕ゆ禍婊堟⒑閸涘﹦绠撻悗姘煎墮閳绘捇濡烽埡鍌楁嫽闂佺ǹ鏈悷褔藝閿曞倹鐓欓悹鍥囧懐鐦堥悗瑙勬礀濠€閬嶅箟閹绢喖绀嬫い鎺嗗亾鐎殿喖娼″娲捶椤撯剝顎楅梺鍝ュУ閻楃娀骞冮垾鎰佹建闁逞屽墴瀵鎮㈤崨濠勭Ф婵°倧绲介崯顖烆敁瀹ュ鈷戠紒瀣儥閸庢劙鏌涢弮鈧悷鈺呯嵁閸愩剮鏃堝川椤撶喎绁舵俊鐐€栭幐楣冨磹椤愶箑顫呴幒铏濠婂牊鐓忓鑸电☉椤╊剛绱掗悩鎰佺劷缂佽鲸甯楀蹇涘Ω閿曗偓闂夊秹姊洪悷鏉挎Щ闁硅櫕锚閻ｇ兘顢曢敃鈧粈瀣棯閻楀煫顏呯閸撗€鍋撻崗澶婁壕闂佸憡娲﹂崜娑㈠储闁秵鈷戦梻鍫熻儐瑜版帒纾块柟鎯版閺勩儵鏌ㄥ┑鍡樼闁稿鎸搁埢鎾诲垂椤旂晫浜俊鐐€ら崢楣冨礂濡警鍤曟い鎰剁畱缁犳稒銇勯幘璺轰户缂佹劗鍋炵换婵嬫偨闂堟刀銏ゆ倵濮樺崬鍘寸€规洏鍎靛畷銊р偓娑櫱氶幏缁樼箾鏉堝墽鎮奸柟铏崌椤㈡艾饪伴崨顖滐紲闁荤姴娲﹁ぐ鍐焵椤掆偓濞硷繝鎮伴钘夌窞濠电偟鍋撻～宥夋⒑闂堟稓绠冲┑顔惧厴椤㈡瑩骞掗弮鍌滐紳闂佺ǹ鏈悷褔宕濆鍡愪簻妞ゆ挾鍋為崰妯尖偓瑙勬磸閸ㄤ粙鐛弽銊﹀闁稿繐顦扮€氬ジ姊绘担鍛婂暈缂佸鍨块弫鍐晲閸ヮ煈鍋ㄩ梻渚囧墮缁夌敻鎮￠弴銏＄厽婵☆垵顕ф晶顖涚箾閸喓鐭岄柍褜鍓濋～澶娒哄鈧畷婵嗏枎閹捐泛绁﹂梺鎼炲労閸撴岸宕戠€ｎ喗鐓曟い鎰Т閻忊晜顨ラ悙鏉戝闁哄矉绲鹃幆鏃堝灳閸愯尪绶熼梻浣呵归鍡涘箲閸ヮ剙绠栨俊銈呮噺閺呮煡骞栫划鍏夊亾閹颁焦楠勯梻鍌欐缁鳖喚绮婚幋锔藉亱闁规崘顕х粻鏍ㄤ繆閵堝懎鏆為柛鐘叉閺屾盯寮撮妸銉ヮ潾濡炪倧璐熼崝鎴﹀蓟閿濆顫呴柍杞拌兌娴狀參鏌ｉ姀鈺佺仯闁哥姵鐗犻獮鍐潨閳ь剟鐛幒鎳虫梹鎷呴崫鍕闂傚倷鑳剁划顖炲礉閺囥埄鏁嬫い鎾卞灩閻撴繈鏌熼崜褏甯涢柣鎾冲暟閹茬ǹ饪伴崼婵堫槶濠电偛妫欓幐鎼佸磼閵娾晜鐓涚€广儱鍟俊鍧楁煟濠靛棛鍩ｉ柡宀嬬節瀹曞爼濡烽妷褌鐥梻浣瑰▕閺€閬嶅垂閸ф钃熸繛鎴炃氶弨浠嬫煕閳╁喚娈㈠ù灏栧亾闂傚倷绀侀悿鍥敋瑜旇棟闁汇垻枪閽冪喐绻涢幋鐐茬劰闁稿鎹囬弫宥夊础閻愬弶娈ㄦ繝銏ｎ潐濞茬喎顫忔繝姘＜婵炲棙甯掗崢锟犳煛鐎ｅ吀绨奸柕鍥у楠炲鈹戦崶鑸碉紗婵°倗濮烽崑鐐哄礉濞嗘挾宓侀柡宥冨妿閻熺懓鈹戦悩鎻掝伀闁崇鍊栫换婵嬫偨闂堟稈鏋呭┑鐐板尃閸ヨ埖鏅為梺鍦濠㈡﹢寮告笟鈧弻娑㈠焺閸愵亖濮囬梺缁樻尰濞茬喖骞冨鈧幃娆撳箵閹哄棙瀵栭梻浣芥〃閻掞箓鎮ч悩璇茶摕闁哄洨鍠撶粻楣冩煟閹伴潧澧柣婵囨礋濮婃椽骞庨懞銉︽殸闂佹悶鍔屽鈥愁嚕鐠囨祴妲堟俊顖炴敱閺傗偓闂備胶纭堕崜婵嬨€冭箛鏂款嚤闁稿本鍑瑰〒濠氭煏閸繈顎楀ù婊冨⒔缁辨帡鎮╅搹顐㈢３閻庢鍠涢褔鍩ユ径鎰潊闁绘鏁稿澶愭⒒娓氣偓閳ь剛鍋涢懟顖涙櫠鐎电硶鍋撶憴鍕缂傚秴锕ら悾椋庣矙鐠囩偓妫冨畷姗€濡歌閸嬪﹪姊婚崒娆戭槮闁硅绻濆畷婵嬫晝閸屾氨鐛ラ梺鍝勭▉閸欏繒绱為弽顓熺厱婵炴垶顭囬幗鐘绘煟閹捐泛鏋戝ǎ鍥э躬椤㈡稑鈹戦崶鏈靛摋濠电偛顕慨鐢电矙閹烘梹宕叉繛鎴欏灩闁卞洭鏌ｉ弮鍥仩闁汇倕瀚埞鎴︻敊绾攱鏁惧┑锛勫仩濡嫰鎮鹃悜绛嬫晝闁挎洍鍋撶紒鈧€ｎ喗鐓曟い顓熷灥閳ь剨缍侀、鏃堝礋閵婏附鏉搁梻浣虹帛閸旀洖螣婵犲伣锝囨喆閸曨厾顔曢梺鍛婄懃椤﹂亶鎯屾繝鍥х闂侇剙绉甸悡娆撴煙濞堝灝鏋涙い锝呫偢閺岋繝宕ㄩ鍓х杽闂佸搫鏈粙鎾寸閿曞倸绀堢憸澶愬几閺冨牊鈷戠憸鐗堝笚閺佽鲸淇婇悙鑸殿棄妞ゎ偄绻愮叅妞ゅ繐鎳庢禍妤呮煙閸忓吋鍎楅柛鐘愁殘缁辩偛螖閸涱喒鎷虹紓浣割儏鐏忓懘寮ㄧ紒妯肩闁告瑥顦辨晶鐢告煙椤栨艾鏆ｆい銏☆殕閹峰懘鎼归崷顓燁潓闂傚倷鐒﹂惇褰掑垂閽樺鐒界憸搴ｇ矉閹烘鏅滈柣锝呯灱椤旀洟姊虹粙璺ㄧ闁稿鍔欓獮濠囧礃椤旇棄浜楅梺闈涚墕濡孩绂嶅⿰鍫熺厵闁诡垎鍐煘闂佽娴氭禍顏堝蓟閿熺姴宸濇い鏃€鍎冲銊╂⒑閸濆嫮鐒跨紓宥勭窔閻涱噣宕堕澶嬫櫍闂佺粯妫佸▍锝夊煝韫囨洜纾介柛灞剧懅椤︼箑顭胯闁帮絽鐣烽幋锕€围濠㈣泛锕﹂悾鍝勨攽椤斿浠滈柛瀣崌閺岀喖顢欓悾灞惧櫚闂佽鍨伴崐鍨嚕閹峰瞼鐤€闁挎繂妫涚粔椋庣磽閸屾瑧顦﹂柛濠傛憸缁棁銇愰幒鎴犵暫濠电偛妫欓幖鈺呭极閸℃褰掓晲閸ゅ€燁潐鐎靛吋鎯旈姀銏㈢槇缂佸墽澧楄摫妞ゎ偄锕弻娑㈠Ω閿曗偓閳绘洜鈧娲忛崹濂杆囧畷鍥╃＜闁稿本姘ㄦ牎闂侀潧鐗炵紞浣哥暦濮椻偓閸┾剝鎷呴幓鎺嶅闂佸壊鐓堥崑鍛村矗韫囨柧绻嗘い鏍ㄧ矊鐢泛霉濠婂牏鐣洪柟顔筋殔椤繈鎮欓鈧锟�
+    can_interrupt_enable(CAN2, CAN_INT_FIFO_WARNING);    // FIFO闂傚倸鍊搁崐鎼佸磹閹间礁纾归柟闂寸绾惧綊鏌熼梻瀵割槮缁炬儳缍婇弻鐔兼⒒鐎靛壊妲紒鐐劤缂嶅﹪寮婚悢鍏尖拻閻庨潧澹婂Σ顔剧磼閻愵剙鍔ゆ繝鈧柆宥呯劦妞ゆ帒鍊归崵鈧柣搴㈠嚬閸欏啫鐣峰畷鍥ь棜閻庯絻鍔嬪Ч妤呮⒑閸︻厼鍔嬮柛銊ョ秺瀹曟劙鎮欓悜妯轰画濠电姴锕ら崰姘熼埀顒勬倵濞堝灝鏋熼柟顔煎€搁锝嗙鐎ｅ灚鏅ｉ梺缁樻煥閹碱偊鐛幇鐗堚拻濞达綀顫夐崑鐘绘煕鎼搭喖鐏︾€规洘娲熼弻鍡楊吋閸℃せ鍋撻崼鏇熺厓闁告繂瀚弳鐔虹棯閹佸仮闁哄瞼鍠栭弻鍥晝閳ь剙顕ｉ悙顒傜闁割偆鍠撻惌鎺楁煛鐏炵硶鍋撳畷鍥ㄦ畷闂侀€炲苯澧寸€规洑鍗冲浠嬵敇閻愮數鏆柣鐔哥矋閺屻劑鎮鹃柨瀣檮闁告稑锕ゆ禍婊堟⒑閸涘﹦绠撻悗姘煎墮閳绘捇濡烽埡鍌楁嫽闂佺ǹ鏈悷褔藝閿曞倹鐓欓悹鍥囧懐鐦堥悗瑙勬礀濠€閬嶅箟閹绢喖绀嬫い鎺嗗亾鐎殿喖娼″娲捶椤撯剝顎楅梺鍝ュУ閻楃娀骞冮垾鎰佹建闁逞屽墴瀵鎮㈤崨濠勭Ф婵°倧绲介崯顖烆敁瀹ュ鈷戠紒瀣儥閸庢劙鏌涢弮鈧悷鈺呯嵁閸愩剮鏃堝川椤撶喎绁舵俊鐐€栭幐楣冨磹椤愶箑顫呴幒铏濠婂牊鐓忓鑸电☉椤╊剛绱掗悩鎰佺劷缂佽鲸甯楀蹇涘Ω閿曗偓闂夊秹姊洪悷鏉挎Щ闁硅櫕锚閻ｇ兘顢曢敃鈧粈瀣棯閻楀煫顏呯閸撗€鍋撻崗澶婁壕闂佸憡娲﹂崜娑㈠储闁秵鈷戦梻鍫熻儐瑜版帒纾块柟鎯版閺勩儵鏌ㄥ┑鍡樼闁稿鎸搁埢鎾诲垂椤旂晫浜俊鐐€ら崢楣冨礂濡警鍤曟い鎰剁畱缁犳稒銇勯幘璺轰户缂佹劗鍋炵换婵嬫偨闂堟刀銏ゆ倵濮樺崬鍘寸€规洏鍎靛畷銊р偓娑櫱氶幏缁樼箾鏉堝墽鎮奸柟铏崌椤㈡艾饪伴崨顖滐紲闁荤姴娲﹁ぐ鍐焵椤掆偓濞硷繝鎮伴钘夌窞濠电偟鍋撻～宥夋⒑闂堟稓绠冲┑顔惧厴椤㈡瑩骞掗弮鍌滐紳闂佺ǹ鏈悷褔宕濆鍡愪簻妞ゆ挾鍋為崰妯尖偓瑙勬磸閸ㄤ粙鐛弽銊﹀闁稿繐顦扮€氬ジ姊绘担鍛婂暈缂佸鍨块弫鍐晲閸ヮ煈鍋ㄩ梻渚囧墮缁夌敻鎮￠弴銏＄厽婵☆垵顕ф晶顖涚箾閸喓鐭岄柍褜鍓濋～澶娒哄鈧畷婵嗏枎閹捐泛绁﹂梺鎼炲労閸撴岸宕戠€ｎ喗鐓曟い鎰Т閻忊晜顨ラ悙鏉戝闁哄矉绲鹃幆鏃堝灳閸愯尪绶熼梻浣呵归鍡涘箲閸ヮ剙绠栨俊銈呮噺閺呮煡骞栫划鍏夊亾閹颁焦楠勯梻鍌欐缁鳖喚绮婚幋锔藉亱闁规崘顕х粻鏍ㄤ繆閵堝懎鏆為柛鐘叉閺屾盯寮撮妸銉ヮ潾濡炪倧璐熼崝鎴﹀蓟閿濆顫呴柍杞拌兌娴狀參鏌ｉ姀鈺佺仯闁哥姵鐗犻獮鍐潨閳ь剟鐛幒鎳虫梹鎷呴崫鍕闂傚倷鑳剁划顖炲礉閺囥埄鏁嬫い鎾卞灩閻撴繈鏌熼崜褏甯涢柣鎾冲暟閹茬ǹ饪伴崼婵堫槶濠电偛妫欓幐鎼佸磼閵娾晜鐓涚€广儱鍟俊鍧楁煟濠靛棛鍩ｉ柡宀嬬節瀹曞爼濡烽妷褌鐥梻浣瑰▕閺€閬嶅垂閸ф钃熸繛鎴炃氶弨浠嬫煕閳╁喚娈㈠ù灏栧亾闂傚倷绀侀悿鍥敋瑜旇棟闁汇垻枪閽冪喐绻涢幋鐐茬劰闁稿鎹囬弫宥夊础閻愬弶娈ㄦ繝銏ｎ潐濞茬喎顫忔繝姘＜婵炲棙甯掗崢锟犳煛鐎ｅ吀绨奸柕鍥у楠炲鈹戦崶鑸碉紗婵°倗濮烽崑鐐哄礉濞嗘挾宓侀柡宥冨妿閻熺懓鈹戦悩鎻掝伀闁崇鍊栫换婵嬫偨闂堟稈鏋呭┑鐐板尃閸ヨ埖鏅為梺鍦濠㈡﹢寮告笟鈧弻娑㈠焺閸愵亖濮囬梺缁樻尰濞茬喖骞冨鈧幃娆撳箵閹哄棙瀵栭梻浣芥〃閻掞箓鎮ч悩璇茶摕闁哄洨鍠撶粻楣冩煟閹伴潧澧柣婵囨礋濮婃椽骞庨懞銉︽殸闂佹悶鍔屽鈥愁嚕鐠囨祴妲堟俊顖炴敱閺傗偓闂備胶纭堕崜婵嬨€冭箛鏂款嚤闁稿本鍑瑰〒濠氭煏閸繈顎楀ù婊冨⒔缁辨帡鎮╅搹顐㈢３閻庢鍠涢褔鍩ユ径鎰潊闁绘鏁稿澶愭⒒娓氣偓閳ь剛鍋涢懟顖涙櫠鐎电硶鍋撶憴鍕缂傚秴锕ら悾椋庣矙鐠囩偓妫冨畷姗€濡歌閸嬪﹪姊婚崒娆戭槮闁硅绻濆畷婵嬫晝閸屾氨鐛ラ梺鍝勭▉閸欏繒绱為弽顓熺厱婵炴垶顭囬幗鐘绘煟閹捐泛鏋戝ǎ鍥э躬椤㈡稑鈹戦崶鏈靛摋濠电偛顕慨鐢电矙閹烘梹宕叉繛鎴欏灩闁卞洭鏌ｉ弮鍥仩闁汇倕瀚埞鎴︻敊绾攱鏁惧┑锛勫仩濡嫰鎮鹃悜绛嬫晝闁挎洍鍋撶紒鈧€ｎ喗鐓曟い顓熷灥閳ь剨缍侀、鏃堝礋閵婏附鏉搁梻浣虹帛閸旀洖螣婵犲伣锝囨喆閸曨厾顔曢梺鍛婄懃椤﹂亶鎯屾繝鍥х闂侇剙绉甸悡娆撴煙濞堝灝鏋涙い锝呫偢閺岋繝宕ㄩ鍓х杽闂佸搫鏈粙鎾寸閿曞倸绀堢憸澶愬几閺冨牊鈷戠憸鐗堝笚閺佽鲸淇婇悙鑸殿棄妞ゎ偄绻愮叅妞ゅ繐鎳庢禍妤呮煙閸忓吋鍎楅柛鐘愁殘缁辩偛螖閸涱喒鎷虹紓浣割儏鐏忓懘寮ㄧ紒妯肩闁告瑥顦辨晶鐢告煙椤栨艾鏆ｆい銏☆殕閹峰懘鎼归崷顓燁潓闂傚倷鐒﹂惇褰掑垂閽樺鐒界憸搴ｇ矉閹烘鏅滈柣锝呯灱椤旀洟姊虹粙璺ㄧ闁稿鍔欓獮濠囧礃椤旇棄浜楅梺闈涚墕濡孩绂嶅⿰鍫熺厵闁诡垎鍐煘闂佽娴氭禍顏堝蓟閿熺姴宸濇い鏃€鍎冲銊╂⒑閸濆嫮鐒跨紓宥勭窔閻涱噣宕堕澶嬫櫍闂佺粯妫佸▍锝夊煝韫囨洜纾介柛灞剧懅椤︼箑顭胯闁帮絽鐣烽幋锕€围濠㈣泛锕﹂悾鍝勨攽椤斿浠滈柛瀣崌閺岀喖顢欓悾灞惧櫚闂佽鍨伴崐鍨嚕閹峰瞼鐤€闁挎繂妫涚粔椋庣磽閸屾瑧顦﹂柛濠傛憸缁棁銇愰幒鎴犵暫濠电偛妫欓幖鈺呭极閸℃褰掓晲閸ゅ€燁潐鐎靛吋鎯旈姀銏㈢槇缂佸墽澧楄摫妞ゎ偄锕弻娑㈠Ω閿曗偓閳绘洜鈧娲忛崹濂杆囧畷鍥╃＜闁稿本姘ㄦ牎闂侀潧鐗炵紞浣哥暦濮椻偓閸┾剝鎷呴幓鎺嶅闂佸壊鐓堥崑鍛村矗韫囨柧绻嗘い鏍ㄧ矊鐢泛霉濠婂牏鐣洪柟顔筋殔椤繈鎮欓鈧锟�
+    can_interrupt_enable(CAN2, CAN_INT_FIFO_OVERFLOW);   // FIFO闂傚倸鍊搁崐鎼佸磹閹间礁纾归柟闂寸绾惧綊鏌熼梻瀵割槮缁炬儳缍婇弻鐔兼⒒鐎靛壊妲紒鐐劤缂嶅﹪寮婚悢鍏尖拻閻庨潧澹婂Σ顔剧磼閻愵剙鍔ゆ繝鈧柆宥呯劦妞ゆ帒鍊归崵鈧柣搴㈠嚬閸欏啫鐣峰畷鍥ь棜閻庯絻鍔嬪Ч妤呮⒑閸︻厼鍔嬮柛銊ョ秺瀹曟劙鎮欓悜妯轰画濠电姴锕ら崰姘熼埀顒勬倵濞堝灝鏋熼柟顔煎€搁锝嗙鐎ｅ灚鏅ｉ梺缁樻煥閹碱偊鐛幇鐗堚拻濞达綀顫夐崑鐘绘煕鎼搭喖鐏︾€规洘娲熼弻鍡楊吋閸℃せ鍋撻崼鏇熺厓闁告繂瀚弳鐔虹棯閹佸仮闁哄瞼鍠栭弻鍥晝閳ь剙顕ｉ悙顒傜闁割偆鍠撻惌鎺楁煛鐏炵硶鍋撳畷鍥ㄦ畷闂侀€炲苯澧寸€规洑鍗冲浠嬵敇閻愮數鏆柣鐔哥矋閺屻劑鎮鹃柨瀣檮闁告稑锕ゆ禍婊堟⒑閸涘﹦绠撻悗姘煎墮閳绘捇濡烽埡鍌楁嫽闂佺ǹ鏈悷褔藝閿曞倹鐓欓悹鍥囧懐鐦堥悗瑙勬礀濠€閬嶅箟閹绢喖绀嬫い鎺嗗亾鐎殿喖娼″娲捶椤撯剝顎楅梺鍝ュУ閻楃娀骞冮垾鎰佹建闁逞屽墴瀵鎮㈤崨濠勭Ф婵°倧绲介崯顖烆敁瀹ュ鈷戠紒瀣儥閸庢劙鏌涢弮鈧悷鈺呯嵁閸愩剮鏃堝川椤撶喎绁舵俊鐐€栭幐楣冨磹椤愶箑顫呴幒铏濠婂牊鐓忓鑸电☉椤╊剛绱掗悩鎰佺劷缂佽鲸甯楀蹇涘Ω閿曗偓闂夊秹姊洪悷鏉挎Щ闁硅櫕锚閻ｇ兘顢曢敃鈧粈瀣棯閻楀煫顏呯閸撗€鍋撻崗澶婁壕闂佸憡娲﹂崜娑㈠储闁秵鈷戦梻鍫熻儐瑜版帒纾块柟鎯版閺勩儵鏌ㄥ┑鍡樼闁稿鎸搁埢鎾诲垂椤旂晫浜俊鐐€ら崢楣冨礂濡警鍤曟い鎰剁畱缁犳稒銇勯幘璺轰户缂佹劗鍋炵换婵嬫偨闂堟刀銏ゆ倵濮樺崬鍘寸€规洏鍎靛畷銊р偓娑櫱氶幏缁樼箾鏉堝墽鎮奸柟铏崌椤㈡艾饪伴崨顖滐紲闁荤姴娲﹁ぐ鍐焵椤掆偓濞硷繝鎮伴钘夌窞濠电偟鍋撻～宥夋⒑闂堟稓绠冲┑顔惧厴椤㈡瑩骞掗弮鍌滐紳闂佺ǹ鏈悷褔宕濆鍡愪簻妞ゆ挾鍋為崰妯尖偓瑙勬磸閸ㄤ粙鐛弽銊﹀闁稿繐顦扮€氬ジ姊绘担鍛婂暈缂佸鍨块弫鍐晲閸ヮ煈鍋ㄩ梻渚囧墮缁夌敻鎮￠弴銏＄厽婵☆垵顕ф晶顖涚箾閸喓鐭岄柍褜鍓濋～澶娒哄鈧畷婵嗏枎閹捐泛绁﹂梺鎼炲労閸撴岸宕戠€ｎ喗鐓曟い鎰Т閻忊晜顨ラ悙鏉戝闁哄矉绲鹃幆鏃堝灳閸愯尪绶熼梻浣呵归鍡涘箲閸ヮ剙绠栨俊銈呮噺閺呮煡骞栫划鍏夊亾閹颁焦楠勯梻鍌欐缁鳖喚绮婚幋锔藉亱闁规崘顕х粻鏍ㄤ繆閵堝懎鏆為柛鐘叉閺屾盯寮撮妸銉ヮ潾濡炪倧璐熼崝鎴﹀蓟閿濆顫呴柍杞拌兌娴狀參鏌ｉ姀鈺佺仯闁哥姵鐗犻獮鍐潨閳ь剟鐛幒鎳虫梹鎷呴崫鍕闂傚倷鑳剁划顖炲礉閺囥埄鏁嬫い鎾卞灩閻撴繈鏌熼崜褏甯涢柣鎾冲暟閹茬ǹ饪伴崼婵堫槶濠电偛妫欓幐鎼佸磼閵娾晜鐓涚€广儱鍟俊鍧楁煟濠靛棛鍩ｉ柡宀嬬節瀹曞爼濡烽妷褌鐥梻浣瑰▕閺€閬嶅垂閸ф钃熸繛鎴炃氶弨浠嬫煕閳╁喚娈㈠ù灏栧亾闂傚倷绀侀悿鍥敋瑜旇棟闁汇垻枪閽冪喐绻涢幋鐐茬劰闁稿鎹囬弫宥夊础閻愬弶娈ㄦ繝銏ｎ潐濞茬喎顫忔繝姘＜婵炲棙甯掗崢锟犳煛鐎ｅ吀绨奸柕鍥у楠炲鈹戦崶鑸碉紗婵°倗濮烽崑鐐哄礉濞嗘挾宓侀柡宥冨妿閻熺懓鈹戦悩鎻掝伀闁崇鍊栫换婵嬫偨闂堟稈鏋呭┑鐐板尃閸ヨ埖鏅為梺鍦濠㈡﹢寮告笟鈧弻娑㈠焺閸愵亖濮囬梺缁樻尰濞茬喖骞冨鈧幃娆撳箵閹哄棙瀵栭梻浣芥〃閻掞箓鎮ч悩璇茶摕闁哄洨鍠撶粻楣冩煟閹伴潧澧柣婵囨礋濮婅櫣绮欓崠鈥冲闂佽桨绀侀…鐑界嵁閸愩劎鏆嬮柟浣冩珪閻庡妫呴銏″闁瑰皷鏅滅粋鎺楀礈瑜忕壕钘壝归敐鍛喐闁绘帡鏀辩换娑欏緞鐎ｎ偆顦┑鈥冲级閸旀瑩鐛幒妤€绫嶉柛灞剧玻缁卞弶绻濈喊妯活潑闁搞劎鏁诲畷鎴﹀箛閻楀牆浠鹃梺鍛婃处閸ㄩ亶鍩涢幋鐘电＝濞达絽顫栭懖鈺傤偨闂侇剙绉甸悡鏇㈡煥濠靛棛绠抽柛鎺斿閵囧嫰寮撮鍡櫳戠紓浣稿€圭敮鐐哄焵椤掑﹦绉甸柍褜鍓﹂崢鎼佸疾閻樿钃熼柕濞炬櫅閸楄櫕淇婇妶鍌氫壕婵炲瓨绮嶉崕鎶解€旈崘顔嘉ч柛娑卞弾閸斿姊洪崷顓熷殌婵炲樊鍘奸锝嗙節濮橆厽娅滄繝銏ｆ硾椤戝懏绂嶅⿰鍫熲拺闁告稑锕︾紓姘舵煕鎼淬垻鍙€鐎规洖鐤囬ˇ褰掓煛瀹€瀣ɑ闁诡垱妫冩慨鈧柣妯哄级閻︽捇姊绘担鍛婂暈闁荤喆鍎靛畷顖炲箻椤斿槈銉ャ€掑锝呬壕閻庢鍣崳锝呯暦婵傚憡鍋勯柧姘€婚惄搴ㄦ⒒閸屾瑨鍏岄弸顏嗙磼缂佹ê濮嶉柟顖氬暣閹粓鎸婃径宀婂數缂傚倸鍊烽悞锕傗€﹂崶鈺冧笉濡わ絽鍟痪褔鏌涢锝囩畵闁抽攱姊荤槐鎺撳緞濡搫顫╅梺瀹狀潐閸ㄥ潡銆佸▎鎾充紶闁告洏鍔屾禍鐐繆閵堝倸浜鹃梺瀹犳椤︾敻骞冮悾宀€鐭欓柛褎顨呴弫褰掓⒒娴ｅ憡鎯堟繛灞傚姂瀹曚即骞樼拠鎻掑亶闂備緡鍓欑粔鐢稿煕閹达附鐓欑紒瀣閹癸絿绱掗悩铏暗缂佽鲸甯炵槐鎺懳熼悜妯跨檨闂備浇顕栭崳锝囩不閺嵮呮殾鐟滅増甯╅弫鍐┿亜閹板墎绉甸柛鐔风Ч濮婄粯鎷呴搹鐟扮闂佸憡姊归…鍥ㄧ缁嬪簱鏋庨柟瀵稿С缁楀绻濋悽闈浶ｇ痪鏉跨Ч閹€斥槈濡繐缍婇弫鎰板醇椤愶絿绉烽柣搴ゎ潐濞叉牠鎯岄崒鐐茶摕闁斥晛鍟刊鎾偡濞嗗繐顏╃痪鐐▕濮婄儤娼幍顔煎闂佸湱鎳撳ú顓烆嚕椤愶箑绠荤紓浣股戝▍銏ゆ⒑鐠恒劌娅愰柟鍑ゆ嫹
+
+    can_operation_mode_enter(CAN2, CAN_NORMAL_MODE);
+ 
+    can_mailbox_transmit_inactive(CAN2, 8U);
+    can_mailbox_transmit_inactive(CAN2, 9U);
+    can_mailbox_transmit_inactive(CAN2, 10U);
+
+  
+}
+
+void can0fd_txMessage(uint8_t length,uint8_t id,uint8_t *can0txdata)
+{
+    for(int i = 0; i < length; i++){
+        transmit_message.data[i] = can0txdata[i];
+    }
+    transmit_message.rtr = 0U;
+    transmit_message.ide = 0U;
+    transmit_message.code = CAN_MB_TX_STATUS_DATA;
+    transmit_message.brs = 1U;
+    transmit_message.fdf = 1U;
+    transmit_message.esi = 0U;
+    transmit_message.prio = 0U;
+    transmit_message.data_bytes = length;
+    transmit_message.id = id;
+
+    can_mailbox_config(CAN0, 1U, &transmit_message);
+}
+
+uint32_t mailbox_code = 0;
+ErrStatus can2_tx_with_mailbox(uint8_t length, uint32_t id, uint8_t *can2txdata, uint32_t mailbox_index)
+{
+    
+    if(length > 8) {
+        return ERROR;
+    }
+    
+    /* 闂傚倸鍊搁崐鎼佸磹閹间礁纾归柟闂寸绾惧綊鏌熼梻瀵割槮缁炬儳缍婇弻鐔兼⒒鐎靛壊妲紒鐐劤缂嶅﹪寮婚悢鍏尖拻閻庨潧澹婂Σ顔剧磼閻愵剙鍔ゆ繝鈧柆宥呯劦妞ゆ帒鍊归崵鈧柣搴㈠嚬閸欏啫鐣峰畷鍥ь棜閻庯絻鍔嬪Ч妤呮⒑閸︻厼鍔嬮柛銊ョ秺瀹曟劙鎮欓悜妯轰画濠电姴锕ら崰姘熼埀顒勬倵濞堝灝鏋熼柟顔煎€搁锝嗙鐎ｅ灚鏅ｉ梺缁樻煥閹碱偊鐛幇鐗堚拻濞达綀顫夐崑鐘绘煕鎼搭喖鐏︾€规洘娲熼弻鍡楊吋閸℃せ鍋撻崼鏇熺厓闁告繂瀚弳鐔虹棯閹佸仮闁哄瞼鍠栭弻鍥晝閳ь剙顕ｉ悙顒傜闁割偆鍠撻惌鎺楁煛鐏炵硶鍋撳畷鍥ㄦ畷闂侀€炲苯澧寸€规洑鍗冲浠嬵敇閻愮數鏆柣鐔哥矋閺屻劑鎮鹃柨瀣檮闁告稑锕ゆ禍婊堟⒑閸涘﹦绠撻悗姘煎墮閳绘捇濡烽埡鍌楁嫽闂佺ǹ鏈悷褔藝閿曞倹鐓欓悹鍥囧懐鐦堥悗瑙勬礀濠€閬嶅箟閹绢喖绀嬫い鎺嗗亾鐎殿喖娼″娲捶椤撯剝顎楅梺鍝ュУ閻楃娀骞冮垾鎰佹建闁逞屽墴瀵鎮㈤崨濠勭Ф婵°倧绲介崯顖烆敁瀹ュ鈷戠紒瀣儥閸庢劙鏌涢弮鈧悷鈺呯嵁閸愩剮鏃堝川椤撶喎绁舵俊鐐€栭幐楣冨磹椤愶箑顫呴幒铏濠婂牊鐓忓鑸电☉椤╊剛绱掗悩鎰佺劷缂佽鲸甯楀蹇涘Ω閿曗偓闂夊秹姊洪悷鏉挎Щ闁硅櫕锚閻ｇ兘顢曢敃鈧粈瀣棯閻楀煫顏呯閸撗€鍋撻崗澶婁壕闂佸憡娲﹂崜娑㈠储闁秵鈷戦梻鍫熻儐瑜版帒纾块柟鎯版閺勩儵鏌ㄥ┑鍡樼闁稿鎸搁埢鎾诲垂椤旂晫浜俊鐐€ら崢楣冨礂濡警鍤曟い鎰剁畱缁犳稒銇勯幘璺轰户缂佹劗鍋炵换婵嬫偨闂堟刀銏ゆ倵濮樺崬鍘寸€规洏鍎靛畷銊р偓娑櫱氶幏缁樼箾鏉堝墽鎮奸柟铏崌椤㈡艾饪伴崨顖滐紲闁荤姴娲﹁ぐ鍐焵椤掆偓濞硷繝鎮伴钘夌窞濠电偟鍋撻～宥夋⒑闂堟稓绠冲┑顔惧厴椤㈡瑩骞掗弮鍌滐紳闂佺ǹ鏈悷褔宕濆鍡愪簻妞ゆ挾鍋為崰妯尖偓瑙勬磸閸ㄤ粙鐛弽銊﹀闁稿繐顦扮€氬ジ姊绘担鍛婂暈缂佸鍨块弫鍐晲閸ヮ煈鍋ㄩ梻渚囧墮缁夌敻鎮￠弴銏＄厽婵☆垵顕ф晶顖涚箾閸喓鐭岄柍褜鍓濋～澶娒哄鈧畷婵嗏枎閹捐泛绁﹂梺鎼炲労閸撴岸宕戠€ｎ喗鐓曟い鎰Т閻忊晜顨ラ悙鏉戝闁哄矉绲鹃幆鏃堝灳閸愯尪绶熼梻浣呵归鍡涘箲閸ヮ剙绠栨俊銈呮噺閺呮煡骞栫划鍏夊亾閹颁焦楠勯梻鍌欐缁鳖喚绮婚幋锔藉亱闁规崘顕х粻鏍ㄤ繆閵堝懎鏆為柛鐘叉閺屾盯寮撮妸銉ヮ潾濡炪倧璐熼崝鎴﹀蓟閿濆顫呴柍杞拌兌娴狀參鏌ｉ姀鈺佺仯闁哥姵鐗犻獮鍐潨閳ь剟鐛幒鎳虫梹鎷呴崫鍕闂傚倷鑳剁划顖炲礉閺囥埄鏁嬫い鎾卞灩閻撴繈鏌熼崜褏甯涢柣鎾冲暟閹茬ǹ饪伴崼婵堫槶濠电偛妫欓幐鎼佸磼閵娾晜鐓涚€广儱鍟俊鍧楁煟濠靛棛鍩ｉ柡宀嬬節瀹曞爼濡烽妷褌鐥梻浣瑰▕閺€閬嶅垂閸ф钃熸繛鎴炃氶弨浠嬫煕閳╁喚娈㈠ù灏栧亾闂傚倷绀侀悿鍥敋瑜旇棟闁汇垻枪閽冪喐绻涢幋鐐茬劰闁稿鎹囬弫宥夊础閻愬弶娈ㄦ繝銏ｎ潐濞茬喎顫忔繝姘＜婵炲棙甯掗崢锟犳煛鐎ｅ吀绨奸柕鍥у楠炲鈹戦崶鑸碉紗婵°倗濮烽崑鐐哄礉濞嗘挾宓侀柡宥冨妿閻熺懓鈹戦悩鎻掝伀闁崇鍊栫换婵嬫偨闂堟稈鏋呭┑鐐板尃閸ヨ埖鏅為梺鍦濠㈡﹢寮告笟鈧弻娑㈠焺閸愵亖濮囬梺缁樻尰濞茬喖骞冨鈧幃娆撳箵閹哄棙瀵栭梻浣芥〃閻掞箓鎮ч悩璇茶摕闁哄洨鍠撶粻楣冩煟閹伴潧澧柣婵囨礋濮婃椽骞庨懞銉︽殸闂佹悶鍔屽鈥愁嚕鐠囨祴妲堟俊顖炴敱閺傗偓闂備胶纭堕崜婵嬨€冭箛鏂款嚤闁稿本鍑瑰〒濠氭煏閸繈顎楀ù婊冨⒔缁辨帡鎮╅搹顐㈢３閻庢鍠涢褔鍩ユ径鎰潊闁绘鏁稿澶愭⒒娓氣偓閳ь剛鍋涢懟顖涙櫠鐎电硶鍋撶憴鍕缂傚秴锕ら悾椋庣矙鐠囩偓妫冨畷姗€濡歌閸嬪﹪姊婚崒娆戭槮闁硅绻濆畷婵嬫晝閸屾氨鐛ラ梺鍝勭▉閸欏繒绱為弽顓熺厱婵炴垶顭囬幗鐘绘煟閹惧磭绠婚柡灞剧洴椤㈡洟鏁愰崶鈺冩毇闂備線娼荤徊钘夛耿鏉堚晜顫曢柟鐑橆殔缁犳稒銇勯幘璺盒涘┑顔兼川缁辨挻鎷呴搹鐟扮缂備浇顕ч悧鎾荤嵁閸愨晝顩烽悗锝庡亽濡啫鈹戦悙娈挎缂傚牅鍗冲畷瑙勭鐎ｎ亞鐣哄┑掳鍊愰崑鎾淬亜椤愶絿绠炴慨濠呭吹閳ь剟娼ч幉锟犲疾閸忚偐绡€缁剧増菤閸嬫捇宕橀懠顒勭崜闂備礁鎲″褰掓偡閵夆晩鏁嬮柨婵嗩槸缁犵粯銇勯弮鍌楁嫛婵炵厧锕娲箮閼恒儲娈伴梺绋款儐閹瑰洭寮婚悢鍓叉Ч閹艰揪绲界粭锛勭磽娴ｈ櫣甯涚紒瀣笒椤洩绠涘☉妯碱槶閻熸粌绉瑰畷鍝勭暆閸曨兘鎷虹紒缁㈠幖閹冲氦顣跨紓鍌欑贰閸犳牕霉閻戣棄绀嗛柟鐑橆殔缁秹鏌涢銈呮瀻闁逞屽墰缁垱绌辨繝鍥舵晬闁绘劕鐡ㄩ悵宕囩磽娴ｉ潧濡兼い顓炲槻椤繐煤椤忓拋妫冨┑鐐村灱妞存悂顢撻崱娑欌拻闁稿本鑹鹃鈺呮倵濮樼厧澧撮柟顔藉劤閻ｏ繝骞嶉鑺ョ暦闂備線鈧偛鑻晶鎾煕閳规儳浜炬俊鐐€栫敮鎺楀窗濮橆剦鐒介柟閭﹀幘缁犻箖鏌涘▎蹇ｆ闁兼澘娼￠弻鏇㈠幢濡も偓閺嗭絿鈧娲忛崝宥咁焽韫囨稑绀堢憸蹇涘煟閵堝棛绡€闁汇垽娼у瓭闂佹寧娲忛崐婵嬪箖瑜斿畷鍗炩槈濞嗗繆鍋撻崸妤佺厱妞ゎ厽鍨垫禍鏍瑰⿰鍕煉闁哄瞼鍠栧畷顐﹀礋椤掑顥ｅ┑鐐茬摠缁秹宕曢幎瑙ｂ偓鏃堝礃椤斿槈褔鏌涢埄鍐剧劷闁宠绋撶槐鎾诲磼濮樻瘷锛勭磼閼搁潧鍝哄┑鈥崇摠缁楃喖鍩€椤掆偓椤曪綁骞橀纰辨綂闂佹枼鏅涢崯顖炴偟閺嶎厽鈷掑〒姘ｅ亾闁逞屽墰閸嬫盯鎳熼娑欐珷闁规鍠氱壕鍏笺亜閺傚灝鈷旈悽顖涚〒缁辨帞绱掑Ο鑲╃暤濡炪値鍋呯换鍫ャ€佸鈧幃娆撳级閸噮鍤欓梻鍌氬€搁崐鐑芥倿閿曞倸绠栭柛顐ｆ礀绾炬寧绻濇繝鍌滃缂佲偓閸愨斂浜滈煫鍥ㄦ尵婢с垻鈧娲樼划宀勫煘閹达附鏅柛鏇ㄥ亗閺夘參姊虹粙鍖℃敾闁搞劌鐏濋悾鐑藉即閵忊€虫濡炪倖甯婄粈浣规償婵犲洦鈷戦柛鎾村絻娴滄繄绱掔拠鑼㈡い顓炴喘瀵粙濡歌椤旀洟鎮楅悷鏉款棌闁哥姵娲滈懞閬嶅礂缁楄桨绨婚梺闈涱槶閸庤櫕鏅跺☉姘辩＜缂備焦顭囧ú瀛橆殽閻愬樊鍎旈柟顔界懅閹瑰嫭绗熼娑辨（婵犵绱曢崑鎴﹀磹瑜忓濠冪鐎ｎ亞顔愬銈嗗姧缁犳垿鎮″鈧弻鐔告綇閸撗呮殸闂佺粯鎼换婵嬪蓟濞戙垹鐒洪柛鎰剁細濞岊亞绱撴担闈涘闁告鍥ｂ偓鏃堝礃椤斿槈褔鏌涢幇鈺佸妞ゎ剙鐗撳娲箰鎼淬垹顦╂繛瀛樼矤娴滄繃绌辨繝鍕ㄥ亾濞戞瑯鐒介柣鐔风秺閺屽秷顧侀柛鎾寸懇椤㈡岸鏁愭径妯绘櫔闂侀€炲苯澧柣锝夋敱缁轰粙宕ㄦ繝鍌欑盎闂傚倷绀侀悘婵嬵敄閸ヮ剙绾ф繛宸簼閳锋帡鏌涚仦鍓ф噮闁告柨绉归弻锝夘敂閸曨厾楔閻庤娲濋～澶屾崲濠靛棭娼╂い鎺嶈兌閳ь剦鍓熷楦裤亹閹烘搫绱电紓浣筋啇缁绘繂顕ｉ锝囩瘈闁搞儯鍔庨崢鎼佹⒑閹肩偛鍔橀柛搴ㄤ憾閹﹢顢旈崼鐔哄帗闂備礁鐏濋鍛存倶閳哄啰纾奸弶鍫涘妼濞搭喗銇勯姀锛勨槈闁宠棄顦埢搴ㄥ箣椤撶啘姘節閻㈤潧袥闁瑰嘲鍟村畷鐔碱敇閻愯尙鍝楅梻鍌欑閹碱偊鎯屾径宀€绀婂〒姘ｅ亾妤犵偛鍟存慨鈧柕鍫濇噽妤犲洭姊洪悷鎵憼缂佽鍊介·鍌炴⒒閸屾艾鈧兘鎳楅崜浣瑰厹闁割偅娲栧Λ姗€鏌涘畝鈧崑娑㈠垂閸岀偞鐓㈡俊顖欒濡叉椽鏌￠崱顓犵暠闁宠鍨垮畷鎺戔攦閹捐埖鍤€闁轰緡鍣ｅ缁樻媴閻熼偊鍤嬪┑顔硷工缂嶅﹤鐣烽弴銏犵闁伙絽鑻粊锕傛⒑瑜版帒浜伴柛蹇旓耿瀵劍绂掔€ｎ偆鍘介梺褰掑亰閸ㄤ即鎮￠幇顔藉枑闁硅泛锕ら幊鎰閻ｅ备鍋撻獮鍨姍缂佲偓娴ｅ湱顩查柣鎰靛厸缁诲棝鏌ｉ幇鍏哥盎闁逞屽厵閸婃繂鐣烽幋锕€绀嬫い鏍ゅ亾闁搞儺鍓﹂弫宥夋煟閹邦厽缍戝ù鐘层偢閹鎮烽弶娆句痪婵犮垻鎳撳Λ婵嗩嚕閹惰棄骞㈡繛鎴炵懅閸樻捇鎮峰⿰鍕煉鐎规洘绮撻幃銏ゆ偂鎼淬垺袣闂備線鈧偛鑻晶顖炴煏閸パ冾伃妤犵偞甯掗濂稿炊椤忓棛宕堕梻鍌欑閹芥粓宕版惔锝嗗床婵せ鍋撶€殿喛顕ч埥澶愬閳╁啯鐝抽梺纭呭亹鐞涖儵宕滃┑瀣仧婵犻潧顑嗛崐鐢告偡濞嗗繐顏紒鈧崘顏嗙＜妞ゆ棁濮ゅ畷灞绢殽閻愭彃鏆ｅ┑顔瑰亾闂侀潧鐗嗗Λ宀勫箯瑜版帗鈷戠憸鐗堝笒娴滀即鏌涢悩鍐插摵闁诡喚鍋撻妶锝夊礃閳圭偓瀚藉┑鐐舵彧缁叉寧鐏欏銈冨劚缁绘﹢寮诲☉姘ｅ亾閿濆簼绨奸柛锝呯秺閹繝濡舵径瀣幐閻庡箍鍎辨鎼佺嵁濡皷鍋撶憴鍕矮缂佽埖宀稿濠氬即閿涘嫮鏉告繝鐢靛仦閸庤櫕绂嶆ィ鍐╃厾缁炬澘宕晶浼存煟閿濆鐣烘慨濠勭帛缁楃喖鍩€椤掆偓椤洩顦归柟顔ㄥ洤骞㈡繛鎴烆焽椤斿棝姊洪悷鎵憼缂佽绉撮…鍥冀閵娿倗绠氶梺闈涚墕閹冲酣寮抽悢铏规／闁诡垎浣镐划闂佸搫鐬奸崰鏍嵁閹捐绠虫繝闈涙婢瑰姊绘担椋庝覆缂佽弓绮欓幃妯侯潩鐠鸿櫣鐤勯梺闈涒康婵″洨寮ч埀顒勬⒑缁嬭儻顫﹂柛濠冾殜瀹曘儳鈧綆鍠楅崐鐢告偡濞嗗繐顏紒鈧崘顔藉仺妞ゆ牗绋戝ù顕€鏌涢埞鍨仾闁诡垱妫冩俊鎼佸Ψ瑜忛弶鍛婁繆閻愵亜鈧牠寮婚妸鈺佺妞ゆ劧绲块々鐑芥煙閻戞ê鐏嶉柡鈧禒瀣厽婵☆垵娅ｆ禒娑㈡煛閸″繑娅婇柡灞剧〒閳ь剨缍嗛崑鍡椕洪幘顔藉癄婵犻潧顑嗛悡娑橆熆鐠轰警鍎滅紒鎵佹櫆缁绘稑顔忛鑽ゅ嚬闂佺ǹ顑呯€氼剟鈥旈崘顏佸亾閿濆簼绨绘い鎺嬪灪缁绘盯宕奸姀鐘卞缂備胶绮惄顖氼嚕閸洖绠ｆ繝闈涙搐閳ь剦鍨伴埞鎴︽倷閹绘帗鍊梺鑽ゅ暀閸涱厼鐏婇柣鐘叉处缁佹潙危閸儲鐓忛煫鍥ュ劤绾惧潡鏌涘Ο鐑樺暈缂佺粯绻堟慨鈧柨婵嗘閵嗘劙姊洪幐搴㈢┛闂傚嫬瀚划瀣箳濡も偓椤懘鏌曢崼婵囶棤闁告﹢浜跺娲濞戞艾顣哄┑鈽嗗亝椤ㄥ﹪骞冨鈧弫鍌炲礈瑜忛敍婊呯磽閸屾瑧鍔嶆い顓炴川缁鎮欓悜妯煎幍濡炪倖妫佸畷鐢告儗濞嗘劒绻嗘い鎰╁灩閺嗘瑩妫佹径鎰仯濞达絽鎲＄拹锛勭磼婢舵ê娅嶉柡宀嬬磿娴狅妇鎷犲ù瀣壕婵犻潧顑呯粻鏍煟閹达絾顥夌紒鐙欏洤绠归悗娑櫳戠亸浼存倵閸偆澧辩紒杈ㄦ崌瀹曟帒鈻庨幋锝囩崶闂備礁鎽滄慨鐢告偋閻樿鐏抽柨鏇炲€归崐璇测攽椤旇棄濮€闁稿鎸婚幏鍛寲閺囩噥娼旈梻渚€娼х换鍡涘焵椤掍焦鐏遍柛瀣崌閹粓鎳為妷銉㈠亾閻㈠憡鐓熼柕蹇嬪灪椤忋垻鎲搁悧鍫濈鐎规挷鐒︽穱濠囧Χ閸涱喖娅ら梺鎶芥敱鐢帡婀侀梺鎸庣箓鐎氼垶顢楅悢鍏肩厸闁逞屽墯鐎佃偐鈧稒顭囬崢闈涒攽閻愯泛钄兼い鏂匡功閼洪亶鎮剧仦绋夸壕闁割煈鍋呯欢鏌ユ煥閺囥劋绨婚柣锝囧厴楠炲洭鎮ч崼婵呯敖濠电偠鎻紞鈧い顐㈩樀閹線鏁愭径瀣ф嫽闂佺ǹ鏈懝楣冨焵椤掍焦鍊愮€规洘鍔栭ˇ鐗堟償閿濆洨鍔跺┑鐐存尰閸╁啴宕戦幘鎼闁绘劕顕晶鍨亜閵忊剝绀嬮柡浣稿暣閸┾偓妞ゆ帒鍊绘稉宥夋煟濡灝鍚归柛娆愭崌閺屾盯濡烽敐鍛瀷闂佸疇妫勯ˇ杈╂閹烘鍋愮€规洖娲ら埛宀勬⒑閸濆嫭婀扮紒瀣灴閹儳鈹戠€ｎ亞鍔﹀銈嗗笒鐎氼剛澹曠紒妯肩闁瑰瓨鐟ラ悘顏堟倵濮橆剚鍤囬柡宀嬬秮瀵剟宕归钘夆偓顖炴⒑缂佹ɑ灏柛搴ｆ暬瀵鏁愭径濠冾棟闂佸湱枪鐎涒晠宕曢幘缁樺€垫繛鎴炵懅缁犳绱掓潏銊ユ诞闁诡喗鐟╅、妤呭焵椤掑嫬绀夐柕鍫濐槹閻撴洘鎱ㄥ鍡楀⒒闁稿孩鍔楃槐鎺戠暆閸愵喖鎽电紓浣虹帛缁诲牆鐣烽崼鏇熷殝闁割煈鍋呴悵顐⑩攽閻樺灚鏆╁┑鐐╁亾濠电偘鍖犻崨顏勪壕婵ǚ鍋撻柛銉戝拑绱遍梻浣筋潐瀹曟﹢顢氳閹偤宕归鐘辩盎闂佸湱鍎ら崹鐢割敂椤忓牊鐓熼柟鎯х摠缁€瀣煙椤旂瓔娈滈柡浣瑰姈閹棃鍨鹃懠顒€鍤梺璇叉唉椤煤閺嶎厽鍎斿┑鍌溓归悞鍨亜閹哄秶璐伴柛鐔风箻閺屾盯鎮╅搹顐ゎ槶闂佸憡甯楃敮鎺楀煝鎼淬劌绠婚柟鍏哥娴滄儳銆掑锝呬壕閻庢鍠楅幐铏叏閳ь剟鏌嶉妷銉ュ笭缂併劌顭峰缁樻媴閸濆嫪澹曢梺鐓庣秺缁犳牕鐣烽幇鏉跨濞达絺鍋撳璺衡看濞尖晜銇勯幘璺盒ラ柣锕€鐗嗛埞鎴︽倷閼碱剙顣洪梺璇茬箲缁诲牆顕ｉ幖浣瑰亜闁稿繗鍋愰崣鍡涙⒑閸濆嫭澶勬い銊ユ閳诲秵绻濋崟銊ヤ壕閻熸瑥瀚粈鍐磼椤旇偐鐒搁柛鈹垮劜瀵板嫭绻濇惔銏犲厞闂佸搫顦悧鍐疾濠靛鍌ㄩ柣妯虹－缁♀偓闂佹眹鍨藉褎绂掑⿰鍕箚妞ゆ牗鐔弨鑽ょ磼閸屾氨孝闁宠鍨归埀顒婄秵閸嬪嫭绂嶅Δ鈧埞鎴︽倷閺夋垹浠ч梺鎼炲妽濡炶棄鐣烽幇鏉块唶闁哄洨鍠撻崢浠嬫⒑闁稑宓嗛柛瀣躬瀵泛煤椤忓懐鍘遍梺闈涚墕濡盯骞婇崘顔界厓閻熸瑥瀚悘瀛樸亜閵忥紕鎳囬柟顔瑰墲閹柨螣鏉炴澘顥氶梻浣侯潒閸曞灚鐣堕梺钘夊暟閸犳牠寮婚敐澶婄睄闁稿本顨嗙€氭盯姊烘潪鎵槮闁挎洦浜璇测槈濡攱鏂€闂佺硶鍓濋〃蹇斿閳ь剙鈹戦悙宸殶闁告鍥ㄥ亱闁规崘顕х粻鏍ㄤ繆閵堝懎鏆為柛鐘叉閺屾盯寮撮妸銉ヮ潾闂佹寧绋掗敃銏狀潖濞差亜宸濆┑鐘插暟閸欏棛绱撴担鍓叉Ц闁绘牕銈搁悰顕€骞嬮敃鈧～鍛存煟濮楀棗浜濋柡鍌楀亾闂備浇顕ч崙鐣岀礊閸℃顩查柣鎰壋閸ヮ剙绾ф繛鍡欏亾鐎靛矂姊洪棃娑氬闁硅櫕鍔楃划濠氭偋閸粎绠氬銈嗗姧缁插灝煤閹绢喗鐓涘ù锝呮憸鏁堥梺璇″枔閸ㄨ棄鐣峰Δ鍐х剨闁哄秲鍔岄娲⒒閸屾瑨鍏岄弸顏堟煛閸偄澧撮柟铏箖閵堬綁宕橀妸褍濮︽俊鐐€栫敮鎺斺偓姘槻铻為柟瀵稿Х绾惧吋銇勯弮鍥т汗濠⒀勭洴閺岀喎鐣￠悧鍫濇畻闂佸湱鍘х紞濠傜暦閻戠瓔鏁囩憸搴ｇ懅婵犵數濮烽弫鍛婃叏閻戣棄鏋侀柛娑橈攻閸欏繘鏌℃径瀣亶闁哄鐗楅幈銊ヮ潨閸℃绠圭紓浣稿閸嬨倝寮婚悢鍏肩劷闁挎洍鍋撳褏澧楅妵鍕籍閳ь剛鏁敓鐘茶摕闁挎繂顦伴崑鎰版煕濞嗗浚妲洪柍瑙勭洴閺岋綀绠涢幘鍓侇唹闂佽崵鍟块弲鐐参涢悢鍏煎仭婵犲﹤鍟版晥闂佺硶鏅濋崑銈夌嵁鐎ｎ喗鏅滅紓浣股戝▍鎾斥攽閻樻剚鍟忛柛鐘愁殜瀹曟繈骞掗弬鍨亰闂佸壊鍋呭ú姗€鍩涢幋鐘电＜閻庯綆鍋掗崕銉╂煕鎼淬垹濮嶉柡宀€鍠栭獮鏍ㄦ媴閾忚姣囬梻浣虹《閺備線宕戦幘鎰佹富闁靛牆妫楃粭鍌滅磼鐠佸湱绡€鐎规洦鍨电粻娑樷槈濞嗘垵骞堥梻浣瑰缁诲倹顨ョ粙搴撴瀺鐎广儱娲犻崑鎾舵喆閸曨剛顦ㄩ梺鎼炲妼婢у酣骞戦姀鐘斀閻庯綆浜為崐鐐烘⒑鐎圭姵銆冮柤鍐茬埣婵″爼鏁傞悾宀€鐦堢紒鍓у钃辨い顐躬閺屾盯濡搁妶鍛ギ闂佽鍨伴崯鎾箖濠婂牊瀵犲璺虹焿缁遍亶姊绘担鍛婅础闁稿鎹囧鎼佹偂楠烆剨缍佸畷濂告偄閾忚鍟庨梻浣告啞缁牏绮堟担鍓插殨闁诡垼鐏愰悷鎵冲牚閹煎瓨绻堥崑妤呮⒑鏉炴壆鍔嶉柛鏃€鐟╅獮鍐ㄢ枎閹炬潙鈧粯淇婇婊呭笡妞ゅ繒鍠栧缁樻媴閾忕懓绗￠柦鍐憾閺岋紕鈧綆浜楅崑銏☆殽閻愯尙绠伴悡銈嗐亜韫囨挻鍣抽柟閿嬫そ濮婃椽宕ㄦ繝鍕ㄦ闂佹寧娲忛崕閬嶆偩閻戣棄绀嬫い鏍ㄧ☉閳ь剙鐖奸悡顐﹀炊閵婏腹鎷婚梺鐟板暱濞层劑鍩€椤掑喚娼愭繛鎻掔箻瀹曠銇愰幒瀣杭婵炴潙鍚嬪娆忣啅濠靛洢浜滈柡宥冨妿閻滆崵绱掓潏銊у弨婵﹦绮幏鍛存惞閻熸壆顐奸梻浣瑰瀹€鎼佸蓟濞戙垺鍋勯梺鍨儏娴犳挳姊虹拠鈥虫灍闁挎洏鍨藉畷娲晸閻樿尙顦ㄥ銈呯箰濡妲愰崣澶夌箚闁绘劦浜滈埀顒佺墪铻炲ù锝堫潐閸欏繘鏌曢崼婵撶礂濠㈣埖鍔曢柋鍥煏婢舵稑顩柛姗€娼ч—鍐Χ閸℃ǚ鎷婚梺绋款儐閹告悂鍩㈠澶婂嵆闁靛骏绱曢崢閬嶆⒑缂佹〒褰掝敋濠婂喚鍟呴柕澶嗘櫆閹虫岸鏌ㄥ┑鍡╂Ц缂佺嫏鍥ㄧ厽闁归偊鍓涢幗鐘电磼鐠哄搫绾ч柕鍥у婵＄兘鏁傜紒銏℃缂傚倷鑳剁划顖滄崲閸岀偛鐓濋柟鎹愵嚙閸ㄥ倹銇勯弮鍌涙珪濞存粌鐖煎缁樻媴閻熼偊鍤嬪┑鐐村絻缁夌懓顕ｉ弻銉﹀亹闁肩⒈鍓氬▓鎯р攽閻樿宸ラ柛鐔哄Т鍗遍柛顐ゅ枑閸欏繑淇婇姘ヤ粧闁告凹鍋婇弻锝夊箻閹颁礁鍓伴梺瀹狀潐閸ㄥ潡骞冨▎鎾崇煑濠㈣泛妫欓悘鍡椻攽閻愯尙鎽犵紒顔肩Ф閹广垽宕奸妷銉х暫闂佺偨鍎查弸鐓幬ｉ崼銉︾厪闊洤艌閸嬫捇寮妷銉ゅ闂佸壊鍋呭ú姗€鎮￠悢鍏肩厵濞村吋娼欐禍浼存煛婢跺銇濋柡灞剧洴婵″爼宕卞▎鎰珣闂備礁鐤囬～澶愬垂閸фぜ鈧礁鈻庨幘鏉戜簵闁圭厧鐡ㄩ敋濞存粓绠栭弻娑滎槼妞ゃ劌鎳橀幏鎴︽偄閸忚偐鍘介梺鍝勫暙閸婄敻骞忛敓鐘崇厸濞达綁娼婚煬顒勬煛鐏炲墽鈽夐柍瑙勫灴瀹曞崬螖婵犱焦顫曢梻鍌欒兌鏋い鎴濇楠炴劙骞栨担鍝ュ幋闂佺鎻粻鎴︾嵁閵忥紕绠鹃柛鈩兠慨鍫熴亜閺冣偓濞茬喎顫忕紒妯诲闁告稑锕ㄧ涵鈧梻浣呵圭花娲磹濠靛棛鏆︾憸鐗堝笚閸嬪嫰鏌ら懠顒€鐨戠紓宥勭閻ｉ攱绺介崨濠備簻缂備礁顑呴悘婵囧鎼淬垻绡€鐎典即鏀卞姗€鍩€椤掍礁濮嶇€规洘鍨块獮妯肩礄閻樼數鐣炬俊鐐€栭崝褏寰婃ィ鍐ㄧ厱闁圭儤鎸风换鍡涙煕濞嗗浚妲稿┑顔肩Ч閺屸剝鎷呯憴鍕３闂佽桨鐒﹂幑鍥极閹剧粯鏅搁柨鐕傛嫹 */
+    if(mailbox_index < 8 || mailbox_index > 10) {
+        return ERROR;
+    }
+    
+    /* 闂傚倸鍊搁崐鎼佸磹閹间礁纾归柟闂寸绾惧綊鏌熼梻瀵割槮缁炬儳缍婇弻鐔兼⒒鐎靛壊妲紒鐐劤缂嶅﹪寮婚悢鍏尖拻閻庨潧澹婂Σ顔剧磼閻愵剙鍔ゆ繝鈧柆宥呯劦妞ゆ帒鍊归崵鈧柣搴㈠嚬閸欏啫鐣峰畷鍥ь棜閻庯絻鍔嬪Ч妤呮⒑閸︻厼鍔嬮柛銊ョ秺瀹曟劙鎮欓悜妯轰画濠电姴锕ら崰姘熼埀顒勬倵濞堝灝鏋熼柟顔煎€搁锝嗙鐎ｅ灚鏅ｉ梺缁樻煥閹碱偊鐛幇鐗堚拻濞达綀顫夐崑鐘绘煕鎼搭喖鐏︾€规洘娲熼弻鍡楊吋閸℃せ鍋撻崼鏇熺厓闁告繂瀚弳鐔虹棯閹佸仮闁哄瞼鍠栭弻鍥晝閳ь剙顕ｉ悙顒傜闁割偆鍠撻惌鎺楁煛鐏炵硶鍋撳畷鍥ㄦ畷闂侀€炲苯澧寸€规洑鍗冲浠嬵敇閻愮數鏆柣鐔哥矋閺屻劑鎮鹃柨瀣檮闁告稑锕ゆ禍婊堟⒑閸涘﹦绠撻悗姘煎墮閳绘捇濡烽埡鍌楁嫽闂佺ǹ鏈悷褔藝閿曞倹鐓欓悹鍥囧懐鐦堥悗瑙勬礀濠€閬嶅箟閹绢喖绀嬫い鎺嗗亾鐎殿喖娼″娲捶椤撯剝顎楅梺鍝ュУ閻楃娀骞冮垾鎰佹建闁逞屽墴瀵鎮㈤崨濠勭Ф婵°倧绲介崯顖烆敁瀹ュ鈷戠紒瀣儥閸庢劙鏌涢弮鈧悷鈺呯嵁閸愩剮鏃堝川椤撶喎绁舵俊鐐€栭幐楣冨磹椤愶箑顫呴幒铏濠婂牊鐓忓鑸电☉椤╊剛绱掗悩鎰佺劷缂佽鲸甯楀蹇涘Ω閿曗偓闂夊秹姊洪悷鏉挎Щ闁硅櫕锚閻ｇ兘顢曢敃鈧粈瀣棯閻楀煫顏呯閸撗€鍋撻崗澶婁壕闂佸憡娲﹂崜娑㈠储闁秵鈷戦梻鍫熻儐瑜版帒纾块柟鎯版閺勩儵鏌ㄥ┑鍡樼闁稿鎸搁埢鎾诲垂椤旂晫浜俊鐐€ら崢楣冨礂濡警鍤曟い鎰剁畱缁犳稒銇勯幘璺轰户缂佹劗鍋炵换婵嬫偨闂堟刀銏ゆ倵濮樺崬鍘寸€规洏鍎靛畷銊р偓娑櫱氶幏缁樼箾鏉堝墽鎮奸柟铏崌椤㈡艾饪伴崨顖滐紲闁荤姴娲﹁ぐ鍐焵椤掆偓濞硷繝鎮伴钘夌窞濠电偟鍋撻～宥夋⒑闂堟稓绠冲┑顔惧厴椤㈡瑩骞掗弮鍌滐紳闂佺ǹ鏈悷褔宕濆鍡愪簻妞ゆ挾鍋為崰妯尖偓瑙勬磸閸ㄤ粙鐛弽銊﹀闁稿繐顦扮€氬ジ姊绘担鍛婂暈缂佸鍨块弫鍐晲閸ヮ煈鍋ㄩ梻渚囧墮缁夌敻鎮￠弴銏＄厽婵☆垵顕ф晶顖涚箾閸喓鐭岄柍褜鍓濋～澶娒哄鈧畷婵嗏枎閹捐泛绁﹂梺鎼炲労閸撴岸宕戠€ｎ喗鐓曟い鎰Т閻忊晜顨ラ悙鏉戝闁哄矉绲鹃幆鏃堝灳閸愯尪绶熼梻浣呵归鍡涘箲閸ヮ剙绠栨俊銈呮噺閺呮煡骞栫划鍏夊亾閹颁焦楠勯梻鍌欐缁鳖喚绮婚幋锔藉亱闁规崘顕х粻鏍ㄤ繆閵堝懎鏆為柛鐘叉閺屾盯寮撮妸銉ヮ潾濡炪倧璐熼崝鎴﹀蓟閿濆顫呴柍杞拌兌娴狀參鏌ｉ姀鈺佺仯闁哥姵鐗犻獮鍐潨閳ь剟鐛幒鎳虫梹鎷呴崫鍕闂傚倷鑳剁划顖炲礉閺囥埄鏁嬫い鎾卞灩閻撴繈鏌熼崜褏甯涢柣鎾冲暟閹茬ǹ饪伴崼婵堫槶濠电偛妫欓幐鎼佸磼閵娾晜鐓涚€广儱鍟俊鍧楁煟濠靛棛鍩ｉ柡宀嬬節瀹曞爼濡烽妷褌鐥梻浣瑰▕閺€閬嶅垂閸ф钃熸繛鎴炃氶弨浠嬫煕閳╁喚娈㈠ù灏栧亾闂傚倷绀侀悿鍥敋瑜旇棟闁汇垻枪閽冪喐绻涢幋鐐茬劰闁稿鎹囬弫宥夊础閻愬弶娈ㄦ繝銏ｎ潐濞茬喎顫忔繝姘＜婵炲棙甯掗崢锟犳煛鐎ｅ吀绨奸柕鍥у楠炲鈹戦崶鑸碉紗婵°倗濮烽崑鐐哄礉濞嗘挾宓侀柡宥冨妿閻熺懓鈹戦悩鎻掝伀闁崇鍊栫换婵嬫偨闂堟稈鏋呭┑鐐板尃閸ヨ埖鏅為梺鍦濠㈡﹢寮告笟鈧弻娑㈠焺閸愵亖濮囬梺缁樻尰濞茬喖骞冨鈧幃娆撳箵閹哄棙瀵栭梻浣芥〃閻掞箓鎮ч悩璇茶摕闁哄洨鍠撶粻楣冩煟閹伴潧澧柣婵囨礋濮婃椽骞庨懞銉︽殸闂佹悶鍔屽鈥愁嚕鐠囨祴妲堟俊顖炴敱閺傗偓闂備胶纭堕崜婵嬨€冭箛鏂款嚤闁稿本鍑瑰〒濠氭煏閸繈顎楀ù婊冨⒔缁辨帡鎮╅搹顐㈢３閻庢鍠涢褔鍩ユ径鎰潊闁绘鏁稿澶愭⒒娓氣偓閳ь剛鍋涢懟顖涙櫠鐎电硶鍋撶憴鍕缂傚秴锕ら悾椋庣矙鐠囩偓妫冨畷姗€濡歌閸嬪﹪姊婚崒娆戭槮闁硅绻濆畷婵嬫晝閸屾氨鐛ラ梺鍝勭▉閸欏繒绱為弽顓熺厱婵炴垶顭囬幗鐘绘煟閹惧磭绠婚柡灞剧洴椤㈡洟鏁愰崶鈺冩毇闂備線娼荤徊钘夛耿鏉堚晜顫曢柟鐑橆殔缁犳稒銇勯幘璺盒涘┑顔兼川缁辨挻鎷呴搹鐟扮缂備浇顕ч悧鎾荤嵁閸愨晝顩烽悗锝庡亽濡啫鈹戦悙娈挎缂傚牅鍗冲畷瑙勭鐎ｎ亞鐣哄┑掳鍊愰崑鎾淬亜椤愶絿绠炴慨濠呭吹閳ь剟娼ч幉锟犲疾閸忚偐绡€缁剧増菤閸嬫捇宕橀懠顒勭崜闂備礁鎲″褰掓偡閵夆晩鏁嬮柨婵嗩槸缁犵粯銇勯弮鍌楁嫛婵炵厧锕娲箮閼恒儲娈伴梺绋款儐閹瑰洭寮婚悢鍓叉Ч閹艰揪绲界粭锛勭磽娴ｈ櫣甯涚紒瀣笒椤洩绠涘☉妯碱槶閻熸粌绉瑰畷鍝勭暆閸曨兘鎷虹紒缁㈠幖閹冲氦顣跨紓鍌欑贰閸犳牕霉閻戣棄绀嗛柟鐑橆殔缁秹鏌涢銈呮瀻闁逞屽墰缁垱绌辨繝鍥舵晬闁绘劕鐡ㄩ悵宕囩磽娴ｉ潧濡兼い顓炲槻椤繐煤椤忓拋妫冨┑鐐村灱妞存悂顢撻崱娑欌拻闁稿本鑹鹃鈺呮倵濮樼厧澧撮柟顔藉劤閻ｏ繝骞嶉鑺ョ暦闂備線鈧偛鑻晶鎾煕閳规儳浜炬俊鐐€栫敮鎺楀窗濮橆剦鐒介柟閭﹀幘缁犻箖鏌涘▎蹇ｆ闁兼澘娼￠弻鏇㈠幢濡も偓閺嗭絿鈧娲忛崝宥咁焽韫囨稑绀堢憸蹇涘煟閵堝棛绡€闁汇垽娼у瓭闂佹寧娲忛崐婵嬪箖瑜斿畷鍗炩槈濞嗗繆鍋撻崸妤佺厱妞ゎ厽鍨垫禍鏍瑰⿰鍕煉闁哄瞼鍠栧畷顐﹀礋椤掑顥ｅ┑鐐茬摠缁秹宕曢幎瑙ｂ偓鏃堝礃椤斿槈褔鏌涢埄鍐剧劷闁宠绋撶槐鎾诲磼濮樻瘷锛勭磼閼搁潧鍝哄┑鈥崇摠缁楃喖鍩€椤掆偓椤曪綁骞橀纰辨綂闂佹枼鏅涢崯顖炴偟閺嶎厽鈷掑〒姘ｅ亾闁逞屽墰閸嬫盯鎳熼娑欐珷闁规鍠氱壕鍏笺亜閺冨倵鎷￠柣鎾炽偢閺岀喓绮甸崷顓犵槇婵犵鈧磭鍩ｇ€规洖鐖奸崺锛勨偓锝庡墴濡嘲鈹戦悩鍨毄闁稿濞€楠炴捇顢旈崱娆戭槸婵炴挻鍩冮崑鎾淬亜閵忊剝宕岀€规洘鍎奸¨浣圭箾鐏忔牗娅婇柟顔款潐閵堬箓骞愭惔顔诲摋婵＄偑鍊栭弻銊ッ洪鐑嗘綎婵炲樊浜濋悞濠氭煟閹邦垰钄奸悗姘緲椤儻顦查柣掳鍔戦獮鍫ュΩ閿斿墽鐦堥梺鍛婂姀閺傚倹绂掗姀銈嗏拺闁革富鍙庨崝婊呯磼缂佹绠栧ǎ鍥э躬瀹曞ジ寮撮悙鑼崺闂備礁鎲℃笟妤呭磻閸曨垱鍊堕柡灞诲劜閻撴稓鈧厜鍋撻柍褜鍓熷畷浼村箻鐠囪尙鐛ユ繝鐢靛Т濞层倗娑甸埀顒勬⒑缂佹ê濮堟繝銏★耿瀵悂宕奸悢鍓佺畾闂侀潧鐗嗗ú銈呮毄闂備胶枪椤戝洭宕戦妶澶婄畺鐟滄棃骞冮埡浣囇囧炊閿濆懍澹曟繛鎾村焹閸嬫挾鈧鍠楅幐铏叏閳ь剟鏌嶉埡浣告殲闁绘繃娲熷缁樻媴閽樺－鎾绘煥濮橆厹浜滈柨鏃囶嚙閺嬨倝鏌ゅú顏冩喚鐎规洖缍婇、鏇㈠Χ閸モ晜顫岄梻鍌欑劍閻綊宕归挊澶樼劷鐟滃海绮嬮幒妤佹櫇闁稿本绋撻崢鍗烆渻閵堝骸骞楅柛銊ф暬閹﹢鏁傞柨顖氫壕閻熸瑥瀚粈鍫ユ煙閾忣偅灏甸柛娆忔噹椤啴濡堕崨顖滎唶闂佺懓鍟跨€涒晝绮嬪鍛傛棃宕ㄩ瑙勫闂傚倸鍊搁悧濠冪瑹濡も偓鍗遍柟缁㈠枟閻撴盯鏌涘☉鍗炴灓闁活厽甯￠弻鐔碱敋閸℃瑧鐦堥梺璇″枔閸ㄨ棄鐣峰Δ鍛殐闁宠桨绀佺粻浼存⒒閸屾瑧鍔嶉柟顔肩埣瀹曟洟顢氶埀顒€顕ｉ幓鎺嗘婵炲棙鍩堝ù鍕攽閻樿宸ラ柣妤€锕幃锟犲礃椤忓懎鏋戝┑鐘诧工閻楀棛绮堥崼鐔虹闁糕剝顨婇悰婊堟煠閺夋寧鍋ユ慨濠冩そ椤㈡鍩€椤掑倻鐭撻柟缁㈠枟閸婂潡鏌涢…鎴濅簴濞存粍绮撻弻鐔煎传閸曨厜銉╂煕韫囨挾鐒搁柡灞剧洴閹垽宕妷銉ョ哗闂備礁鎼惉濂稿窗閺嵮呮殾婵炲棙鎸稿洿闂佺硶鍓濋〃蹇斿閿燂拷 */
+    mailbox_code = can_mailbox_code_get(CAN2, mailbox_index);
+    if(mailbox_code != CAN_MB_TX_STATUS_INACTIVE) {
+        return ERROR; /* 闂傚倸鍊搁崐鎼佸磹閹间礁纾归柟闂寸绾惧綊鏌熼梻瀵割槮缁炬儳缍婇弻鐔兼⒒鐎靛壊妲紒鐐劤缂嶅﹪寮婚悢鍏尖拻閻庨潧澹婂Σ顔剧磼閻愵剙鍔ゆ繝鈧柆宥呯劦妞ゆ帒鍊归崵鈧柣搴㈠嚬閸欏啫鐣峰畷鍥ь棜閻庯絻鍔嬪Ч妤呮⒑閸︻厼鍔嬮柛銊ョ秺瀹曟劙鎮欓悜妯轰画濠电姴锕ら崰姘熼埀顒勬倵濞堝灝鏋熼柟顔煎€搁锝嗙鐎ｅ灚鏅ｉ梺缁樻煥閹碱偊鐛幇鐗堚拻濞达綀顫夐崑鐘绘煕鎼搭喖鐏︾€规洘娲熼弻鍡楊吋閸℃せ鍋撻崼鏇熺厓闁告繂瀚弳鐔虹棯閹佸仮闁哄瞼鍠栭弻鍥晝閳ь剙顕ｉ悙顒傜闁割偆鍠撻惌鎺楁煛鐏炵硶鍋撳畷鍥ㄦ畷闂侀€炲苯澧寸€规洑鍗冲浠嬵敇閻愮數鏆柣鐔哥矋閺屻劑鎮鹃柨瀣檮闁告稑锕ゆ禍婊堟⒑閸涘﹦绠撻悗姘煎墮閳绘捇濡烽埡鍌楁嫽闂佺ǹ鏈悷褔藝閿曞倹鐓欓悹鍥囧懐鐦堥悗瑙勬礀濠€閬嶅箟閹绢喖绀嬫い鎺嗗亾鐎殿喖娼″娲捶椤撯剝顎楅梺鍝ュУ閻楃娀骞冮垾鎰佹建闁逞屽墴瀵鎮㈤崨濠勭Ф婵°倧绲介崯顖烆敁瀹ュ鈷戠紒瀣儥閸庢劙鏌涢弮鈧悷鈺呯嵁閸愩剮鏃堝川椤撶喎绁舵俊鐐€栭幐楣冨磹椤愶箑顫呴幒铏濠婂牊鐓忓鑸电☉椤╊剛绱掗悩鎰佺劷缂佽鲸甯楀蹇涘Ω閿曗偓闂夊秹姊洪悷鏉挎Щ闁硅櫕锚閻ｇ兘顢曢敃鈧粈瀣棯閻楀煫顏呯閸撗€鍋撻崗澶婁壕闂佸憡娲﹂崜娑㈠储闁秵鈷戦梻鍫熻儐瑜版帒纾块柟鎯版閺勩儵鏌ㄥ┑鍡樼闁稿鎸搁埢鎾诲垂椤旂晫浜俊鐐€ら崢楣冨礂濡警鍤曟い鎰剁畱缁犳稒銇勯幘璺轰户缂佹劗鍋炵换婵嬫偨闂堟刀銏ゆ倵濮樺崬鍘寸€规洏鍎靛畷銊р偓娑櫱氶幏缁樼箾鏉堝墽鎮奸柟铏崌椤㈡艾饪伴崨顖滐紲闁荤姴娲﹁ぐ鍐焵椤掆偓濞硷繝鎮伴钘夌窞濠电偟鍋撻～宥夋⒑闂堟稓绠冲┑顔惧厴椤㈡瑩骞掗弮鍌滐紳闂佺ǹ鏈悷褔宕濆鍡愪簻妞ゆ挾鍋為崰妯尖偓瑙勬磸閸ㄤ粙鐛弽銊﹀闁稿繐顦扮€氬ジ姊绘担鍛婂暈缂佸鍨块弫鍐晲閸ヮ煈鍋ㄩ梻渚囧墮缁夌敻鎮￠弴銏＄厽婵☆垵顕ф晶顖涚箾閸喓鐭岄柍褜鍓濋～澶娒哄鈧畷婵嗏枎閹捐泛绁﹂梺鎼炲労閸撴岸宕戠€ｎ喗鐓曟い鎰Т閻忊晜顨ラ悙鏉戝闁哄矉绲鹃幆鏃堝灳閸愯尪绶熼梻浣呵归鍡涘箲閸ヮ剙绠栨俊銈呮噺閺呮煡骞栫划鍏夊亾閹颁焦楠勯梻鍌欐缁鳖喚绮婚幋锔藉亱闁规崘顕х粻鏍ㄤ繆閵堝懎鏆為柛鐘叉閺屾盯寮撮妸銉ヮ潾濡炪倧璐熼崝鎴﹀蓟閿濆顫呴柍杞拌兌娴狀參鏌ｉ姀鈺佺仯闁哥姵鐗犻獮鍐潨閳ь剟鐛幒鎳虫梹鎷呴崫鍕闂傚倷鑳剁划顖炲礉閺囥埄鏁嬫い鎾卞灩閻撴繈鏌熼崜褏甯涢柣鎾冲暟閹茬ǹ饪伴崼婵堫槶濠电偛妫欓幐鎼佸磼閵娾晜鐓涚€广儱鍟俊鍧楁煟濠靛棛鍩ｉ柡宀嬬節瀹曞爼濡烽妷褌鐥梻浣瑰▕閺€閬嶅垂閸ф钃熸繛鎴炃氶弨浠嬫煕閳╁喚娈㈠ù灏栧亾闂傚倷绀侀悿鍥敋瑜旇棟闁汇垻枪閽冪喐绻涢幋鐐茬劰闁稿鎹囬弫宥夊础閻愬弶娈ㄦ繝銏ｎ潐濞茬喎顫忔繝姘＜婵炲棙甯掗崢锟犳煛鐎ｅ吀绨奸柕鍥у楠炲鈹戦崶鑸碉紗婵°倗濮烽崑鐐哄礉濞嗘挾宓侀柡宥冨妿閻熺懓鈹戦悩鎻掝伀闁崇鍊栫换婵嬫偨闂堟稈鏋呭┑鐐板尃閸忕姴缍婂畷鎺戭潩閼测晛濮烘繝鐢靛仜濡瑩骞愭繝姘亗婵炴垶鍩冮崑鎾荤嵁閸喖濮庨梺鍝ュ櫏閸嬪懏绌辨繝鍐浄閻庯綆鍋嗛崢鎼佹⒑缁洖澧查柣鐔村劜缁傛帟顦寸紒杈ㄥ笚濞煎繘濡搁敃鈧壕鎶芥倵鐟欏嫭绀冮悽顖涘浮閸┿垺鎯旈妸銉ь唺闂佺懓鐡ㄧ换鍌炴嚈閹邦厾绡€闁汇垽娼ф牎濡炪倖姊归悧鐘茬暦閺夋娼╅悹铏瑰劋閻庮剟姊洪崨濠勭細闁稿酣浜跺畷鐟扳攽閸モ晝顔曢梺绯曞墲钃遍悘蹇ｅ幘缁辨帡鎮崨顖溞滈梺鍝勮閸旀垵顕ｉ弶鎳虫棃鍩€椤掍胶顩插Δ锝呭暞閳锋垹绱撴担鑲℃垹浜搁幍顔剧＜閻犲洩灏欐晶锕傛煟濞戝崬娅嶇€殿喕绮欓垾鏍Ψ閵夆晛寮板銈冨灪椤ㄥ﹪宕洪埀顒併亜閹哄秵顦风紒璇叉閺屻倕霉鐎ｎ偅鐝栫紒鐐劤閵堟悂寮婚敐鍛瀻闊洦鏌ㄥ▍褏绱撴担鍓插剰妞ゎ厾鍏樺濠氬即閵忕姷鍊為悷婊冪Ч椤㈡棃顢橀悤浣诡啍闂佺粯鍔栭幆宀勬倿娴犲鐓欓柣鐔告緲椤忣參鏌熼鐣岀煀閾伙綁鎮樿箛鏃傚ⅹ濞存粓绠栭弻鐔碱敍閸℃婀伴悗闈涚焸濮婃椽妫冨☉姘暫濠碘槅鍋呴悷鈺勬＂闂佸搫绋侀崢浠嬫偂濞嗘挻鐓曢柟瀛樼懃閳ь剚鐗滈埀顒佺啲閹凤拷 */
+    }
+    
+    
+    /* 闂傚倸鍊搁崐鎼佸磹閹间礁纾归柟闂寸绾惧綊鏌熼梻瀵割槮缁炬儳缍婇弻鐔兼⒒鐎靛壊妲紒鐐劤缂嶅﹪寮婚悢鍏尖拻閻庨潧澹婂Σ顔剧磼閻愵剙鍔ゆ繝鈧柆宥呯劦妞ゆ帒鍊归崵鈧柣搴㈠嚬閸欏啫鐣峰畷鍥ь棜閻庯絻鍔嬪Ч妤呮⒑閸︻厼鍔嬮柛銊ョ秺瀹曟劙鎮欓悜妯轰画濠电姴锕ら崰姘熼埀顒勬倵濞堝灝鏋熼柟顔煎€搁锝嗙鐎ｅ灚鏅ｉ梺缁樻煥閹碱偊鐛幇鐗堚拻濞达綀顫夐崑鐘绘煕鎼搭喖鐏︾€规洘娲熼弻鍡楊吋閸℃せ鍋撻崼鏇熺厓闁告繂瀚弳鐔虹棯閹佸仮闁哄瞼鍠栭弻鍥晝閳ь剙顕ｉ悙顒傜闁割偆鍠撻惌鎺楁煛鐏炵硶鍋撳畷鍥ㄦ畷闂侀€炲苯澧寸€规洑鍗冲浠嬵敇閻愮數鏆柣鐔哥矋閺屻劑鎮鹃柨瀣檮闁告稑锕ゆ禍婊堟⒑閸涘﹦绠撻悗姘煎墮閳绘捇濡烽埡鍌楁嫽闂佺ǹ鏈悷褔藝閿曞倹鐓欓悹鍥囧懐鐦堥悗瑙勬礀濠€閬嶅箟閹绢喖绀嬫い鎺嗗亾鐎殿喖娼″娲捶椤撯剝顎楅梺鍝ュУ閻楃娀骞冮垾鎰佹建闁逞屽墴瀵鎮㈤崨濠勭Ф婵°倧绲介崯顖烆敁瀹ュ鈷戠紒瀣儥閸庢劙鏌涢弮鈧悷鈺呯嵁閸愩剮鏃堝川椤撶喎绁舵俊鐐€栭幐楣冨磹椤愶箑顫呴幒铏濠婂牊鐓忓鑸电☉椤╊剛绱掗悩鎰佺劷缂佽鲸甯楀蹇涘Ω閿曗偓闂夊秹姊洪悷鏉挎Щ闁硅櫕锚閻ｇ兘顢曢敃鈧粈瀣棯閻楀煫顏呯閸撗€鍋撻崗澶婁壕闂佸憡娲﹂崜娑㈠储闁秵鈷戦梻鍫熻儐瑜版帒纾块柟鎯版閺勩儵鏌ㄥ┑鍡樼闁稿鎸搁埢鎾诲垂椤旂晫浜俊鐐€ら崢楣冨礂濡警鍤曟い鎰剁畱缁犳稒銇勯幘璺轰户缂佹劗鍋炵换婵嬫偨闂堟刀銏ゆ倵濮樺崬鍘寸€规洏鍎靛畷銊р偓娑櫱氶幏缁樼箾鏉堝墽鎮奸柟铏崌椤㈡艾饪伴崨顖滐紲闁荤姴娲﹁ぐ鍐焵椤掆偓濞硷繝鎮伴钘夌窞濠电偟鍋撻～宥夋⒑闂堟稓绠冲┑顔惧厴椤㈡瑩骞掗弮鍌滐紳闂佺ǹ鏈悷褔宕濆鍡愪簻妞ゆ挾鍋為崰妯尖偓瑙勬磸閸ㄤ粙鐛弽銊﹀闁稿繐顦扮€氬ジ姊绘担鍛婂暈缂佸鍨块弫鍐晲閸ヮ煈鍋ㄩ梻渚囧墮缁夌敻鎮￠弴銏＄厽婵☆垵顕ф晶顖涚箾閸喓鐭岄柍褜鍓濋～澶娒哄鈧畷婵嗏枎閹捐泛绁﹂梺鎼炲労閸撴岸宕戠€ｎ喗鐓曟い鎰Т閻忊晜顨ラ悙鏉戝闁哄矉绲鹃幆鏃堝灳閸愯尪绶熼梻浣呵归鍡涘箲閸ヮ剙绠栨俊銈呮噺閺呮煡骞栫划鍏夊亾閹颁焦楠勯梻鍌欐缁鳖喚绮婚幋锔藉亱闁规崘顕х粻鏍ㄤ繆閵堝懎鏆為柛鐘叉閺屾盯寮撮妸銉ヮ潾濡炪倧璐熼崝鎴﹀蓟閿濆顫呴柍杞拌兌娴狀參鏌ｉ姀鈺佺仯闁哥姵鐗犻獮鍐潨閳ь剟鐛幒鎳虫梹鎷呴崫鍕闂傚倷鑳剁划顖炲礉閺囥埄鏁嬫い鎾卞灩閻撴繈鏌熼崜褏甯涢柣鎾冲暟閹茬ǹ饪伴崼婵堫槶濠电偛妫欓幐鎼佸磼閵娾晜鐓涚€广儱鍟俊鍧楁煟濠靛棛鍩ｉ柡宀嬬節瀹曞爼濡烽妷褌鐥梻浣瑰▕閺€閬嶅垂閸ф钃熸繛鎴炃氶弨浠嬫煕閳╁喚娈㈠ù灏栧亾闂傚倷绀侀悿鍥敋瑜旇棟闁汇垻枪閽冪喐绻涢幋鐐茬劰闁稿鎹囬弫宥夊础閻愬弶娈ㄦ繝銏ｎ潐濞茬喎顫忔繝姘＜婵炲棙甯掗崢锟犳煛鐎ｅ吀绨奸柕鍥у楠炲鈹戦崶鑸碉紗婵°倗濮烽崑鐐哄礉濞嗘挾宓侀柡宥冨妿閻熺懓鈹戦悩鎻掝伀闁崇鍊栫换婵嬫偨闂堟稈鏋呭┑鐐板尃閸ヨ埖鏅為梺鍦濠㈡﹢寮告笟鈧弻娑㈠焺閸愵亖濮囬梺缁樻尰濞茬喖骞冨鈧幃娆撳箵閹哄棙瀵栭梻浣芥〃閻掞箓鎮ч悩璇茶摕闁哄洨鍠撶粻楣冩煟閹伴潧澧柣婵囨礋濮婃椽骞庨懞銉︽殸闂佹悶鍔屽鈥愁嚕鐠囨祴妲堟俊顖炴敱閺傗偓闂備胶纭堕崜婵嬨€冭箛鏂款嚤闁稿本鍑瑰〒濠氭煏閸繈顎楀ù婊冨⒔缁辨帡鎮╅搹顐㈢３閻庢鍠涢褔鍩ユ径鎰潊闁绘鏁稿澶愭⒒娓氣偓閳ь剛鍋涢懟顖涙櫠鐎电硶鍋撶憴鍕缂傚秴锕ら悾椋庣矙鐠囩偓妫冨畷姗€濡歌閸嬪﹪姊婚崒娆戭槮闁硅绻濆畷婵嬫晝閸屾氨鐛ラ梺鍝勭▉閸欏繒绱為弽顓熺厱婵炴垶顭囬幗鐘绘煟閹惧磭绠婚柡灞剧洴椤㈡洟鏁愰崶鈺冩毇闂備線娼荤徊钘夛耿鏉堚晜顫曢柟鐑橆殔缁犳稒銇勯幘璺盒涘┑顔兼川缁辨挻鎷呴搹鐟扮缂備浇顕ч悧鎾荤嵁閸愨晝顩烽悗锝庡亽濡啫鈹戦悙娈挎缂傚牅鍗冲畷瑙勭鐎ｎ亞鐣哄┑掳鍊愰崑鎾淬亜椤愶絿绠炴慨濠呭吹閳ь剟娼ч幉锟犲疾閸忚偐绡€缁剧増菤閸嬫捇宕橀懠顒勭崜闂備礁鎲″褰掓偡閵夆晩鏁嬮柨婵嗩槸缁犵粯銇勯弮鍌楁嫛婵炵厧锕娲箮閼恒儲娈伴梺绋款儐閹瑰洭寮婚悢鍓叉Ч閹艰揪绲界粭锛勭磽娴ｈ櫣甯涚紒瀣笒椤洩绠涘☉妯碱槶閻熸粌绉瑰畷鍝勭暆閸曨兘鎷虹紒缁㈠幖閹冲氦顣跨紓鍌欑贰閸犳牕霉閻戣棄绀嗛柟鐑橆殔缁秹鏌涢銈呮瀻闁逞屽墰缁垱绌辨繝鍥舵晬闁绘劕鐡ㄩ悵宕囩磽娴ｉ潧濡兼い顓炲槻椤繐煤椤忓拋妫冨┑鐐村灱妞存悂顢撻崱娑欌拻闁稿本鑹鹃鈺呮倵濮樼厧澧撮柟顔藉劤閻ｏ繝骞嶉鑺ョ暦闂備線鈧偛鑻晶鎾煕閳规儳浜炬俊鐐€栫敮鎺楀窗濮橆剦鐒介柟閭﹀幘缁犻箖鏌涘▎蹇ｆ闁兼澘娼￠弻鏇㈠幢濡も偓閺嗭絿鈧娲忛崝宥咁焽韫囨稑绀堢憸蹇涘煟閵堝棛绡€闁汇垽娼у瓭闂佹寧娲忛崐婵嬪箖瑜斿畷鍗炩槈濞嗗繆鍋撻崸妤佺厱妞ゎ厽鍨垫禍鏍瑰⿰鍕煉闁哄瞼鍠栧畷顐﹀礋椤掑顥ｅ┑鐐茬摠缁秹宕曢幎瑙ｂ偓鏃堝礃椤斿槈褔鏌涢埄鍐剧劷闁宠绋撶槐鎾诲磼濮樻瘷锛勭磼閼搁潧鍝哄┑鈥崇摠缁楃喖鍩€椤掆偓椤曪綁骞橀纰辨綂闂佹枼鏅涢崯顖炴偟閺嶎厽鈷掑〒姘ｅ亾闁逞屽墰閸嬫盯鎳熼娑欐珷闁规鍠氱壕鍏笺亜閺冨倵鎷￠柣鎾炽偢閺岀喓绮甸崷顓犵槇婵犵鈧磭鍩ｇ€规洖鐖奸崺锛勨偓锝庡墴濡嘲鈹戦悩鍨毄闁稿濞€楠炴捇顢旈崱娆戭槸闂侀€炲苯澧撮柡灞剧〒閳ь剨缍嗘禍婊堝焵椤掆偓濞硷繝鎮伴閿亾閿濆簼绨撮柡鈧禒瀣厱闁硅埇鍔嶅▍鍥煃瑜滈崜姘渻閽樺娼栨繛宸簼椤ュ牊绻涢幋鐐寸殤闁汇倕瀚板铏圭矙閸栤剝鏁鹃梺缁橆殘婵炩偓鐎规洖鎼埥澶愬閻樻鍚呴梻浣瑰濡礁螞閸曨剛顩锋い鏍仦閳锋垿鎮归崶锝傚亾閸愯尙顔戦梺姹囧焺閸ㄨ京鏁Δ浣衡攳濠电姴娲ょ粈鍌炴煠濞村娅囨い鏃€娲熷娲川婵犱胶绻侀梺鍝ュУ閻楁骞堥妸銉悑濠㈣泛顑囬崢鎼佹倵閸忓浜鹃梺閫炲苯澧寸€规洑鍗冲鍊燁槾闁哄棴闄勭换娑㈠幢濡纰嶉柛銉︽尦濮婅櫣鍖栭弴鐐测拤濡炪們鍔岀换鎴犫偓闈涖偢閺佹捇鏁撻敓锟� */
+    for(int i = 0; i < length; i++) {
+        can2transmit_message.data[i] = can2txdata[i];
+    }
+    
+    /* 闂傚倸鍊搁崐鎼佸磹閹间礁纾归柟闂寸绾惧綊鏌熼梻瀵割槮缁炬儳缍婇弻鐔兼⒒鐎靛壊妲紒鐐劤缂嶅﹪寮婚悢鍏尖拻閻庨潧澹婂Σ顔剧磼閻愵剙鍔ゆ繝鈧柆宥呯劦妞ゆ帒鍊归崵鈧柣搴㈠嚬閸欏啫鐣峰畷鍥ь棜閻庯絻鍔嬪Ч妤呮⒑閸︻厼鍔嬮柛銊ョ秺瀹曟劙鎮欓悜妯轰画濠电姴锕ら崰姘熼埀顒勬倵濞堝灝鏋熼柟顔煎€搁锝嗙鐎ｅ灚鏅ｉ梺缁樻煥閹碱偊鐛幇鐗堚拻濞达綀顫夐崑鐘绘煕鎼搭喖鐏︾€规洘娲熼弻鍡楊吋閸℃せ鍋撻崼鏇熺厓闁告繂瀚弳鐔虹棯閹佸仮闁哄瞼鍠栭弻鍥晝閳ь剙顕ｉ悙顒傜闁割偆鍠撻惌鎺楁煛鐏炵硶鍋撳畷鍥ㄦ畷闂侀€炲苯澧寸€规洑鍗冲浠嬵敇閻愮數鏆柣鐔哥矋閺屻劑鎮鹃柨瀣檮闁告稑锕ゆ禍婊堟⒑閸涘﹦绠撻悗姘煎墮閳绘捇濡烽埡鍌楁嫽闂佺ǹ鏈悷褔藝閿曞倹鐓欓悹鍥囧懐鐦堥悗瑙勬礀濠€閬嶅箟閹绢喖绀嬫い鎺嗗亾鐎殿喖娼″娲捶椤撯剝顎楅梺鍝ュУ閻楃娀骞冮垾鎰佹建闁逞屽墴瀵鎮㈤崨濠勭Ф婵°倧绲介崯顖烆敁瀹ュ鈷戠紒瀣儥閸庢劙鏌涢弮鈧悷鈺呯嵁閸愩剮鏃堝川椤撶喎绁舵俊鐐€栭幐楣冨磹椤愶箑顫呴幒铏濠婂牊鐓忓鑸电☉椤╊剛绱掗悩鎰佺劷缂佽鲸甯楀蹇涘Ω閿曗偓闂夊秹姊洪悷鏉挎Щ闁硅櫕锚閻ｇ兘顢曢敃鈧粈瀣棯閻楀煫顏呯閸撗€鍋撻崗澶婁壕闂佸憡娲﹂崜娑㈠储闁秵鈷戦梻鍫熻儐瑜版帒纾块柟鎯版閺勩儵鏌ㄥ┑鍡樼闁稿鎸搁埢鎾诲垂椤旂晫浜俊鐐€ら崢楣冨礂濡警鍤曟い鎰剁畱缁犳稒銇勯幘璺轰户缂佹劗鍋炵换婵嬫偨闂堟刀銏ゆ倵濮樺崬鍘寸€规洏鍎靛畷銊р偓娑櫱氶幏缁樼箾鏉堝墽鎮奸柟铏崌椤㈡艾饪伴崨顖滐紲闁荤姴娲﹁ぐ鍐焵椤掆偓濞硷繝鎮伴钘夌窞濠电偟鍋撻～宥夋⒑闂堟稓绠冲┑顔惧厴椤㈡瑩骞掗弮鍌滐紳闂佺ǹ鏈悷褔宕濆鍡愪簻妞ゆ挾鍋為崰妯尖偓瑙勬磸閸ㄤ粙鐛弽銊﹀闁稿繐顦扮€氬ジ姊绘担鍛婂暈缂佸鍨块弫鍐晲閸ヮ煈鍋ㄩ梻渚囧墮缁夌敻鎮￠弴銏＄厽婵☆垵顕ф晶顖涚箾閸喓鐭岄柍褜鍓濋～澶娒哄鈧畷婵嗏枎閹捐泛绁﹂梺鎼炲労閸撴岸宕戠€ｎ喗鐓曟い鎰Т閻忊晜顨ラ悙鏉戝闁哄矉绲鹃幆鏃堝灳閸愯尪绶熼梻浣呵归鍡涘箲閸ヮ剙绠栨俊銈呮噺閺呮煡骞栫划鍏夊亾閹颁焦楠勯梺鑽ゅ仦閻旑剟姊介崟顒傗攳濠电姴娲﹂崐閿嬨亜韫囨挸顏ら柛瀣崌楠炲鏁冮埀顒勫垂閸岀偞鐓熼柟瀵稿剱閻掕棄霉閻樺磭顣插ǎ鍥э躬閹瑩顢旈崟銊ヤ壕鐟滄柨顫忔禒瀣妞ゆ棁妗ㄥЧ妤呮⒑閸涘﹤濮﹂柛鐘愁殘缁骞掗幘鍓佺槇闂佹眹鍨藉褍鐡梻浣瑰濞插繘宕愬Δ鍛劦妞ゆ帊绀侀崵顒勬煕閿濆繒绉鐐叉閻ｆ繈宕熼銈庡敽婵犲痉鏉库偓鎾绘嚄閸洖鍌ㄩ柟闂寸劍閻撶喖鐓崶銊︾濞寸姵绮岄…鑳樁婵☆偄瀚崣鍛存⒑閸濆嫷妲归柛銊у枛瀵劍绂掔€ｎ偆鍘撻梺闈涱槶閸庢娊鏁嶅澶嬬厱闁冲搫顑囬幃濂告煃瑜滈崜婵嬶綖婢跺⊕娲冀瑜忛弳锔姐亜閹烘垵顏╅柣鎾寸箞楠炴牕菐椤掆偓閳ь剚顨婇幃鍧楀焵椤掍胶绡€闁汇垽娼у瓭闂佸摜鍣ラ崑濠囥€侀弮鍫晬婵炴垶姘ㄩ惁鍫ユ倵閸忕ǹ宓嗛柡鈧崡鐑嗙唵婵せ鍋撻柛鈹惧亾濡炪倖甯婄欢鈥斥枔閺囥垺鐓欏〒姘仢婵倿鏌熼鐣岀煉闁圭ǹ锕ュ鍕暆鐎ｎ剙鑰挎繝鐢靛Х閺佹悂宕戦悙鍝勫瀭闁告挷绀侀弸鍫⑩偓骞垮劚閹虫劙寮抽敃鍌涚厱婵炲棗娴氬Σ褰掓煕濞嗗繒绠插ǎ鍥э躬閹瑦锛愬┑鍡橆唲濠电偛鐡ㄧ划宥夊磿鐎圭姷浜欓梻浣虹帛閿曘垹顭囪缁傛帒饪伴崼鐔哄幈闂佺粯娲戠粈浣圭娴煎瓨鐓忛柛顐亗缁ㄥジ鎮楅棃娑栧仮鐎殿喖鐖奸獮瀣晝閳ь剟寮ぐ鎺撯拻濞达綀娅ｇ敮娑欎繆椤愩垹鏆ｇ€殿喓鍔戦弻鍡楊吋閸℃ぞ鐥梻浣告啞缁嬫垿鎮洪妸鈺佺厱闁圭儤鍨埀顒佸笒椤繈鏁愰崨顒€顥氬┑鐘垫暩閸嬫﹢宕犻悩璇插惞闂婎剚褰冩慨鍌炴煕閳规儳浜炬俊鐐€栫敮鎺斺偓姘煎弮閸╂盯骞掑Δ浣哄幈闂佸搫娲㈤崝灞剧濠婂嫨浜滈煫鍥风到楠炴鏌曢崶褍顏┑顔瑰亾闂佹枼鏅涢崰姘涢崘顔解拺閻犲洠鈧櫕鐏侀梺鎼炲姀濡嫰鎮惧畡鎷旀棃宕樿閸撱劑姊洪崫鍕犻柛鏂跨焸椤㈡柨煤椤忓應鎷婚梺绋挎湰閻熴劑宕楀畝鍕嚑妞ゅ繐鐗婇悡娑㈡煕椤愵偄浜滃褎鎸抽弻鐔碱敊閻愵剛鍔瑰銈忕畱椤曨厾妲愰幒妤婃晪闁糕剝鐟цⅵ闁诲孩顔栭崳顕€宕抽敐澶婃槬闁逞屽墯閵囧嫰骞掗幋婵愪患婵℃鎳樺娲川婵犲啫顦╅梺鎼炲姂娴滆泛顕ｉ弻銉ヨ摕闁靛／鍐ㄧ导闂備焦鎮堕崕顖炲礉瀹ュ绠氶柛鏇ㄥ墰缁犲墽鈧懓澹婇崰鏍ь嚕椤曗偓閺岀喖顢欑粵瀣杹閻庤娲栫紞濠囥€侀弴銏℃櫜闁搞儜鍐╊吋闂傚倸鍊烽悞锔锯偓绗涘厾楦跨疀濞戞锛熼梺瑙勫劶濡嫮绮婚弻銉︾厪闊洦娲栬ⅴ闂佽　鍋撳ù鐘差儐閻撴洟鏌嶉柨顖氫壕闂佸搫鎳忕划鎾崇暦閹剧粯鍋ㄩ柛娑樑堥幏铏圭磽娴ｅ壊鍎撴繛澶嬫礈缁粯瀵肩€涙鍘卞┑顔斤供閸擄箓宕曡箛娑欑厓閻犲洩灏欐晥閻庢鍣崳锝夊春閳ь剚銇勯幒鎴濃偓鐟扮暦閸欏绡€闂傚牊渚楅崕鎰版煕鐎ｃ劌濮傛慨濠傤煼瀹曞ジ鎮㈠畡鎵偓顒勬⒑闂堟稓绠為柛濠冪墵閹繝濡烽埡鍌滃幐闂佹悶鍎洪悡渚€顢旈崼婵堝姦濡炪倖甯婇懗鍓佺不閻愭惌娈介柣鎰絻閺嗐垺銇勯敃鈧﹢閬嶅焵椤掑喚娼愭繛鍙夌墪閻ｇ兘顢楅崟顐ゅ幒闁瑰吋鐣崝宀€绮婚敐鍡欑瘈濠电姴鍊归崳浠嬫煙閼碱剚鍤€闁宠鍨块弫宥夊礋椤愨剝婢€闂備胶枪閿曘儵鎮ч悩璇茬畺鐟滃秹銈导鏉戦唶婵犻潧鐗炵槐閬嶆⒒娴ｈ櫣甯涢柛鏃€顨婂畷鏇㈠Χ婢跺﹦锛涢梺绋跨灱閸嬬偤鎮￠悢鍏肩厸闁稿本姘ㄦ禒銏ゆ煙椤旇棄鐏撮柡宀嬬秮楠炴鈧潧鎲￠崳浼存倵濞堝灝鏋涢柣鏍帶閻ｇ兘鎮℃惔妯绘杸闂佺硶鈧磭绠查悗鍨墵濮婄粯鎷呴崨濠傛殘闁汇埄鍨遍〃鍡欑博閻旂厧骞㈡繛鎴烆焽閻ｅ搫顪冮妶鍡樷拻闁冲嘲鐗嗛…鍥煛閸涱喚鍘鹃梺鍛婄缚閸庢椽寮抽鐐寸厵闂佸灝顑嗛妵婵囨叏婵犲啯銇濈€规洏鍔嶇换婵嬪礋椤撶姵娈奸梻浣筋嚙鐎涒晠宕欒ぐ鎺戠煑闁告劑鍔庨弳锕傛煕閹邦垼姊挎繛宸憾閺佸倿鏌涘☉鍗炵仩妤犵偛绉垫穱濠囨倷椤忓嫧鍋撻弽褜娼栧┑鐘宠壘閸屻劎鎲搁弮鍫濇槬闁逞屽墯閵囧嫰骞掗崱妞惧闂備浇顕х换鎴犳崲閸儯鈧礁顫濋懜鍨珳闂佺硶鍓濋悷褔鎯侀崼婵冩斀妞ゆ梹鏋绘笟娑㈡煕濡寧顥夐柍璇茬Ч婵偓闁靛牆妫岄幏铏圭磽閸屾瑧鍔嶉柕鍡樺浮瀹曠兘顢樺┑鍫濆⒕婵犵數鍋涘Λ娆撳箰婵犳艾鐤炬い鎺嶈兌缁♀偓婵犵數濮撮崐鎼佸汲婵犲洦鐓涢柍褜鍓氱粋鎺斺偓锝庡亞閸樻捇姊洪懞銉冾亪藝娴兼澶娾堪閸喓鍘介棅顐㈡搐椤戝懘宕濋敃鍌涚厸閻忕偟鍋撶粈瀣偓瑙勬礉缁墽绮诲☉銏犵闁圭粯甯╁Λ婊堟⒒閸屾艾鈧悂宕愰悜鑺ュ殑闁煎摜鏁告禒姘繆閻愵亜鈧牠宕归棃娴虫稑鈹戠€ｎ剙绁﹂梺纭呮彧缁犳垿鎮欐繝鍕枑婵犲﹤鐗嗛崥褰掓煛閸モ晙绱崇憸鐗堝笚閸嬫劗鈧懓澹婇崰鏍礈妤ｅ啯鈷戦弶鐐村椤︼箓鏌涢悢鍛婂唉鐎殿喖顭烽弫鎰緞婵犲嫮娼夐梻浣规偠閸庮垶宕濊箛娑樿Е闁稿本绋撶弧鈧梺闈涢獜缂嶅棗顭囬幇顓犵闁告瑥顦辨晶鐢告煕閳哄啫浠辨鐐差儔閺佸倻绱掑Ο缁樼彟缂傚倸鍊烽悞锔剧矙閹达富鏁勯柛銉墮缁€澶愭煟閹达絽袚闁抽攱鍨圭槐鎺斺偓锝庡亽閸庛儵鏌涙惔銏犲闁哄瞼鍠栭獮鏍ㄦ媴閾忚姣囬梻浣虹《閺備線宕戦幘鎰佹富闁靛牆妫楃粭鍌炴煠閸愯尙鍩ｇ€规洦鍨跺濠氬Ψ閿旀儳骞嶉梻浣告啞閸垶宕愰弽顐熷亾濮樼偓瀚� */
+    can2transmit_message.rtr = 0U;
+    can2transmit_message.ide = 0U;
+    can2transmit_message.code = CAN_MB_TX_STATUS_DATA;
+    can2transmit_message.brs = 0U;
+    can2transmit_message.fdf = 0U;
+    can2transmit_message.esi = 0U;
+    can2transmit_message.prio = 0U;
+    can2transmit_message.data_bytes = length;
+    can2transmit_message.id = id;
+    
+    /* 闂傚倸鍊搁崐鎼佸磹閹间礁纾归柟闂寸绾惧綊鏌熼梻瀵割槮缁炬儳缍婇弻鐔兼⒒鐎靛壊妲紒鐐劤缂嶅﹪寮婚悢鍏尖拻閻庨潧澹婂Σ顔剧磼閻愵剙鍔ゆ繝鈧柆宥呯劦妞ゆ帒鍊归崵鈧柣搴㈠嚬閸欏啫鐣峰畷鍥ь棜閻庯絻鍔嬪Ч妤呮⒑閸︻厼鍔嬮柛銊ョ秺瀹曟劙鎮欓悜妯轰画濠电姴锕ら崰姘熼埀顒勬倵濞堝灝鏋熼柟顔煎€搁锝嗙鐎ｅ灚鏅ｉ梺缁樻煥閹碱偊鐛幇鐗堚拻濞达綀顫夐崑鐘绘煕鎼搭喖鐏︾€规洘娲熼弻鍡楊吋閸℃せ鍋撻崼鏇熺厓闁告繂瀚弳鐔虹棯閹佸仮闁哄瞼鍠栭弻鍥晝閳ь剙顕ｉ悙顒傜闁割偆鍠撻惌鎺楁煛鐏炵硶鍋撳畷鍥ㄦ畷闂侀€炲苯澧寸€规洑鍗冲浠嬵敇閻愮數鏆柣鐔哥矋閺屻劑鎮鹃柨瀣檮闁告稑锕ゆ禍婊堟⒑閸涘﹦绠撻悗姘煎墮閳绘捇濡烽埡鍌楁嫽闂佺ǹ鏈悷褔藝閿曞倹鐓欓悹鍥囧懐鐦堥悗瑙勬礀濠€閬嶅箟閹绢喖绀嬫い鎺嗗亾鐎殿喖娼″娲捶椤撯剝顎楅梺鍝ュУ閻楃娀骞冮垾鎰佹建闁逞屽墴瀵鎮㈤崨濠勭Ф婵°倧绲介崯顖烆敁瀹ュ鈷戠紒瀣儥閸庢劙鏌涢弮鈧悷鈺呯嵁閸愩剮鏃堝川椤撶喎绁舵俊鐐€栭幐楣冨磹椤愶箑顫呴幒铏濠婂牊鐓忓鑸电☉椤╊剛绱掗悩鎰佺劷缂佽鲸甯楀蹇涘Ω閿曗偓闂夊秹姊洪悷鏉挎Щ闁硅櫕锚閻ｇ兘顢曢敃鈧粈瀣棯閻楀煫顏呯閸撗€鍋撻崗澶婁壕闂佸憡娲﹂崜娑㈠储闁秵鈷戦梻鍫熻儐瑜版帒纾块柟鎯版閺勩儵鏌ㄥ┑鍡樼闁稿鎸搁埢鎾诲垂椤旂晫浜俊鐐€ら崢楣冨礂濡警鍤曟い鎰剁畱缁犳稒銇勯幘璺轰户缂佹劗鍋炵换婵嬫偨闂堟刀銏ゆ倵濮樺崬鍘寸€规洏鍎靛畷銊р偓娑櫱氶幏缁樼箾鏉堝墽鎮奸柟铏崌椤㈡艾饪伴崨顖滐紲闁荤姴娲﹁ぐ鍐焵椤掆偓濞硷繝鎮伴钘夌窞濠电偟鍋撻～宥夋⒑闂堟稓绠冲┑顔惧厴椤㈡瑩骞掗弮鍌滐紳闂佺ǹ鏈悷褔宕濆鍡愪簻妞ゆ挾鍋為崰妯尖偓瑙勬磸閸ㄤ粙鐛弽銊﹀闁稿繐顦扮€氬ジ姊绘担鍛婂暈缂佸鍨块弫鍐晲閸ヮ煈鍋ㄩ梻渚囧墮缁夌敻鎮￠弴銏＄厽婵☆垵顕ф晶顖涚箾閸喓鐭岄柍褜鍓濋～澶娒哄鈧畷婵嗏枎閹捐泛绁﹂梺鎼炲労閸撴岸宕戠€ｎ喗鐓曟い鎰Т閻忊晜顨ラ悙鏉戝闁哄矉绲鹃幆鏃堝灳閸愯尪绶熼梻浣呵归鍡涘箲閸ヮ剙绠栨俊銈呮噺閺呮煡骞栫划鍏夊亾閹颁焦楠勯梻鍌欐缁鳖喚绮婚幋锔藉亱闁规崘顕х粻鏍ㄤ繆閵堝懎鏆為柛鐘叉閺屾盯寮撮妸銉ヮ潾濡炪倧璐熼崝鎴﹀蓟閿濆顫呴柍杞拌兌娴狀參鏌ｉ姀鈺佺仯闁哥姵鐗犻獮鍐潨閳ь剟鐛幒鎳虫梹鎷呴崫鍕闂傚倷鑳剁划顖炲礉閺囥埄鏁嬫い鎾卞灩閻撴繈鏌熼崜褏甯涢柣鎾冲暟閹茬ǹ饪伴崼婵堫槶濠电偛妫欓幐鎼佸磼閵娾晜鐓涚€广儱鍟俊鍧楁煟濠靛棛鍩ｉ柡宀嬬節瀹曞爼濡烽妷褌鐥梻浣瑰▕閺€閬嶅垂閸ф钃熸繛鎴炃氶弨浠嬫煕閳╁喚娈㈠ù灏栧亾闂傚倷绀侀悿鍥敋瑜旇棟闁汇垻枪閽冪喐绻涢幋鐐茬劰闁稿鎹囬弫宥夊础閻愬弶娈ㄦ繝銏ｎ潐濞茬喎顫忔繝姘＜婵炲棙甯掗崢锟犳煛鐎ｅ吀绨奸柕鍥у楠炲鈹戦崶鑸碉紗婵°倗濮烽崑鐐哄礉濞嗘挾宓侀柡宥冨妿閻熺懓鈹戦悩鎻掝伀闁崇鍊栫换婵嬫偨闂堟稈鏋呭┑鐐板尃閸ヨ埖鏅為梺鍦濠㈡﹢寮告笟鈧弻娑㈠焺閸愵亖濮囬梺缁樻尰濞茬喖骞冨鈧幃娆撳箵閹哄棙瀵栭梻浣芥〃閻掞箓鎮ч悩璇茶摕闁哄洨鍠撶粻楣冩煟閹伴潧澧柣婵囨礋濮婃椽骞庨懞銉︽殸闂佹悶鍔屽鈥愁嚕鐠囨祴妲堟俊顖炴敱閺傗偓闂備胶纭堕崜婵嬨€冭箛鏂款嚤闁稿本鍑瑰〒濠氭煏閸繈顎楀ù婊冨⒔缁辨帡鎮╅搹顐㈢３閻庢鍠涢褔鍩ユ径鎰潊闁绘鏁稿澶愭⒒娓氣偓閳ь剛鍋涢懟顖涙櫠鐎电硶鍋撶憴鍕缂傚秴锕ら悾椋庣矙鐠囩偓妫冨畷姗€濡歌閸嬪﹪姊婚崒娆戭槮闁硅绻濆畷婵嬫晝閸屾氨鐛ラ梺鍝勭▉閸欏繒绱為弽顓熺厱婵炴垶顭囬幗鐘绘煟閹惧磭绠婚柡灞剧洴椤㈡洟鏁愰崶鈺冩毇闂備線娼荤徊钘夛耿鏉堚晜顫曢柟鐑橆殔缁犳稒銇勯幘璺盒涘┑顔兼川缁辨挻鎷呴搹鐟扮缂備浇顕ч悧鎾荤嵁閸愨晝顩烽悗锝庡亽濡啫鈹戦悙娈挎缂傚牅鍗冲畷瑙勭鐎ｎ亞鐣哄┑掳鍊愰崑鎾淬亜椤愶絿绠炴慨濠呭吹閳ь剟娼ч幉锟犲疾閸忚偐绡€缁剧増菤閸嬫捇宕橀懠顒勭崜闂備礁鎲″褰掓偡閵夆晩鏁嬮柨婵嗩槸缁犵粯銇勯弮鍌楁嫛婵炵厧锕娲箮閼恒儲娈伴梺绋款儐閹瑰洭寮婚悢鍓叉Ч閹艰揪绲界粭锛勭磽娴ｈ櫣甯涚紒瀣笒椤洩绠涘☉妯碱槶閻熸粌绉瑰畷鍝勭暆閸曨兘鎷虹紒缁㈠幖閹冲氦顣跨紓鍌欑贰閸犳牕霉閻戣棄绀嗛柟鐑橆殔缁秹鏌涢銈呮瀻闁逞屽墰缁垱绌辨繝鍥舵晬闁绘劕鐡ㄩ悵宕囩磽娴ｉ潧濡兼い顓炲槻椤繐煤椤忓拋妫冨┑鐐村灱妞存悂顢撻崱娑欌拻闁稿本鑹鹃鈺呮倵濮樼厧澧撮柟顔藉劤閻ｏ繝骞嶉鑺ョ暦闂備線鈧偛鑻晶鎾煕閳规儳浜炬俊鐐€栫敮鎺楀窗濮橆剦鐒介柟閭﹀幘缁犻箖鏌涘▎蹇ｆ闁兼澘娼￠弻鏇㈠幢濡も偓閺嗭絿鈧娲忛崝宥咁焽韫囨稑绀堢憸蹇涘煟閵堝棛绡€闁汇垽娼у瓭闂佹寧娲忛崐婵嬪箖瑜斿畷鍗炩槈濞嗗繆鍋撻崸妤佺厱妞ゎ厽鍨垫禍鏍瑰⿰鍕煉闁哄瞼鍠栧畷顐﹀礋椤掑顥ｅ┑鐐茬摠缁秹宕曢幎瑙ｂ偓鏃堝礃椤斿槈褔鏌涢埄鍐剧劷闁宠绋撶槐鎾诲磼濮樻瘷锛勭磼閼搁潧鍝哄┑鈥崇摠缁楃喖鍩€椤掆偓椤曪綁骞橀纰辨綂闂佹枼鏅涢崯顖炴偟閺嶎厽鈷掑〒姘ｅ亾闁逞屽墰閸嬫盯鎳熼娑欐珷闁规鍠氱壕鍏笺亜閺傚灝鈷旈悽顖涚〒缁辨帞绱掑Ο鑲╃暤濡炪値鍋呯换鍫ャ€佸鈧幃娆撳级閸噮鍤欓梻鍌氬€搁崐鐑芥倿閿曞倸绠栭柛顐ｆ礀绾惧潡鏌ｉ幋鐑嗙劷妞も晛寮剁换婵囩節閸屾粌顤€闂佺ǹ楠哥粔褰掑蓟閿濆绠ｉ柣鎰暞缁秶绮嬪鍛牚闁割偆鍠撻崢鐢告⒑鐠団€崇€婚柛娑卞枟閸犳牠姊绘笟鈧褍煤閿旂偓宕查柛鎰靛枛缁犵偤鏌曟繝蹇擃洭缂佲檧鍋撻梻浣告啞閸斿繘寮崒娑氼浄闁靛繈鍊栭崐鐢告偡濞嗗繐顏紒鈧崼銉︾厱闊洦妫戦懓鍧楁煏閸℃洜顦︽い顐ｇ矒閸┾偓妞ゆ帒瀚粻鏍ㄧ箾閸℃ɑ灏紒鐘垫暬閺岀喖鎮滃Ο鑲╃暭闂侀€炲苯澧村ù婊嗘硾椤繑绻濆顒傦紲濠电偛妫欓崹鍨繆娴犲鈷戦悹鍥ｂ偓铏亪闂佺粯鐗滈崢褔鎮惧畡鎵虫斀濠电姴瀚弶绋库攽閻愭潙鐏︽い顓炴喘閺佸秴鈽夐姀鈾€鎷洪梺闈╁瘜閸樺ジ銆傞崗鑲╃瘈闁靛繆妲勯懓鍧楁煙椤旀儳浠辩€规洖缍婇、鏇㈡偐鏉堚晝娉块梻鍌欒兌閹虫捇骞栭銈囩煋闁绘垼妫勭粈鍌炴倶閻愭澘瀚庡ù婊勭矒閺屻劌鈹戦崱姗嗘￥闂佸憡鐟㈤崑鎾绘⒒娴ｅ憡鎯堥柣顓烆槺缁辩偞绗熼埀顒勭嵁閸愵喖顫呴柕鍫濇噽閻撴垶绻濋姀锝嗙【妞ゆ垵娲╅妵鎰板川椤旇崵绠氶梺缁樺姦娴滄粓鍩€椤戞儳鈧繂鐣烽幋锕€绀嬫い鎾跺枎鎼村﹤鈹戦濮愪粶闁稿鎸婚〃銉╂倷鐎电ǹ鈷岄悗瑙勬礈閸忔﹢銆佸鈧幃銏ゆ煥鐎ｎ兘鍋撻銏♀拻濞达絽鎲￠崯鐐寸箾鐠囇呯暤鐎规洘鍨垮畷鍗炩槈濞嗘劖鐝梻濠庡亜濞诧妇绮欓幒妤€鐓曢柟鐑樺灟閳ь剚甯掗～婵嬫晲閸涱剙顥氬┑鐘垫暩閸嬫﹢宕犻悩璇茬妞ゆ挻绻勫▔濠囨⒒閸屾艾鈧兘鎳楅懜鐢典粴闂佽瀛╃粙鍫ュ疾閻樿绠栭柨鐔哄У閺呮悂鏌ｅΟ鍨毢闁伙絽鎼埞鎴炲箠闁稿﹥鎹囧钘夘吋婢跺﹦锛涢梺鍛婄☉閻°劑鎮￠弴銏＄厵闁煎壊鍓欐俊浠嬫煛婢跺﹦绉洪柡宀€鍠栭弻銊р偓锝庡亖娴犮垹鈹戦纭锋敾婵＄偠妫勯悾鐑藉Ω閿斿墽鐦堥梺鍛婃处閸橀箖寮抽妶澶嬧拺閻犲洦褰冮銏℃叏濡ǹ濮傜€规洘顨呰灒闁惧繗顫夊▓楣冩⒑閸濆嫭绁紒杈ㄦ礋閹潡鍩€椤掑嫭鈷戦柛婵嗗閳ь兛绮欓、娆愮節閸曨喖小闁荤姴娲ゅΟ濠傘€掓繝姘厪闁割偅绻冮ˉ鐐烘倶韫囨稒娑ч柍瑙勫灴椤㈡瑩鎳為妷銉ユ敪闁诲氦顫夊ú蹇涘垂娴犲宓佹慨妞诲亾妞ゃ垺鐟╅幃鍓т沪閽樺顔戞繝鐢靛Х閺佹悂宕戦悙鍝勫瀭闂傚牊绋撻弳锔姐亜閹烘垵顏╅柛鎴犲█閺屻劑寮崹顔规寖缂佺偓鍎抽妶鎼佸蓟閿濆憘鐔兼惞閻у摜绀婇梻浣哥枃濡嫰藝閻㈢ǹ钃熺€广儱顦扮€电姴顭块懜鐬垹鐟ч梻鍌欑閻ゅ洭顢氳椤繈鏁傞崜褌绗夊┑鐐村灦閻熝呭姬閳ь剟姊虹粙鎸庢拱闁荤喆鍎佃棢婵﹩鍏橀弨浠嬫煟濡櫣浠涢柡鍡忔櫅閳规垿顢欓悙顒佹瘎闂佸摜濮撮敃銈夘敇閸忕厧绶為悗锝庝簷缁ㄧ敻姊绘担铏瑰笡妞ゎ厼娲ㄩ崚鎺楊敍閻愭潙浜楀┑鐐叉閸旀垶绂嶅⿰鍫熺厵闁硅鍔栫涵楣冩煛鐎ｎ亝鎹ｇ紒杈ㄥ笒铻栧ù锝呮啞鐠囩偤姊洪崫鍕拱闁烩晩鍨伴锝夘敋閳ь剟宕洪埀顒併亜閹烘垵鈧悂宕瑰┑鍫氬亾楠炲灝鍔氭繛璇х畱閻ｇ兘宕ｆ径宀€顔曢梺鐟扮摠閻熴儵鎮橀埡鍐ｅ亾閻熺増鍟炵紒璇插暣婵＄敻宕熼姘辩杸闂佸疇妗ㄩ懗鑸靛閸曨剛绠鹃悗鐢登圭敮鍫曟煟濡も偓濡繈宕洪悙鍝勭闁挎梻绮弲鈺冪磼缂併垹寮柡鈧柆宥呮瀬闁诡垎鈧弨浠嬫煥濞戞ê顏╁ù鐘櫆娣囧﹪顢曢姀鐙€浼冮梺璇″櫍缁犳牠骞冨⿰鍛┏閻庯綆鍋呭▍鍥⒒娴ｇ懓顕滄繛鎻掔Ч瀹曟垿骞橀崜浣猴紲闂侀€炲苯澧伴柍褜鍓ㄧ紞鍡涘磻娴ｅ湱顩叉繝濠傜墛閻撴瑩姊洪銊х暠闁哄鐩弻锛勨偓锝庝邯椤庢妫佹径瀣瘈濠电姴鍊绘晶銏ゆ煟閿濆棙銇濋柡宀嬬磿娴狅箓宕滆閸掓稑顪冮妶鍐ㄧ仾婵炶尙鍠栧顐﹀箛閺夊灝鑰垮┑鐐叉钃辩悮锝囩磽閸屾艾鈧兘鎳楅崼鏇炵；闁规崘顕х壕璺ㄢ偓瑙勬礀濞层劎绮堟繝鍌楁斀闁绘ê寮堕幖鎰版煢閸愵亜鏋涢柡灞界Ч婵＄兘鏁冮埀顒佹櫠椤栫偞鐓曟慨姗嗗墻閸庢梹顨ラ悙瀵稿⒈闁告帗甯″畷妤佸緞婵犱礁顥氶梻浣藉亹閳峰牓宕滃☉銏犳槬鐎广儱顦伴埛鎺楁煕鐏炲墽鎳嗛柛蹇撶焸瀵悂顢旈崨顐＄盎闂佺懓鐡ㄧ换鍐夐姀鈽嗘闁绘劖娼欐慨宥嗩殽閻愬澧紒妤冨枑缁绘繈宕熼娑欙紙婵犵數濮烽弫鍛婄箾閳ь剚绻涙担鍐叉祩閺佸嫰鏌涢埄鍐槈缁炬儳缍婂娲垂椤曞懎鍓繛瀛樼矋缁捇寮婚悢鐓庝紶闁告洦鍓﹀Λ鐐寸箾鐎涙鐭嬮柛搴㈠▕閳ユ棃宕橀鍢壯囨煕濞戞﹩鍤熺€规洦浜娲偡閺夋寧顔€闂佺懓鍤栭幏锟� */
+    can_mailbox_config(CAN2, mailbox_index, &can2transmit_message);
+    
+    return SUCCESS;
+}
+ErrStatus can2_tx_auto(uint8_t length, uint32_t id, uint8_t *can2txdata)
+{
+    /* 闂傚倸鍊搁崐鎼佸磹閹间礁纾归柟闂寸绾惧綊鏌熼梻瀵割槮缁炬儳缍婇弻鐔兼⒒鐎靛壊妲紒鐐劤缂嶅﹪寮婚悢鍏尖拻閻庨潧澹婂Σ顔剧磼閻愵剙鍔ゆ繝鈧柆宥呯劦妞ゆ帒鍊归崵鈧柣搴㈠嚬閸欏啫鐣峰畷鍥ь棜閻庯絻鍔嬪Ч妤呮⒑閸︻厼鍔嬮柛銊ョ秺瀹曟劙鎮欓悜妯轰画濠电姴锕ら崰姘熼埀顒勬倵濞堝灝鏋熼柟顔煎€搁锝嗙鐎ｅ灚鏅ｉ梺缁樻煥閹碱偊鐛幇鐗堚拻濞达綀顫夐崑鐘绘煕鎼搭喖鐏︾€规洘娲熼弻鍡楊吋閸℃せ鍋撻崼鏇熺厓闁告繂瀚弳鐔虹棯閹佸仮闁哄瞼鍠栭弻鍥晝閳ь剙顕ｉ悙顒傜闁割偆鍠撻惌鎺楁煛鐏炵硶鍋撳畷鍥ㄦ畷闂侀€炲苯澧寸€规洑鍗冲浠嬵敇閻愮數鏆柣鐔哥矋閺屻劑鎮鹃柨瀣檮闁告稑锕ゆ禍婊堟⒑閸涘﹦绠撻悗姘煎墮閳绘捇濡烽埡鍌楁嫽闂佺ǹ鏈悷褔藝閿曞倹鐓欓悹鍥囧懐鐦堥悗瑙勬礀濠€閬嶅箟閹绢喖绀嬫い鎺嗗亾鐎殿喖娼″娲捶椤撯剝顎楅梺鍝ュУ閻楃娀骞冮垾鎰佹建闁逞屽墴瀵鎮㈤崨濠勭Ф婵°倧绲介崯顖烆敁瀹ュ鈷戠紒瀣儥閸庢劙鏌涢弮鈧悷鈺呯嵁閸愩剮鏃堝川椤撶喎绁舵俊鐐€栭幐楣冨磹椤愶箑顫呴幒铏濠婂牊鐓忓鑸电☉椤╊剛绱掗悩鎰佺劷缂佽鲸甯楀蹇涘Ω閿曗偓闂夊秹姊洪悷鏉挎Щ闁硅櫕锚閻ｇ兘顢曢敃鈧粈瀣棯閻楀煫顏呯閸撗€鍋撻崗澶婁壕闂佸憡娲﹂崜娑㈠储闁秵鈷戦梻鍫熻儐瑜版帒纾块柟鎯版閺勩儵鏌ㄥ┑鍡樼闁稿鎸搁埢鎾诲垂椤旂晫浜俊鐐€ら崢楣冨礂濡警鍤曟い鎰剁畱缁犳稒銇勯幘璺轰户缂佹劗鍋炵换婵嬫偨闂堟刀銏ゆ倵濮樺崬鍘寸€规洏鍎靛畷銊р偓娑櫱氶幏缁樼箾鏉堝墽鎮奸柟铏崌椤㈡艾饪伴崨顖滐紲闁荤姴娲﹁ぐ鍐焵椤掆偓濞硷繝鎮伴钘夌窞濠电偟鍋撻～宥夋⒑闂堟稓绠冲┑顔惧厴椤㈡瑩骞掗弮鍌滐紳闂佺ǹ鏈悷褔宕濆鍡愪簻妞ゆ挾鍋為崰妯尖偓瑙勬磸閸ㄤ粙鐛弽銊﹀闁稿繐顦扮€氬ジ姊绘担鍛婂暈缂佸鍨块弫鍐晲閸ヮ煈鍋ㄩ梻渚囧墮缁夌敻鎮￠弴銏＄厽婵☆垵顕ф晶顖涚箾閸喓鐭岄柍褜鍓濋～澶娒哄鈧畷婵嗏枎閹捐泛绁﹂梺鎼炲労閸撴岸宕戠€ｎ喗鐓曟い鎰Т閻忊晜顨ラ悙鏉戝闁哄矉绲鹃幆鏃堝灳閸愯尪绶熼梻浣呵归鍡涘箲閸ヮ剙绠栨俊銈呮噺閺呮煡骞栫划鍏夊亾閹颁焦楠勯梻鍌欐缁鳖喚绮婚幋锔藉亱闁规崘顕х粻鏍ㄤ繆閵堝懎鏆為柛鐘叉閺屾盯寮撮妸銉ヮ潾濡炪倧璐熼崝鎴﹀蓟閿濆顫呴柍杞拌兌娴狀參鏌ｉ姀鈺佺仯闁哥姵鐗犻獮鍐潨閳ь剟鐛幒鎳虫梹鎷呴崫鍕闂傚倷鑳剁划顖炲礉閺囥埄鏁嬫い鎾卞灩閻撴繈鏌熼崜褏甯涢柣鎾冲暟閹茬ǹ饪伴崼婵堫槶濠电偛妫欓幐鎼佸磼閵娾晜鐓涚€广儱鍟俊鍧楁煟濠靛棛鍩ｉ柡宀嬬節瀹曞爼濡烽妷褌鐥梻浣瑰▕閺€閬嶅垂閸ф钃熸繛鎴炃氶弨浠嬫煕閳╁喚娈㈠ù灏栧亾闂傚倷绀侀悿鍥敋瑜旇棟闁汇垻枪閽冪喐绻涢幋鐐茬劰闁稿鎹囬弫宥夊础閻愬弶娈ㄦ繝銏ｎ潐濞茬喎顫忔繝姘＜婵炲棙甯掗崢锟犳煛鐎ｅ吀绨奸柕鍥у楠炲鈹戦崶鑸碉紗婵°倗濮烽崑鐐哄礉濞嗘挾宓侀柡宥冨妿閻熺懓鈹戦悩鎻掝伀闁崇鍊栫换婵嬫偨闂堟稈鏋呭┑鐐板尃閸ヨ埖鏅為梺鍦濠㈡﹢寮告笟鈧弻娑㈠焺閸愵亖濮囬梺缁樻尰濞茬喖骞冨鈧幃娆撳箵閹哄棙瀵栭梻浣芥〃閻掞箓鎮ч悩璇茶摕闁哄洨鍠撶粻楣冩煟閹伴潧澧柣婵囨礋濮婃椽骞庨懞銉︽殸闂佹悶鍔屽鈥愁嚕鐠囨祴妲堟俊顖炴敱閺傗偓闂備胶纭堕崜婵嬨€冭箛鏂款嚤闁稿本鍑瑰〒濠氭煏閸繈顎楀ù婊冨⒔缁辨帡鎮╅搹顐㈢３閻庢鍠涢褔鍩ユ径鎰潊闁绘鏁稿澶愭⒒娓氣偓閳ь剛鍋涢懟顖涙櫠鐎电硶鍋撶憴鍕缂傚秴锕ら悾椋庣矙鐠囩偓妫冨畷姗€濡歌閸嬪﹪姊婚崒娆戭槮闁硅绻濆畷婵嬫晝閸屾氨鐛ラ梺鍝勭▉閸欏繒绱為弽顓熺厱婵炴垶顭囬幗鐘绘煟閹惧磭绠婚柡灞剧洴椤㈡洟鏁愰崶鈺冩毇闂備線娼荤徊钘夛耿鏉堚晜顫曢柟鐑橆殔缁犳稒銇勯幘璺盒涘┑顔兼川缁辨挻鎷呴搹鐟扮缂備浇顕ч悧鎾荤嵁閸愨晝顩烽悗锝庡亽濡啫鈹戦悙娈挎缂傚牅鍗冲畷瑙勭鐎ｎ亞鐣哄┑掳鍊愰崑鎾淬亜椤愶絿绠炴慨濠呭吹閳ь剟娼ч幉锟犲疾閸忚偐绡€缁剧増菤閸嬫捇宕橀懠顒勭崜闂備礁鎲″褰掓偡閵夆晩鏁嬮柨婵嗩槸缁犵粯銇勯弮鍌楁嫛婵炵厧锕娲箮閼恒儲娈伴梺绋款儐閹瑰洭寮婚悢鍓叉Ч閹艰揪绲界粭锛勭磽娴ｈ櫣甯涚紒瀣笒椤洩绠涘☉妯碱槶閻熸粌绉瑰畷鍝勭暆閸曨兘鎷虹紒缁㈠幖閹冲氦顣跨紓鍌欑贰閸犳牕霉閻戣棄绀嗛柟鐑橆殔缁秹鏌涢銈呮瀻闁逞屽墰缁垱绌辨繝鍥舵晬闁绘劕鐡ㄩ悵宕囩磽娴ｉ潧濡兼い顓炲槻椤繐煤椤忓拋妫冨┑鐐村灱妞存悂顢撻崱娑欌拻闁稿本鑹鹃鈺呮倵濮樼厧澧撮柟顔藉劤閻ｏ繝骞嶉鑺ョ暦闂備線鈧偛鑻晶鎾煕閳规儳浜炬俊鐐€栫敮鎺楀窗濮橆剦鐒介柟閭﹀幘缁犻箖鏌涘▎蹇ｆ闁兼澘娼￠弻鏇㈠幢濡も偓閺嗭絿鈧娲忛崝宥咁焽韫囨稑绀堢憸蹇涘煟閵堝棛绡€闁汇垽娼у瓭闂佹寧娲忛崐婵嬪箖瑜斿畷鍗炩槈濞嗗繆鍋撻崸妤佺厱妞ゎ厽鍨垫禍鏍瑰⿰鍕煉闁哄瞼鍠栧畷顐﹀礋椤掑顥ｅ┑鐐茬摠缁秹宕曢幎瑙ｂ偓鏃堝礃椤斿槈褔鏌涢埄鍐剧劷闁宠绋撶槐鎾诲磼濮樻瘷锛勭磼閼搁潧鍝哄┑鈥崇摠缁楃喖鍩€椤掆偓椤曪綁骞橀纰辨綂闂佹枼鏅涢崯顖炴偟閺嶎厽鈷掑〒姘ｅ亾闁逞屽墰閸嬫盯鎳熼娑欐珷闁规鍠氱壕鍏笺亜閺傚灝鈷旈悽顖涚〒缁辨帞绱掑Ο鑲╃暤濡炪値鍋呯换鍫ャ€佸鈧幃娆撳级閸噮鍤欓梻鍌氬€搁崐鐑芥倿閿曞倸绠栭柛顐ｆ礀绾炬寧绻濇繝鍌滃缂佲偓閸愨斂浜滈煫鍥ㄦ尵婢с垻鈧娲樼划宀勫煘閹达附鏅柛鏇ㄥ亗閺夘參姊虹粙鍖℃敾闁搞劌鐏濋悾鐑藉即閵忊€虫濡炪倖甯婄粈浣规償婵犲洦鈷戦柛鎾村絻娴滄繄绱掔拠鑼㈡い顓炴喘瀵粙濡歌椤旀洟鎮楅悷鏉款棌闁哥姵娲滈懞閬嶅礂缁楄桨绨婚梺闈涱槶閸庤櫕鏅跺☉姘辩＜缂備焦顭囧ú瀛橆殽閻愬樊鍎旈柟顔界懅閹瑰嫭绗熼娑辨（婵犵绱曢崑鎴﹀磹瑜忓濠冪鐎ｎ亞顔愬銈嗗姧缁犳垿鎮″鈧弻鐔告綇閸撗呮殸闂佺粯鎼换婵嬪蓟濞戙垹鐒洪柛鎰剁細濞岊亞绱撴担闈涘闁告鍥ｂ偓鏃堝礃椤斿槈褔鏌涢幇鈺佸妞ゎ剙鐗撳娲箰鎼淬垹顦╂繛瀛樼矤娴滄繃绌辨繝鍕ㄥ亾濞戞瑯鐒介柣鐔风秺閺屽秷顧侀柛鎾寸懇椤㈡岸鏁愭径妯绘櫔闂侀€炲苯澧柣锝囧厴閹剝鎯斿Ο缁樻澑闂佽鍑界紞鍡樼濠靛姹叉い蹇撶墛閳锋帡鏌涚仦鍓ф噮妞わ讣绠撻弻鐔哄枈閸楃偘绨婚柣鎾卞€濋弻鏇熺箾閻愵剚鐝旈梺姹囧€ら崳锝夊蓟濞戞粠妲煎銈冨妼閹虫劗鍒掓繝姘兼晬婵炴垶姘ㄩ鏇㈡倵閻熸澘顥忛柛鐘虫礈閼鸿鲸绺介崨濠勫幗闂佽宕樺▔娑㈠几濞戙垺鐓涚€光偓鐎ｎ剙鍩岄柧浼欑秮閺屾稑鈹戦崱妤婁患缂備焦顨忛崣鍐潖濞差亝鍋傞幖绮规濡本绻涚€涙鐭ゅù婊庝簻椤曪絿鎷犲ù瀣潔闂侀潧绻掓慨鐢杆夊┑瀣厽闁绘ê鍘栭懜顏堟煕閺傚潡鍙勭€规洘绻堥、娑㈡倷閺夋垟鍋撻崹顐ょ闁割偅绻勬禒銏ゆ煛鐎ｎ剙鏋涢柡宀€鍠栭、娆撴偂鎼存ê浜鹃柛褎顨嗛崑妯汇亜閺冨牊鏆滈柛瀣崌閺佹劖鎯旈埄鍐憾闂備礁鎼幊蹇曞垝閹捐钃熼柨婵嗩槹閺呮煡鏌涘☉娆愮凡妞ゅ浚鍘艰灃闁绘﹢娼ф禒锕傛煕閺冣偓閻熴儵锝炶箛娑欐優閻熸瑥瀚悵浼存⒑閸︻厾甯涢悽顖涘笒琚欓柟閭﹀枤绾句粙鏌涚仦鐐殤鐎涙繂鈹戦埥鍡椾簼闁荤啙鍛灊閻庯綆浜堕崥瀣熆鐠虹尨韬柛鐐茬埣濮婃椽宕崟顒€绐涢梺鍝ュТ鐎涒晝绮嬪鍛傛棃宕ㄩ瑙勫缂傚倷绀侀鍫濃枖閺囩姷涓嶉柟鎯板Г閻撳啰鈧懓瀚竟鍡樻櫠閺囥垺鐓冪紓浣股戠亸鎵磼閸屾稑绗ч柍褜鍓ㄧ紞鍡涘磻閸℃稑鍌ㄥù鐘差儐閳锋垹鎲搁悧鍫濈瑨濞存粈鍗抽弻娑㈠Ω閵堝懎绁梺璇″灠閸熸挳骞栬ぐ鎺戞嵍妞ゆ挾濯寸槐鏌ユ⒒娴ｈ櫣甯涢柨姘繆椤栨熬韬柟顔瑰墲缁轰粙宕ㄦ繝鍕箰闁诲骸鍘滈崑鎾绘煃瑜滈崜鐔风暦娴兼潙鍐€妞ゆ挻澹曢崑鎾存媴缁洘鐎婚梺鍦亾濞兼瑦绂掓總鍛婂€甸柛蹇擃槸娴滈箖姊洪柅鐐茶嫰婢ф挳鏌熼鐟板⒉鐎垫澘瀚伴獮鍥敇濞戞瑥顏归梻鍌欐祰瀹曠敻宕伴幇顓犵彾闁糕剝绋掗弲顒傗偓骞垮劚椤︿即鎮￠弴銏″€甸柨婵嗗暙婵″ジ鏌嶈閸撴岸鎮уΔ鍐煔閺夊牄鍔庣弧鈧梺鎼炲劘閸斿矂鍩€椤掆偓椤兘寮婚妶澶婄畳闁圭儤鍨垫慨鏇炩攽閻愬弶鍣规俊顐ｇ〒濡叉劙骞樼€涙ê顎撻梺闈╁瘜閸樼ǹ危閸繍娓婚柕鍫濇閻忋儵鎮楀顐㈠祮闁绘侗鍠氶埀顒婄秵閸犳宕愭繝姘厾闁诡厽甯掗崝妤呮煙瀹勯偊鐓兼慨濠呮缁瑩骞愭惔銏″闂備胶鍘х紞濠勭不閺嶎厼鏄ラ柍褜鍓氶妵鍕箳瀹ュ洤濡介梺绋匡攻閸旀鍩€椤掑喚娼愭繛鍙夛耿瀹曟繂鈻庨幘璺虹ウ闂佸搫绉查崝宥嗗垔閹绢喗鐓曟繝闈涘閸旂數绱掓鏍ф珝婵﹦绮幏鍛村传閵夘灝銊モ攽閳藉棗浜繛澶嬫礈閸掓帡宕奸悢铏规嚌闂侀€炲苯澧存鐐插暣瀹曠ǹ螖婵犲啯娅旈梻渚€鈧偛鑻晶瀵糕偓娈垮枦椤曆囧煡婢舵劕顫呴柣妯兼暩閺夊憡淇婇悙顏勨偓鏍箰閻愵剚鍙忓ù鍏兼綑绾惧鏌ｉ幇顔煎妺闁抽攱鍨块弻娑樷攽閸℃浼岄梺绋垮閸旀瑩寮婚敐鍛傛梹绗熼崶銊ф毉闂備胶鎳撶粻宥夊垂瑜版帒鐓″鑸靛姇椤懘鏌ｅΟ娲诲晱闁告艾鎳忕换婵嬫偨闂堟稐绮跺┑鈽嗗亝椤ㄥ牓骞戦姀銈呯闁归箖顤傚ù鍕節闂堟稑鈧悂骞夐敓鐘茬厱闁硅揪闄勯悡鏇熺節闂堟稒顥滄い蹇婃櫆閵囧嫯绠涚€ｎ亜濮﹂梺鍝勬湰缁嬫帡骞嗛弮鍫熸櫜闁糕剝蓱閻︽捇鏌ｆ惔銏╁晱闁哥姵鐗犻垾锕傛煥鐎ｂ晝绠氶梺褰掓？缁€渚€鎮″☉銏＄厱閻忕偛澧介悡顖滅磼閵娿儺鐓兼慨濠勭帛閹峰懘宕ㄦ繝鍌涙畼缂傚倷娴囬褔宕愭繝姘劦妞ゆ帊鐒﹂惃鎴︽煕韫囨棑鑰跨€规洘妞介崺鈧い鎺嶉檷娴滄粓鏌熼崫鍕棞濞存粓绠栧鍝劽虹拠鎻掔闂佺ǹ锕ら悘婵嬵敋閿濆棛绡€婵﹩鍓涢崝鎾⒑閸涘﹤濮€闁哄懏鐩、鎾诲箻缂佹ǚ鎷洪梺鍛婄☉閿曪箓鍩ユ径瀣垫妞ゅ繐鎳忕紞鎴︽懚閻愮儤鐓熼柟閭﹀枛閸斿鏌嶉柨瀣伌闁诡喗顨婂畷鐑筋敇閻戝棌鍋撶仦鍓х闁稿繒鍘ф慨宥夋煛鐏炲墽娲村┑鈩冩倐婵＄兘鏁冮埀顒佺閺夋嚦鏃堟偐闂堟稐绮堕梺鍝ュ枑閹稿啿鐣峰ú顏呮櫢闁绘ɑ褰冪粣娑橆渻閵堝棙灏靛┑顖ｅ弮瀹曨剚绂掔€ｎ偀鎷绘繛杈剧到閹诧紕鎷归敓鐘崇厱閹煎瓨绋戦埀顒佺箞閻涱噣骞囬鐘电槇濠殿喗锚閸氬寮查埡鍛拺闁告稑锕ユ径鍕煕韫囨梻銆掗柟骞垮灲瀹曞崬鈽夊▎鎴濆箺闂備浇顫夊姗€宕ラ埀顒傜磼閵娿儺鐓奸柡灞界Х椤т線鏌涢幘纾嬪閻撱倖绻濇繝鍌滃缂佺姵鐓￠弻鏇＄疀鐎ｎ亖鍋撻弴鐘典笉婵炴垯鍨洪悡鐔镐繆閵堝倸浜鹃梺缁橆殔濡瑧绮嬪澶樻晬闁绘劗琛ラ幏铏圭磽閸屾瑧鍔嶉拑閬嶆倶韫囷絽寮柟顔筋殜瀹曞綊顢曢姀銏㈡噯婵＄偑鍊ら崢鐓幟洪鐑嗗殨濞寸姴顑愰弫鍥煟閺傛寧鎯堢€殿喕鍗冲缁樼節鎼粹€茬盎濠电偠顕滅粻鎾崇暦濞嗘挻鍋￠梺顓ㄥ閸旂兘姊鸿ぐ鎺戜喊闁哥姵甯″畷鎴﹀箻閼搁潧鏋傞梺鍛婃处閸撴盯藝閵夈儺娓婚柕鍫濈箰椤╊剟鏌℃担绛嬪殭妞ゆ洩绲剧换婵嗩潩椤掆偓瀹撳棝姊虹紒妯活梿婵炲拑缍侀、娆撳即閵忊檧鎷洪梺鍛婃崄鐏忔瑩宕㈠☉銏＄厱闁绘ê纾晶顒勬煙娓氬灝濮傜€殿喗鎸虫慨鈧柍閿亾闁归攱妞介弻锝夋偐閸欏鈹涢柣蹇撶箲閻熝呭垝婵犳碍鏅查柛銉㈡櫇閿涙粓姊烘總鍛婃珳缂佽尙绮粩鐔肺熷Ч鍥︾盎濡炪倖鍔戦崹鑽ょ不婵犳碍鐓欓柣鎾虫捣缁夎櫣鈧娲滈崗姗€銆佸鈧幃顏堝川椤栨氨鍝庡┑鐘垫暩婵兘銆傞挊澹╋綁宕ㄩ弶鎴濈€繛瀵稿帶閻°劑宕曞鍥ｅ亾閻熸澘顏悗姘墕閳藉濮€閻樻牑鏅犻弻宥夊传閸曨偀鍋撻悽绋跨闁惧繐婀辩壕钘壝归敐鍛棌闁稿骸绻橀幃妯跨疀閹炬潙娈楅悗娈垮枔閸旀垿骞婇敓鐘参ч柛銉㈡櫔缁辨煡姊洪懡銈呅㈡繛娴嬫櫇娴滅ǹ鈻庨幇顓熺彿闂佸搫娲㈤崹娲偂閻斿吋鐓ユ繝闈涙閸ｈ淇婇幓鎺濈吋闁诡噯绻濇俊鍫曞幢閹邦亞鐩庨梻濠庡亜濞诧箓骞愰幖浣瑰仧閻庯綆鍠楅悡蹇撯攽閻愰潧浜炬繛鍛閺岋綁骞橀崘鍙夋閻庢鍠栭悥濂稿箖濞嗘挸绾ч柟鎼幗椤ュ淇婇悙顏勨偓褏鎷嬮敐鍡曠箚闁搞儮鏅滈～鏇㈡煙閻戞﹩娈旂紒鐘崇⊕閵囧嫰骞樼捄鐩掓稒淇婇幓鎺斿妞ゎ亜鍟存俊鑸垫償濠靛牏娉块梻浣告憸閸犲酣鎮洪妸锔锯攳濠电姴娲ら柋鍥煛閸モ晛浠滈柤鏉跨仢閳规垿鍩ラ崱妤冧桓闂佽　鍋撻弶鍫氭杹閸嬫挸顫濋銈囩厯濠殿喖锕︾划顖炲箯閸涱垳鐭欓柟绋垮閻︼綁姊绘担瑙勫仩闁搞劍妞介幃锟犳晸閻樿尙鐣洪悷婊冩捣閹广垹鈹戠€ｎ亞顦伴梺闈浨归崕鐗堢珶閺囥垺鈷掗柛灞炬皑婢ф稓绱掔€ｎ亞绠荤€规洘鍨挎慨鈧柍钘夋椤旀棃姊虹紒妯哄闁诡垰鐭傞幃鐐烘偩瀹€鈧壕濂稿级閸稑濡肩紒妤佸浮閹藉爼鏁愭径瀣ф嫼闂佸壊鐓堥崳顕€宕曡箛鏂讳簻闊洦娲栭崝瀣磼缂佹绠為柟顔荤矙濡啫鈽夊Δ鈧幗瀣⒒娴ｇ瓔娼愭俊鐐村缁傚秹鎮欓崹顐綗闂佺粯鍔曢幖顐︽倿閸偁浜滈柟鍝勬娴滈箖姊虹€圭媭娼愰柛銊ユ健閵嗕礁鈻庨幘鍏呯炊闂佸憡娲忛崝灞剧閻愵兛绻嗛柕鍫濆€告禍楣冩⒑鐎圭姵顥夋い锔炬暬楠炲啴鎮惧畝鈧惌娆撴煕瑜庨〃鍛村极瑜版帗鈷掑ù锝呮啞閹牊绻涚仦鍌氬鐎规洑鍗抽獮妯兼嫚閹绘帒浜堕梻鍌欑贰閸撴瑧绮旈悽绋跨厱闁瑰濮风壕钘壝归敐鍛辅婵☆偁鍔嶉妵鍕疀閹捐泛顣洪梺姹囧€ら崳锝夊蓟閻旇櫣鐭欓柛顭戝櫘閸斿姊洪崨濠勬噧缂佺粯甯￠崺鈧い鎺嗗亾缂佺姴绉瑰畷鏇㈠础閻忕粯妞介幃鈺冩嫚閼碱剨绱遍梻浣告贡閸嬫捇寮告總绋垮嚑闁哄啫鐗婇悡鏇熴亜椤撶喎鐏ラ柡瀣枛閺岋綀绠涢幘璺衡叺濠殿喖锕ㄥ▍锝呪槈閻㈢ǹ妞藉ù锝呮啞閻ゅ倻绱撻崒娆愮グ濡炲枪鐓ら柣鏃囧亹瀹撲線鏌熸潏鍓х暠妞ゎ偄鎳橀弻锝咁潨閸℃ぞ绨奸梺鍝勫€甸崑鎾绘⒒閸屾瑨鍏岀痪顓℃硾椤﹨顦圭€殿喗褰冮オ浼村醇濠靛牞绱抽梻鍌氬€搁悧濠冪瑹濡も偓閵嗘帗绻濆顓犲帾闂佸壊鍋呯换鍐夊⿰鍛＜婵°倓绀佸ù顕€鏌＄仦鍓с€掗柍褜鍓ㄧ紞鍡樼濠靛瑤澶愬閳垛晛浜鹃悷娆忓婢跺嫰鏌涢幘璺烘灈妤犵偛鍟粋鎺斺偓锝庝簻缁愭稒绻濋悽闈涗户闁稿鎸鹃埀顒佷亢濡嫰鍩為幋锔藉€烽柤鎼佹涧濞懷呯磽娴ｈ棄绱︾紒顔界懇閻涱噣寮介褎鏅濋梺鎸庣箓濞村倸煤閸涘﹣绻嗛柕鍫濈箳閸掍即鏌涢悤浣哥仸闁诡噯绻濋幃鈺呭垂椤愩垺鐎鹃梻浣虹帛椤ㄥ懘鎮ч崱娆戠當鐟滄棃寮婚敐澶嬫櫜闁割偆鍣ユ禒鈺呮⒑闁偛鑻晶鍙夈亜椤愩埄妲搁悡銈嗘叏濡炶浜鹃悗瑙勬礃缁诲牆顕ｆ禒瀣垫晝闁挎繂鎳庣花銉︾節閻㈤潧鈻堟繛浣冲吘娑㈩敇閻戝棛鍔烽梺鍐叉惈閹冲繘鎮￠弴銏㈠彄闁搞儯鍔嶇亸顓㈡煙椤旇棄鐏︾紒缁樼洴瀹曘劑顢橀悤浣癸紗婵犳鍠栭敃銈夆€﹀畡鎵殾闁圭儤鍨熼弸搴ㄦ煙鏉堝墽鎮奸柣娑栧劦濮婄粯鎷呴崨濠傛殘闂佸湱枪椤兘骞冮悿顖ｆЬ闂佸憡甯楃敮鈥愁嚕椤曗偓瀹曞ジ鎮㈤摎鍌滅处缂傚倸鍊风粈渚€顢栭崼婵冩灃闁哄洢鍨归崒銊╂⒑椤掆偓缁夌敻鍩涢幋鐘垫／妞ゆ挾鍋為崳铏规喐閹跺﹤娲﹂埛鎺楁煕閺囥劌浜滄い蹇ｅ幘閳ь剝顫夊ú姗€宕归崸妤€鏋侀柟閭﹀幖缁剁偤鎮楅敐搴″妤犵偛绉垫穱濠囨倷椤忓嫧鍋撻弽顓炵濡わ絽鍟粣妤呭箹鏉堝墽鎮肩紒鐘虫閺岀喖鎮滃Ο铏逛憾闂佽　鍋撳ù鐘差儐閻撳啴鏌曟竟顖氬暕缂傛捇姊虹粙娆惧剭闁搞劋绮欏濠氬灳瀹曞洦娈曢柣搴秵閸撴盯鏁嶉悢鍏尖拺闂侇偆鍋涢懟顖涙櫠閸撗呯＝鐎广儱鎳忛ˉ銏⑩偓瑙勬礃閸ㄥ灝鐣烽悢纰辨晬婵炴垶菤閸嬫捇宕奸弴鐔哄幍缂傚倷闄嶉崹褰掑几閻斿吋鐓熼柟鎯ь嚟閵嗘帡鏌嶈閸撴瑩宕㈠⿰鍫濈；闁瑰墽绮崐鐢告煥濠靛棝顎楀褌鍗抽弻銊モ槈濮橆剚鐏堝┑顔硷攻濡炰粙寮婚崨瀛樺€烽柤鑹版硾椤忣厽绻濋埛鈧崘銊㈡寖缂備浇椴搁幐鎼侇敇婵傜ǹ宸濇い鏇炴噺閿涗胶绱撻崒娆戭槮闁稿﹤鎽滅划鏃堟偡閹殿喗娈炬繝闈涘€绘灙闁告濞婇弻锝夊籍閸ャ劏鍚傜紓浣靛妿閺佽顫忕紒妯诲闁告盯娼у﹢閬嶅箲閵忋倕绠虫俊銈傚亾闁绘挻娲熼弻娑㈩敃閿濆洤顩梺鍝勵儐閺屻劑婀侀梺缁樏Ο濠囧磿閹扮増鐓熼柟鎹愭硾閺嬫盯鏌″畝鈧崰鏍蓟閸ヮ剚鏅濋柍褜鍓熼幃姗€鎮╃紒妯煎幗闂侀潧枪閸斿秹顢旈悩鐢电＜閺夊牄鍔屽ù顕€鏌熼瑙勬珔妞ゆ柨绻橀、娆撳箚瑜庨崐顖炴⒒閸屾瑧顦﹂柟纰卞亰閹绺界粙璺ㄧ崶闂佸搫绋侀崢褰掑焵椤戣法顦﹂柍璇查叄楠炴﹢寮堕幋婊勫亝闂佽楠搁崢婊堝磻閹剧粯鐓冪憸婊堝礈閻旂厧绠栭柍鈺佸暙缁剁偤鏌熼柇锕€骞愰柟閿嬫そ濮婃椽鎳￠妶鍛€炬繝銏㈡嚀濡繈寮鍜佸悑濠㈣泛顑囬崢閬嶆煟鎼搭垳绁烽柛鏂跨焸閸┾偓妞ゆ帊鑳舵晶顒傜磼瀹€鍐摵缂佺粯绻堝畷鍫曞Ω閵夈垹浜惧┑鐘崇閻撶娀鏌熼鐔风瑨闁告梹绮嶇换娑㈠川椤撶噥妫ょ紓浣介哺閹稿骞忛崨鏉戞嵍妞ゆ挻绋掗～宥嗕繆閻愵亜鈧牠宕归悽纰樺亾濮橆偄宓嗛柣娑卞枤閳ь剨缍嗛崰妤呭磹婵犳碍鐓犻柟顓熷笒閸旀鏌熷畡閭︾吋婵﹨娅ｇ划娆撳箰鎼淬垺瀚抽梻浣哄帶缂嶅﹦绮婚弽顓炴槬闁逞屽墯閵囧嫰骞掗幋婵愪紝濠碘槅鍋呴崹鍦閹烘鏁婇柤娴嬫櫅椤も偓缂傚倷鐒﹂〃鍫ュ窗閺嶎厼鏄ラ柍褜鍓氶妵鍕箳閹存繍浼€閻庤鎸风欢姘跺蓟閳ユ剚鍚嬮幖绮光偓鍐差劀闂備浇妗ㄧ粈渚€宕幘顔艰摕闁靛ň鏅涢崡铏繆閵堝倸浜炬繛瀛樼矊婢х晫妲愰幒妤佸€锋い鎺嗗亾闁告柣鍊楃槐鎾愁吋閸滃啳鍚悗娈垮枦椤曆囧煡婢舵劕顫呴柍鍝勫€瑰▍鍥⒒娴ｇ懓顕滅紒璇插€歌灋婵炴垟鎳為崶顒€唯鐟滃繒澹曟總鍛婄厽闁逛即娼ф晶顕€鏌涢弬璇测偓妤冩閹炬剚鍚嬮柛婊冨暢閸氼偊鎮楀▓鍨灈妞ゎ厾鍏樺畷瑙勩偅閸愩劎鐤€婵炶揪绲介幉锟犲磹椤栫偞鈷戠痪顓炴噹娴滃綊鎮跺☉鏍у姦闁糕斁鍋撳銈嗗笒閸燁偊鎯冨ú顏呯厽闁哄稁鍘洪幉鐐叏婵犲嫮甯涢柟宄版嚇瀹曘劑妫冨☉姘毙ㄥ銈冨灪閻楃姴鐣烽崡鐐╂婵☆垳鈷堥崬鍫曟⒒娴ｅ摜绉烘俊顐ユ硶濞嗐垽濡堕崶鈺冾槸闂佸搫绉查崝搴ｅ姬閳ь剟姊婚崒姘卞濞撴碍顨婂畷鏇炩槈閵忥紕鍘告繛杈剧到閹诧繝藟閵忋倖鐓涢悘鐐插⒔閵嗘帒霉閻欏懐鐣电€规洘绮忛ˇ鎶芥煛閸涱厹鍋㈡慨濠冩そ濡啫霉閵夈儳澧︾€殿喗褰冮オ浼村醇濠靛牆骞堥梻浣侯攰閹活亪姊介崟顖涘亗闁哄洨鍠撶弧鈧梻鍌氱墛缁嬫帡藟濠婂嫨浜滈煫鍥风到婢ь垶鏌曢崶褍顏い銏℃礋椤㈡宕掑⿰鍕啌闂傚倷绀侀幖顐﹀嫉椤掑嫭鍎庢い鏍ㄥ嚬閸ゆ洘銇勯弴妤€浜鹃梺绯曟杹閸嬫挸顪冮妶鍡楃瑨閻庢凹鍓熷畷褰掑磼閻愬鍘遍悷婊冮叄閵嗗啴宕煎┑鍫熸婵炴挻鍩冮崑鎾绘煛鐏炲墽娲存鐐叉喘濡啫鈽夊▎鎴滈偗濠碉紕鍋戦崐銈夊磻閸曨垰绠犳慨妞诲亾鐎殿喖顭峰鎾閻樿鏁规繝鐢靛█濞佳兠归崒姣兼盯鏁撻悩鏂ユ嫼缂備礁顑呴悘婵嬫儊閵娿儍鐟扳堪鎼存繄鐩庡銈庡亜缁绘劗鍙呭銈呯箰閹冲骸鈻撻妷鈺傗拺闂傚牊绋撴晶鏇㈡煙閸愯尙绠婚柟顔筋殜楠炲棜顦柡鈧禒瀣厽婵妫楅弸娑㈡煟韫囷絼绨奸柕鍥у椤㈡﹢鎮欑€涙ɑ鍊锋俊鐐€栧ú蹇涘磿閼碱剚宕叉繝闈涱儏閻愬﹪鏌曟繛鍨姕闁伙絼鍗冲缁樻媴缁嬫寧姣愰梺鍦拡閸嬪﹤鐣烽娑橆嚤閻庢稒蓱濞呮牕鈹戦悩缁樻锭婵炲眰鍔庣划缁樸偅閸愩劎楠囬梺鍓插亝缁诲倿鍩涢弮鍫熺厱闁瑰搫绉村畵鍡涙煛瀹€鈧崰鎾诲窗婵犲洤纭€闁绘劖澹嗛崙鍦磽閸屾瑧顦﹂柛濠傛憸缁棁銇愰幒鎴犵暫濠电偛妫欓幖鈺呭极閸℃稒鐓曢悘鐐插⒔閻本淇婇幓鎺撳枠婵﹦绮粭鐔煎焵椤掆偓椤洩顦撮柟骞垮灲瀹曞崬顪冮～顔剧М鐎规洜鍠栭、娑樷槈濡崵鏆氶梻鍌欒兌椤宕熼崹顐ゆ殾闂佽娴烽弫鍛婃叏閻㈠灚宕叉繝闈涱儐椤ュ牊绻涢幋婵嗚埞闁告捇浜跺铏圭磼濡闉嶉梺鑽ゅ櫐婵″洭骞戦姀鐘闁靛繒濞€閸炶泛鈹戦悩缁樻锭闁绘鎳橀幖瑙勬償閵婏腹鎷洪梺鍛婄箓鐎氱兘宕曢幇鐗堢厵闁荤喓澧楅崰妯尖偓娈垮枦椤曆囧煡婢跺⿴娼╅柨婵嗘噸婢规洟姊洪幐搴ｇ畵濡ょ姴鎲＄粋宥呪攽鐎ｎ偄鈧爼鐓崶椋庡埌妤犵偞顨婇弻鏇㈠炊瑜嶉顓熴亜閵忊剝绀嬮柡浣瑰姍瀹曞爼鍩￠崘鈺傜钒闂傚倸鍊峰ù鍥敋閺嶎厼绐楁俊銈呮噺閸嬶繝鏌嶉崫鍕櫡闁逞屽厸缁€浣界亙闂佸憡渚楅崢楣冨礉閿曗偓椤啴濡堕崱妤冪懆闁诲孩姘ㄩ崗妯侯嚕椤愶箑纾奸柣鎰嚟閸欏棝姊虹紒妯荤闁稿﹤婀遍埀顒佺啲閹凤拷 */
+    for(uint8_t i = 0; i < 3; i++) {
+        uint32_t mailbox_index = can2_tx_manager.mailboxes[i];
+        uint32_t mailbox_code = can_mailbox_code_get(CAN2, mailbox_index);
+        
+        if(mailbox_code == CAN_MB_TX_STATUS_INACTIVE) {
+            if(can2_tx_with_mailbox(length, id, can2txdata, mailbox_index) == SUCCESS) {
+                can2_tx_manager.sent_count[i]++;
+                return SUCCESS;
+            }
         }
-			
     }
+    
+    return ERROR; /* 闂傚倸鍊搁崐鎼佸磹閹间礁纾归柟闂寸绾惧綊鏌熼梻瀵割槮缁炬儳缍婇弻鐔兼⒒鐎靛壊妲紒鐐劤缂嶅﹪寮婚悢鍏尖拻閻庨潧澹婂Σ顔剧磼閻愵剙鍔ゆ繝鈧柆宥呯劦妞ゆ帒鍊归崵鈧柣搴㈠嚬閸欏啫鐣峰畷鍥ь棜閻庯絻鍔嬪Ч妤呮⒑閸︻厼鍔嬮柛銊ョ秺瀹曟劙鎮欓悜妯轰画濠电姴锕ら崰姘熼埀顒勬倵濞堝灝鏋熼柟顔煎€搁锝嗙鐎ｅ灚鏅ｉ梺缁樻煥閹碱偊鐛幇鐗堚拻濞达綀顫夐崑鐘绘煕鎼搭喖鐏︾€规洘娲熼弻鍡楊吋閸℃せ鍋撻崼鏇熺厓闁告繂瀚弳鐔虹棯閹佸仮闁哄瞼鍠栭弻鍥晝閳ь剙顕ｉ悙顒傜闁割偆鍠撻惌鎺楁煛鐏炵硶鍋撳畷鍥ㄦ畷闂侀€炲苯澧寸€规洑鍗冲浠嬵敇閻愮數鏆柣鐔哥矋閺屻劑鎮鹃柨瀣檮闁告稑锕ゆ禍婊堟⒑閸涘﹦绠撻悗姘煎墮閳绘捇濡烽埡鍌楁嫽闂佺ǹ鏈悷褔藝閿曞倹鐓欓悹鍥囧懐鐦堥悗瑙勬礀濠€閬嶅箟閹绢喖绀嬫い鎺嗗亾鐎殿喖娼″娲捶椤撯剝顎楅梺鍝ュУ閻楃娀骞冮垾鎰佹建闁逞屽墴瀵鎮㈤崨濠勭Ф婵°倧绲介崯顖烆敁瀹ュ鈷戠紒瀣儥閸庢劙鏌涢弮鈧悷鈺呯嵁閸愩剮鏃堝川椤撶喎绁舵俊鐐€栭幐楣冨磹椤愶箑顫呴幒铏濠婂牊鐓忓鑸电☉椤╊剛绱掗悩鎰佺劷缂佽鲸甯楀蹇涘Ω閿曗偓闂夊秹姊洪悷鏉挎Щ闁硅櫕锚閻ｇ兘顢曢敃鈧粈瀣棯閻楀煫顏呯閸撗€鍋撻崗澶婁壕闂佸憡娲﹂崜娑㈠储闁秵鈷戦梻鍫熻儐瑜版帒纾块柟鎯版閺勩儵鏌ㄥ┑鍡樼闁稿鎸搁埢鎾诲垂椤旂晫浜俊鐐€ら崢楣冨礂濡警鍤曟い鎰剁畱缁犳稒銇勯幘璺轰户缂佹劗鍋炵换婵嬫偨闂堟刀銏ゆ倵濮樺崬鍘寸€规洏鍎靛畷銊р偓娑櫱氶幏缁樼箾鏉堝墽鎮奸柟铏崌椤㈡艾饪伴崨顖滐紲闁荤姴娲﹁ぐ鍐焵椤掆偓濞硷繝鎮伴钘夌窞濠电偟鍋撻～宥夋⒑闂堟稓绠冲┑顔惧厴椤㈡瑩骞掗弮鍌滐紳闂佺ǹ鏈悷褔宕濆鍡愪簻妞ゆ挾鍋為崰妯尖偓瑙勬磸閸ㄤ粙鐛弽銊﹀闁稿繐顦扮€氬ジ姊绘担鍛婂暈缂佸鍨块弫鍐晲閸ヮ煈鍋ㄩ梻渚囧墮缁夌敻鎮￠弴銏＄厽婵☆垵顕ф晶顖涚箾閸喓鐭岄柍褜鍓濋～澶娒哄鈧畷婵嗏枎閹捐泛绁﹂梺鎼炲労閸撴岸宕戠€ｎ喗鐓曟い鎰Т閻忊晜顨ラ悙鏉戝闁哄矉绲鹃幆鏃堝灳閸愯尪绶熼梻浣呵归鍡涘箲閸ヮ剙绠栨俊銈呮噺閺呮煡骞栫划鍏夊亾閹颁焦楠勯梻鍌欐缁鳖喚绮婚幋锔藉亱闁规崘顕х粻鏍ㄤ繆閵堝懎鏆為柛鐘叉閺屾盯寮撮妸銉ヮ潾濡炪倧璐熼崝鎴﹀蓟閿濆顫呴柍杞拌兌娴狀參鏌ｉ姀鈺佺仯闁哥姵鐗犻獮鍐潨閳ь剟鐛幒鎳虫梹鎷呴崫鍕闂傚倷鑳剁划顖炲礉閺囥埄鏁嬫い鎾卞灩閻撴繈鏌熼崜褏甯涢柣鎾冲暟閹茬ǹ饪伴崼婵堫槶濠电偛妫欓幐鎼佸磼閵娾晜鐓涚€广儱鍟俊鍧楁煟濠靛棛鍩ｉ柡宀嬬節瀹曞爼濡烽妷褌鐥梻浣瑰▕閺€閬嶅垂閸ф钃熸繛鎴炃氶弨浠嬫煕閳╁喚娈㈠ù灏栧亾闂傚倷绀侀悿鍥敋瑜旇棟闁汇垻枪閽冪喐绻涢幋鐐茬劰闁稿鎹囬弫宥夊础閻愬弶娈ㄦ繝銏ｎ潐濞茬喎顫忔繝姘＜婵炲棙甯掗崢锟犳煛鐎ｅ吀绨奸柕鍥у楠炲鈹戦崶鑸碉紗婵°倗濮烽崑鐐哄礉濞嗘挾宓侀柡宥冨妿閻熺懓鈹戦悩鎻掝伀闁崇鍊栫换婵嬫偨闂堟稈鏋呭┑鐐板尃閸ヨ埖鏅為梺鍦濠㈡﹢寮告笟鈧弻娑㈠焺閸愵亖濮囬梺缁樻尰濞茬喖骞冨鈧幃娆撳箵閹哄棙瀵栭梻浣芥〃閻掞箓鎮ч悩璇茶摕闁哄洨鍠撶粻楣冩煟閹伴潧澧柣婵囨礋濮婃椽骞庨懞銉︽殸闂佹悶鍔屽鈥愁嚕鐠囨祴妲堟俊顖炴敱閺傗偓闂備胶纭堕崜婵嬨€冭箛鏂款嚤闁稿本鍑瑰〒濠氭煏閸繈顎楀ù婊冨⒔缁辨帡鎮╅搹顐㈢３閻庢鍠涢褔鍩ユ径鎰潊闁绘鏁稿澶愭⒒娓氣偓閳ь剛鍋涢懟顖涙櫠鐎电硶鍋撶憴鍕缂傚秴锕ら悾椋庣矙鐠囩偓妫冨畷姗€濡歌閸嬪﹪姊婚崒娆戭槮闁硅绻濆畷婵嬫晝閸屾氨鐛ラ梺鍝勭▉閸欏繒绱為弽顓熺厱婵炴垶顭囬幗鐘绘煟閹惧磭绠婚柡灞剧洴椤㈡洟鏁愰崶鈺冩毇闂備線娼荤徊钘夛耿鏉堚晜顫曢柟鐑橆殔缁犳稒銇勯幘璺盒涘┑顔兼川缁辨挻鎷呴搹鐟扮缂備浇顕ч悧鎾荤嵁閸愨晝顩烽悗锝庡亽濡啫鈹戦悙娈挎缂傚牅鍗冲畷瑙勭鐎ｎ亞鐣哄┑掳鍊愰崑鎾淬亜椤愶絿绠炴慨濠呭吹閳ь剟娼ч幉锟犲疾閸忚偐绡€缁剧増菤閸嬫捇宕橀懠顒勭崜闂備礁鎲″褰掓偡閵夆晩鏁嬮柨婵嗩槸缁犵粯銇勯弮鍌楁嫛婵炵厧锕娲箮閼恒儲娈伴梺绋款儐閹瑰洭寮婚悢鍓叉Ч閹艰揪绲界粭锛勭磽娴ｈ櫣甯涚紒瀣笒椤洩绠涘☉妯碱槶閻熸粌绉瑰畷鍝勭暆閸曨兘鎷虹紒缁㈠幖閹冲氦顣跨紓鍌欑贰閸犳牕霉閻戣棄绀嗛柟鐑橆殔缁秹鏌涢銈呮瀻闁逞屽墰缁垱绌辨繝鍥舵晬闁绘劕鐡ㄩ悵宕囩磽娴ｉ潧濡兼い顓炲槻椤繐煤椤忓拋妫冨┑鐐村灱妞存悂顢撻崱娑欌拻闁稿本鑹鹃鈺呮倵濮樼厧澧撮柟顔藉劤閻ｏ繝骞嶉鑺ョ暦闂備線鈧偛鑻晶鎾煕閳规儳浜炬俊鐐€栫敮鎺楀窗濮橆剦鐒介柟閭﹀幘缁犻箖鏌涘▎蹇ｆ闁兼澘娼￠弻鏇㈠幢濡も偓閺嗭絿鈧娲忛崝宥咁焽韫囨稑绀堢憸蹇涘煟閵堝棛绡€闁汇垽娼у瓭闂佹寧娲忛崐婵嬪箖瑜斿畷鍗炩槈濞嗗繆鍋撻崸妤佺厱妞ゎ厽鍨垫禍鏍瑰⿰鍕煉闁哄瞼鍠栧畷顐﹀礋椤掑顥ｅ┑鐐茬摠缁秹宕曢幎瑙ｂ偓鏃堝礃椤斿槈褔鏌涢埄鍐剧劷闁宠绋撶槐鎾诲磼濮樻瘷锛勭磼閼搁潧鍝哄┑鈥崇摠缁楃喖鍩€椤掆偓椤曪綁骞橀纰辨綂闂佹枼鏅涢崯顖炴偟閺嶎厽鈷掑〒姘ｅ亾闁逞屽墰閸嬫盯鎳熼娑欐珷闁规鍠氱壕鍏笺亜閺傚灝鈷旈悽顖涚〒缁辨帞绱掑Ο鑲╃暤濡炪値鍋呯换鍫ャ€佸鈧幃娆撳级閸噮鍤欓梻鍌氬€搁崐鐑芥倿閿曞倸绠栭柛顐ｆ礀绾惧潡鏌ｉ幋鐑嗙劷妞も晛寮剁换婵囩節閸屾粌顤€闂佺ǹ楠哥粔褰掑蓟閿濆绠ｉ柣鎰暞缁秶绮嬪鍛牚闁割偆鍠撻崢鐢告⒑鐠団€崇€婚柛娑卞枟閸犳牠姊绘笟鈧褍煤閿旂偓宕查柛鎰靛枛缁犵偤鏌曟繝蹇擃洭缂佲檧鍋撻梻浣告啞閸斿繘寮崒娑氼浄闁靛繈鍊栭崐鐢告偡濞嗗繐顏紒鈧崼銉︾厱闊洦妫戦懓鍧楁煏閸℃洜顦︽い顐ｇ矒閸┾偓妞ゆ帒瀚粻鏍ㄧ箾閸℃ɑ灏紒鐘垫暬閺岀喖鎮滃Ο鑲╃暭闂侀€炲苯澧€规洦鍓熼崺鐐哄箣閿旇姤娅栭梺鍛婃处閸嬪倿寮堕銏♀拺缂佸灏呴弨濠氭煕閵娿儳浠㈤柣锝呭槻閳规垿宕卞▎鎰暦闂備礁鎲″ú锕傚磻閸℃稒鍋柛銉戔偓閺€浠嬫煃閽樺顥滈柣蹇嬪劜缁绘盯宕崘顏喰滈悗娈垮枟婵炲﹪寮崘顔肩＜婵炴垶鑹剧敮楣冩⒒婵犲骸浜滄繛灞傚€濋、鏍川閺夋垹鍔﹀銈嗗笂閻掞妇绮堥崼銏㈢＜妞ゆ柨鐏濋崥鍦磼鏉堛劌绗掗摶锝夋⒒閳ь剟骞囬鐐櫒闂傚倸鍊风粈渚€骞栭锕€鐤柣妯款嚙绾惧鏌熼崜褏甯涢柣鎾存礋楠炴牗娼忛崜褏锛熼梺鍝勵儏閸熸挳寮婚弴銏犵倞闁靛ǹ鍎遍～鎺楁倵鐟欏嫭绀堥柛鐘崇墵閵嗕礁鈽夊Ο閿嬵潔闂佸湱鍎ら幐鎼侇敂瑜版帗鈷掗柛灞剧懆閸忓本銇勯姀鐙呰含鐎规洘鍨块獮鍥级鐠侯煉绱辨繝鐢靛仦閸垶宕归崷顓犵焼濠㈣泛顑嗛崣蹇斾繆閻愰鍤欏ù婊堢畺濮婃椽宕崟顒佹嫳闂佺儵鏅╅崹浼搭敋閿濆鏁嗛柛鏇ㄥ亰閺佹粌鈹戞幊閸婃劙宕戦幘鍨涘亾濞堝灝鏋熸繝銏∏归悘鍐⒑缂佹﹫鑰挎繛浣冲嫮顩锋繝濠傜墛閻撱儵鏌￠崶銉ュ缂併劌顭烽弻锝夋晲閸パ冨箣婵犵鍓濋幃鍌炲春閳╁啰绡€闁告劏鏅滈悵锕傛⒒娴ｅ憡鎯堟い锕備憾瀹曟垿鎮欑€靛摜褰鹃梺绯曞墲缁嬫帡宕曟惔銊ョ婵烇綆鍓欐俊浠嬫煃闁垮绗掗棁澶愭煥濠靛棙澶勯柛銈傚亾婵＄偑鍊栧ú妯煎垝鎼达絾顫曢柟鐑樻⒐鐎氭岸鏌熺紒妯哄潑闁稿鎸荤换婵嗩潩椤掑偆鍞归梻渚€娼х换鍫ュ磹閺囩姷涓嶉柨婵嗩槹閻撶喐鎱ㄥΔ鈧Λ妤佺濠婂厾鐟扳堪閸涱厺澹曢梺閫涚┒閸斿矁鐏掗梺缁樻尭缁ㄥ吋绔熼弴銏＄厽閹兼番鍨婚崯鏌ユ煙閸戙倖瀚� */
 }
-
-  void Error_Handler(void)
+void can2_txMessage(uint8_t length,uint8_t id,uint8_t *can2txdata)
 {
-    __disable_irq();
-
-    /* Main PWM Output Disable */
-    timer_primary_output_config(TIMER0, DISABLE);
-
-    while (1) {
+    for(int i = 0; i < length; i++){
+        can2transmit_message.data[i] = can2txdata[i];
     }
+    can2transmit_message.rtr = 0U;
+    can2transmit_message.ide = 0U;
+    can2transmit_message.code = CAN_MB_TX_STATUS_DATA;
+    can2transmit_message.brs = 0U;
+    can2transmit_message.fdf = 0U;
+    can2transmit_message.esi = 0U;
+    can2transmit_message.prio = 0U;
+    can2transmit_message.data_bytes = length;
+    can2transmit_message.id = id;
+
+    can_mailbox_config(CAN2, 3u, &can2transmit_message);
 }
 
-void delay_ms(const uint16_t ms)
-{
-    volatile uint32_t i = ms * 17200;
-    while (i-- > 0) {
-        __NOP();
-        __NOP();
-    }
-}

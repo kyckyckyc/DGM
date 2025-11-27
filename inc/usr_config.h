@@ -85,6 +85,7 @@ typedef struct sUsrConfig
     int32_t encoder_dir;                // (Auto)
     int32_t encoder_offset;             // (Auto)
     int32_t offset_lut[OFFSET_LUT_NUM]; // (Auto)
+    int32_t encoder_electrical_offset;  // (Auto)
 
     uint32_t crc;
 } tUsrConfig;

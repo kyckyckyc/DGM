@@ -151,14 +151,38 @@ void FOC_voltage(float Vd_set, float Vq_set, float phase)
     }
 }
 
+void FOC_voltage_my(float mod_d, float mod_q, float phase)
+{
+
+    // Inverse park transform
+    float alpha, beta;
+    float pwm_phase = phase;
+    inverse_park(mod_d, mod_q, pwm_phase, &alpha, &beta);
+
+    // SVM
+    if (0 == svm(alpha, beta, &Foc.dtc_a, &Foc.dtc_b, &Foc.dtc_c)) {
+        set_a_duty((uint16_t) (Foc.dtc_a * (float) HALF_PWM_PERIOD_CYCLES));
+        set_b_duty((uint16_t) (Foc.dtc_b * (float) HALF_PWM_PERIOD_CYCLES));
+        set_c_duty((uint16_t) (Foc.dtc_c * (float) HALF_PWM_PERIOD_CYCLES));
+    }
+}
+
+
+float factor = 0.0f;
+float mod_vd = 0.0f;
+float mod_vq = 0.0f;
+float alpha, beta;
+float i_alpha, i_beta;
+float i_d, i_q;
+
 void FOC_current(float Id_set, float Iq_set, float phase, float phase_vel)
 {
     // Clarke transform
-    float i_alpha, i_beta;
+//    float i_alpha, i_beta;
     clarke_transform(Foc.i_a, Foc.i_b, Foc.i_c, &i_alpha, &i_beta);
 
     // Park transform
-    float i_d, i_q;
+//    float i_d, i_q;
     park_transform(i_alpha, i_beta, phase, &i_d, &i_q);
 
     // Current PI control
@@ -169,11 +193,11 @@ void FOC_current(float Id_set, float Iq_set, float phase, float phase_vel)
 
     // voltage normalize = 1/(2/3*v_bus)
     float v_to_mod = 1.5f / Foc.v_bus_filt;
-    float mod_vd   = v_d * v_to_mod;
-    float mod_vq   = v_q * v_to_mod;
+    mod_vd   = v_d * v_to_mod;
+    mod_vq   = v_q * v_to_mod;
 
     // Vector modulation saturation, lock integrator if saturated
-    float factor = 0.9f * SQRT3_BY_2 / sqrtf(SQ(mod_vd) + SQ(mod_vq));
+    factor = 0.9f * SQRT3_BY_2 / sqrtf(SQ(mod_vd) + SQ(mod_vq));
     if (factor < 1.0f) {
         mod_vd *= factor;
         mod_vq *= factor;
@@ -185,7 +209,7 @@ void FOC_current(float Id_set, float Iq_set, float phase, float phase_vel)
     }
 
     // Inverse park transform
-    float alpha, beta;
+//    float alpha, beta;
     float pwm_phase = phase + phase_vel * CURRENT_MEASURE_PERIOD;
     inverse_park(mod_vd, mod_vq, pwm_phase, &alpha, &beta);
 
