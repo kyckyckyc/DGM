@@ -34,7 +34,7 @@ void USR_CONFIG_set_default_config(void)
     UsrConfig.velocity_limit         = 60;
 
     // Encoder
-    UsrConfig.calib_current = 10.0f;
+    UsrConfig.calib_current = 5.0f;
     UsrConfig.calib_voltage = 2.0f;
 
     // Controller
@@ -58,7 +58,7 @@ void USR_CONFIG_set_default_config(void)
     // Protect
     UsrConfig.protect_under_voltage = 12;
     UsrConfig.protect_over_voltage  = 50;
-    UsrConfig.protect_over_current  = 10;
+    UsrConfig.protect_over_current  = 30;
     UsrConfig.protect_drv_over_tmp  = 80;
     UsrConfig.protect_ntc_over_tmp  = 80;
 
@@ -70,6 +70,7 @@ void USR_CONFIG_set_default_config(void)
 
     // Encoder
     UsrConfig.calib_valid = 0;
+    memset(UsrConfig.offset_lut, 0, OFFSET_LUT_NUM * sizeof(int32_t));
 }
 
 int USR_CONFIG_erease_config(void)

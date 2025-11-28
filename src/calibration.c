@@ -105,7 +105,7 @@ void CALIBRATION_loop(void)
     static uint32_t loop_count;
 
     // R
-    static const float    kI           = 0.005f;
+    static const float    kI           = 0.5f;
     static const uint32_t num_R_cycles = CURRENT_MEASURE_HZ * 2;// 电阻测量周期数(2秒)
 
     // L
@@ -125,8 +125,8 @@ void CALIBRATION_loop(void)
 
     float       time    = (float) loop_count * CURRENT_MEASURE_PERIOD;                                     // 当前时间
     const float voltage = UsrConfig.calib_current * UsrConfig.motor_phase_resistance * 3.0f / 2.0f;        // 计算电压=校准电流*相电阻*3/2
-    const float voltageencoder = 6*UsrConfig.calib_current * UsrConfig.motor_phase_resistance * 3.0f / 2.0f;//@
-    const float voltagepp = 3*UsrConfig.calib_current * UsrConfig.motor_phase_resistance * 3.0f / 2.0f;//@
+    const float voltageencoder = 1*UsrConfig.calib_current * UsrConfig.motor_phase_resistance * 3.0f / 2.0f;//@
+    const float voltagepp = 1*UsrConfig.calib_current * UsrConfig.motor_phase_resistance * 3.0f / 2.0f;//@
 
     switch (mCalibStep) {
     case CS_NULL:
@@ -240,7 +240,7 @@ void CALIBRATION_loop(void)
 
     case CS_DIR_PP_END: {
         int32_t diff = Encoder.shadow_count - start_count;    // 计算旋转的编码器脉冲数
-        int32_t diff2 = start_count_ccw - ccw_encoder_end;    // 计算旋转的编码器脉冲数
+        //int32_t diff2 = start_count_ccw - ccw_encoder_end;    // 计算旋转的编码器脉冲数
         // Check direction
         if (diff > 0) {
             UsrConfig.encoder_dir = +1;
@@ -343,13 +343,15 @@ void CALIBRATION_loop(void)
             moving_avg += p_error_arr[i];
         }
         UsrConfig.encoder_offset = moving_avg / (UsrConfig.motor_pole_pairs * SAMPLES_PER_PPAIR);//取平均
-        UsrConfig.encoder_electrical_offset = (UsrConfig.encoder_offset * UsrConfig.motor_pole_pairs)%360;
+        UsrConfig.encoder_electrical_offset = fmodf((float) UsrConfig.encoder_offset / ENCODER_CPR_F * 360.0f * UsrConfig.motor_pole_pairs, 360.0f);
  
 
 
         {
             uint8_t data[4];
-            float_to_data((float) UsrConfig.encoder_offset, data);
+            //float_to_data((float) UsrConfig.encoder_offset, data);
+            float_to_data( UsrConfig.encoder_electrical_offset, data);
+            //float_to_data(fmodf((float) UsrConfig.encoder_offset / ENCODER_CPR_F * 360.0f * UsrConfig.motor_pole_pairs, 360.0f), data);
             CAN_calib_report(5, data);// 报告偏移量
         }
 

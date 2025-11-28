@@ -385,7 +385,7 @@ void MCT_safety_task(void)
        }
    }
 
-//    watch_dog_feed();
+   watch_dog_feed();
 }
 
 void MCT_low_priority_task(void)
@@ -414,13 +414,7 @@ void MCT_low_priority_task(void)
     led_act_loop();
     CAN_comm_loop();
 
-   if (mFSM.state_next != mFSM.state) {
-       exit_state();
-       if (mFSM.state_next_ready) {
-           mFSM.state = mFSM.state_next;
-           enter_state();
-       }
-   }
+ 
 
 }
 

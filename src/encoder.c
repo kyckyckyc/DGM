@@ -30,7 +30,7 @@ void ENCODER_init(void)
     Encoder.pll_pos      = 0;
     Encoder.pll_vel      = 0;
 
-    int encoder_pll_bw     = 100 * M_2PI;
+    int encoder_pll_bw     = 150 * M_2PI;                                                         //@
     Encoder.pll_kp         = 2.0f * encoder_pll_bw;      // basic conversion to discrete time
     Encoder.pll_ki         = 0.25f * SQ(Encoder.pll_kp); // Critically damped
     Encoder.snap_threshold = 0.5f * CURRENT_MEASURE_PERIOD * Encoder.pll_ki;
@@ -138,7 +138,7 @@ uint16_t spi_rw_half_word(uint32_t spi_periph, const uint16_t i_HalfWord)
     bool ok = true;
 
     // Send data
-    to = 200;
+    to = 200;                                                                            //@
     while ((RESET == spi_flag_get(spi_periph, SPI_FLAG_TBE)) && --to);
     if (to == 0) ok = false;
 
@@ -150,13 +150,13 @@ uint16_t spi_rw_half_word(uint32_t spi_periph, const uint16_t i_HalfWord)
         spi_data_transmit(spi_periph, i_HalfWord);
 
         /* wait rx succ*/
-        to = 200;
+        to = 200;                                                                        //@
         while ((RESET == spi_flag_get(spi_periph, SPI_FLAG_RBNE)) && --to);
         if (to == 0) ok = false;
         else data = spi_data_receive(spi_periph); /* throw Dummy wait bsu idle */
 
         if (ok) {
-            to = 200;
+            to = 200;                                                                     //@
             while ((SET == spi_flag_get(spi_periph, SPI_FLAG_TRANS)) 
                    && SET == spi_flag_get(spi_periph, SPI_FLAG_RBNE) && --to);
             if (to == 0) ok = false;
